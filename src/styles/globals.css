@@ -2,3 +2,229 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+/* DevLens primitive palette from the Figma Foundations / Dark export. */
+@theme static {
+  --color-devlens-neutral-50: #f7f8fa;
+  --color-devlens-neutral-100: #eef0f4;
+  --color-devlens-neutral-200: #dde1e8;
+  --color-devlens-neutral-300: #c2c8d2;
+  --color-devlens-neutral-400: #9ca5b4;
+  --color-devlens-neutral-500: #737d8c;
+  --color-devlens-neutral-600: #555f6d;
+  --color-devlens-neutral-700: #37404c;
+  --color-devlens-neutral-800: #252b35;
+  --color-devlens-neutral-850: #1c212a;
+  --color-devlens-neutral-900: #141820;
+  --color-devlens-neutral-950: #0d1016;
+
+  --color-devlens-violet-300: #b8a7ff;
+  --color-devlens-violet-500: #7c5cfc;
+  --color-devlens-violet-700: #5938d8;
+  --color-devlens-teal-500: #20bfa9;
+  --color-devlens-amber-500: #f59e0b;
+  --color-devlens-blue-500: #3b82f6;
+  --color-devlens-green-500: #22c55e;
+  --color-devlens-red-500: #ef4444;
+  --color-devlens-white: #ffffff;
+  --color-devlens-black: #000000;
+  --color-devlens-black-08: #00000014;
+  --color-devlens-black-64: #000000a3;
+}
+
+:root {
+  color-scheme: light;
+
+  /* DevLens Light semantic roles. */
+  --background: var(--color-devlens-neutral-100);
+  --foreground: var(--color-devlens-neutral-950);
+  --surface: var(--color-devlens-white);
+  --surface-subtle: var(--color-devlens-neutral-50);
+  --input-background: var(--color-devlens-white);
+  --code: var(--color-devlens-neutral-950);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--color-devlens-neutral-600);
+  --text-accent: var(--color-devlens-violet-700);
+  --success: var(--color-devlens-green-500);
+  --error: var(--color-devlens-red-500);
+  --method-get: var(--color-devlens-teal-500);
+  --method-post: var(--color-devlens-amber-500);
+  --method-put: var(--color-devlens-blue-500);
+  --method-patch: var(--color-devlens-blue-500);
+  --method-delete: var(--color-devlens-red-500);
+
+  /* Light shadcn semantic roles. */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --primary: var(--color-devlens-violet-700);
+  --primary-foreground: var(--color-devlens-white);
+  --secondary: var(--surface-subtle);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-subtle);
+  --muted-foreground: var(--color-devlens-neutral-600);
+  --accent: var(--surface-subtle);
+  --accent-foreground: var(--foreground);
+  --destructive: var(--error);
+  --destructive-foreground: var(--color-devlens-white);
+  --border: var(--color-devlens-neutral-300);
+  --input: var(--color-devlens-neutral-300);
+  --ring: var(--color-devlens-violet-500);
+
+  /* Light sidebar roles. */
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--text-secondary);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--surface-subtle);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  /* Screenshot-aligned semantic aliases. */
+  --border-default: var(--border);
+  --border-focus: var(--ring);
+  --status-success-fg: var(--success);
+  --status-error-fg: var(--error);
+  --method-get-fg: var(--method-get);
+  --method-post-fg: var(--method-post);
+  --method-put-fg: var(--method-put);
+  --method-patch-fg: var(--method-patch);
+  --method-delete-fg: var(--method-delete);
+
+  --chart-1: var(--color-devlens-violet-700);
+  --chart-2: var(--color-devlens-teal-500);
+  --chart-3: var(--color-devlens-amber-500);
+  --chart-4: var(--color-devlens-blue-500);
+  --chart-5: var(--color-devlens-green-500);
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* DevLens Dark semantic roles. */
+  --background: var(--color-devlens-neutral-950);
+  --foreground: var(--color-devlens-neutral-50);
+  --surface: var(--color-devlens-neutral-900);
+  --surface-subtle: var(--color-devlens-neutral-850);
+  --input-background: var(--color-devlens-neutral-900);
+  --code: var(--color-devlens-neutral-950);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--color-devlens-neutral-300);
+  --text-accent: var(--color-devlens-violet-300);
+  --success: var(--color-devlens-green-500);
+  --error: var(--color-devlens-red-500);
+  --method-get: var(--color-devlens-teal-500);
+  --method-post: var(--color-devlens-amber-500);
+  --method-put: var(--color-devlens-blue-500);
+  --method-patch: var(--color-devlens-blue-500);
+  --method-delete: var(--color-devlens-red-500);
+
+  /* Dark shadcn semantic roles. */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --primary: var(--color-devlens-violet-500);
+  --primary-foreground: var(--color-devlens-neutral-50);
+  --secondary: var(--surface-subtle);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-subtle);
+  --muted-foreground: var(--color-devlens-neutral-400);
+  --accent: var(--color-devlens-neutral-800);
+  --accent-foreground: var(--foreground);
+  --destructive: var(--error);
+  --destructive-foreground: var(--color-devlens-neutral-50);
+  --border: var(--color-devlens-neutral-700);
+  --input: var(--color-devlens-neutral-700);
+  --ring: var(--color-devlens-violet-500);
+
+  /* Dark sidebar roles. */
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--text-secondary);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--surface-subtle);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  /* Screenshot-aligned semantic aliases. */
+  --border-default: var(--border);
+  --border-focus: var(--ring);
+  --status-success-fg: var(--success);
+  --status-error-fg: var(--error);
+  --method-get-fg: var(--method-get);
+  --method-post-fg: var(--method-post);
+  --method-put-fg: var(--method-put);
+  --method-patch-fg: var(--method-patch);
+  --method-delete-fg: var(--method-delete);
+
+  --chart-1: var(--color-devlens-violet-500);
+  --chart-2: var(--color-devlens-teal-500);
+  --chart-3: var(--color-devlens-amber-500);
+  --chart-4: var(--color-devlens-blue-500);
+  --chart-5: var(--color-devlens-green-500);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-input-background: var(--input-background);
+  --color-code: var(--code);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-accent: var(--text-accent);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-method-get: var(--method-get);
+  --color-method-post: var(--method-post);
+  --color-method-put: var(--method-put);
+  --color-method-patch: var(--method-patch);
+  --color-method-delete: var(--method-delete);
+  --color-border-default: var(--border-default);
+  --color-border-focus: var(--border-focus);
+  --color-status-success-fg: var(--status-success-fg);
+  --color-status-error-fg: var(--status-error-fg);
+  --color-method-get-fg: var(--method-get-fg);
+  --color-method-post-fg: var(--method-post-fg);
+  --color-method-put-fg: var(--method-put-fg);
+  --color-method-patch-fg: var(--method-patch-fg);
+  --color-method-delete-fg: var(--method-delete-fg);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
