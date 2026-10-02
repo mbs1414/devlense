@@ -9,9 +9,9 @@ import {
 
 const AppSidebar = () => {
   return (
-    <Sidebar>
-      <SidebarHeader className="flex-row items-center">
-        <div className="h-6 w-6 rounded-full bg-devlens-violet-500" />
+    <Sidebar className="bg-sidebar">
+      <SidebarHeader className="flex-row items-center py-5 px-4">
+        <div className="size-6 rounded-full" />
         <div>DevLense</div>
       </SidebarHeader>
 
