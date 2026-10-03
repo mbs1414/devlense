@@ -36,75 +36,221 @@
 
 :root {
   color-scheme: light;
-  --sidebar: var(--color-devlens-neutral-50);
+
   --canvas: var(--color-devlens-neutral-100);
   --surface: var(--color-devlens-white);
   --surface-subtle: var(--color-devlens-neutral-50);
+  --surface-raised: var(--color-devlens-white);
   --input: var(--color-devlens-white);
   --code: var(--color-devlens-neutral-950);
-  --primary: var(--color-devlens-neutral-900);
-  --secondary: var(--color-devlens-neutral-600);
-  --accent: var(--color-devlens-violet-700);
-  --border: var(--color-devlens-neutral-300);
-  --focus: var(--color-devlens-violet-500);
+  --sidebar: var(--color-devlens-neutral-50);
+  --hover: var(--color-devlens-neutral-100);
   --active: var(--color-devlens-neutral-200);
-  --success: var(--color-devlens-green-500);
-  --error: var(--color-devlens-red-500);
-  --get: var(--color-devlens-teal-500);
-  --post: var(--color-devlens-amber-500);
+
+  --text-color-primary: var(--color-devlens-neutral-900);
+  --text-color-secondary: var(--color-devlens-neutral-600);
+  --text-color-muted: var(--color-devlens-neutral-500);
+  --text-color-inverse: var(--color-devlens-white);
+  --text-color-accent: var(--color-devlens-violet-700);
+  --text-color-disabled: var(--color-devlens-neutral-400);
+  --text-color-code: var(--color-devlens-neutral-100);
+
+  --border: var(--color-devlens-neutral-300);
+  --border-subtle: var(--color-devlens-neutral-200);
+  --border-strong: var(--color-devlens-neutral-400);
+  --border-focus: var(--color-devlens-violet-500);
+  --border-error: var(--color-devlens-red-500);
+
   --action-primary: var(--color-devlens-violet-500);
   --action-primary-hover: var(--color-devlens-violet-700);
   --action-primary-pressed: var(--color-devlens-violet-700);
-  --action-secondary: var(--color-devlens-neutral-800);
-  --action-secondary-hover: var(--color-devlens-neutral-700);
+  --action-primary-text: var(--color-devlens-white);
+  --action-secondary: var(--color-devlens-neutral-100);
+  --action-secondary-hover: var(--color-devlens-neutral-200);
   --action-destructive: var(--color-devlens-red-500);
   --action-destructive-hover: var(--color-devlens-red-500);
+
+  --code-key: var(--color-devlens-violet-300);
+  --code-string: var(--color-devlens-teal-500);
+  --code-number: var(--color-devlens-amber-500);
+
+  --overlay-scrim: var(--color-devlens-black-64);
+
+  --status-success-fg: var(--color-devlens-green-500);
+  --status-success-bg: var(--color-devlens-neutral-100);
+  --status-warning-fg: var(--color-devlens-amber-500);
+  --status-warning-bg: var(--color-devlens-neutral-100);
+  --status-error-fg: var(--color-devlens-red-500);
+  --status-error-bg: var(--color-devlens-neutral-100);
+  --status-info-fg: var(--color-devlens-blue-500);
+  --status-info-bg: var(--color-devlens-neutral-100);
+
+  --method-get-fg: var(--color-devlens-teal-500);
+  --method-get-bg: var(--color-devlens-neutral-100);
+  --method-post-fg: var(--color-devlens-amber-500);
+  --method-post-bg: var(--color-devlens-neutral-100);
+  --method-put-fg: var(--color-devlens-blue-500);
+  --method-put-bg: var(--color-devlens-neutral-100);
+  --method-patch-fg: var(--color-devlens-blue-500);
+  --method-patch-bg: var(--color-devlens-neutral-100);
+  --method-delete-fg: var(--color-devlens-red-500);
+  --method-delete-bg: var(--color-devlens-neutral-100);
+
+  /* Compatibility aliases for existing theme tokens. */
+  --primary: var(--text-color-primary);
+  --secondary: var(--text-color-secondary);
+  --accent: var(--text-color-accent);
+  --focus: var(--border-focus);
+  --success: var(--status-success-fg);
+  --error: var(--status-error-fg);
+  --get: var(--method-get-fg);
+  --post: var(--method-post-fg);
 }
 
 .dark {
   color-scheme: dark;
-  --sidebar: var(--color-devlens-slate-900);
+
   --canvas: var(--color-devlens-neutral-950);
   --surface: var(--color-devlens-neutral-900);
   --surface-subtle: var(--color-devlens-neutral-850);
-  --input: var(--color-devlens-neutral-800);
+  --surface-raised: var(--color-devlens-neutral-800);
+  --input: var(--color-devlens-neutral-900);
   --code: var(--color-devlens-neutral-950);
-  --primary: var(--color-devlens-neutral-50);
-  --secondary: var(--color-devlens-neutral-300);
-  --accent: var(--color-devlens-violet-300);
-  --border: var(--color-devlens-neutral-700);
-  --focus: var(--color-devlens-violet-500);
+  --sidebar: var(--color-devlens-slate-900);
+  --hover: var(--color-devlens-neutral-850);
   --active: var(--color-devlens-neutral-800);
-  --success: var(--color-devlens-green-500);
-  --error: var(--color-devlens-red-500);
-  --get: var(--color-devlens-teal-500);
-  --post: var(--color-devlens-amber-500);
+
+  --text-color-primary: var(--color-devlens-neutral-50);
+  --text-color-secondary: var(--color-devlens-neutral-300);
+  --text-color-muted: var(--color-devlens-neutral-500);
+  --text-color-inverse: var(--color-devlens-neutral-950);
+  --text-color-accent: var(--color-devlens-violet-300);
+  --text-color-disabled: var(--color-devlens-neutral-600);
+  --text-color-code: var(--color-devlens-neutral-100);
+
+  --border: var(--color-devlens-neutral-700);
+  --border-subtle: var(--color-devlens-neutral-800);
+  --border-strong: var(--color-devlens-neutral-600);
+  --border-focus: var(--color-devlens-violet-500);
+  --border-error: var(--color-devlens-red-500);
+
+  --action-primary: var(--color-devlens-violet-500);
+  --action-primary-hover: var(--color-devlens-violet-700);
+  --action-primary-pressed: var(--color-devlens-violet-700);
+  --action-primary-text: var(--color-devlens-white);
+  --action-secondary: var(--color-devlens-neutral-800);
+  --action-secondary-hover: var(--color-devlens-neutral-700);
+  --action-destructive: var(--color-devlens-red-500);
+  --action-destructive-hover: var(--color-devlens-red-500);
+
+  --code-key: var(--color-devlens-violet-300);
+  --code-string: var(--color-devlens-teal-500);
+  --code-number: var(--color-devlens-amber-500);
+
+  --overlay-scrim: var(--color-devlens-black-64);
+
+  --status-success-fg: var(--color-devlens-green-500);
+  --status-success-bg: var(--color-devlens-neutral-850);
+  --status-warning-fg: var(--color-devlens-amber-500);
+  --status-warning-bg: var(--color-devlens-neutral-850);
+  --status-error-fg: var(--color-devlens-red-500);
+  --status-error-bg: var(--color-devlens-neutral-850);
+  --status-info-fg: var(--color-devlens-blue-500);
+  --status-info-bg: var(--color-devlens-neutral-850);
+
+  --method-get-fg: var(--color-devlens-teal-500);
+  --method-get-bg: var(--color-devlens-neutral-850);
+  --method-post-fg: var(--color-devlens-amber-500);
+  --method-post-bg: var(--color-devlens-neutral-850);
+  --method-put-fg: var(--color-devlens-blue-500);
+  --method-put-bg: var(--color-devlens-neutral-850);
+  --method-patch-fg: var(--color-devlens-blue-500);
+  --method-patch-bg: var(--color-devlens-neutral-850);
+  --method-delete-fg: var(--color-devlens-red-500);
+  --method-delete-bg: var(--color-devlens-neutral-850);
+
+  /* Compatibility aliases for existing theme tokens. */
+  --primary: var(--text-color-primary);
+  --secondary: var(--text-color-secondary);
+  --accent: var(--text-color-accent);
+  --focus: var(--border-focus);
+  --success: var(--status-success-fg);
+  --error: var(--status-error-fg);
+  --get: var(--method-get-fg);
+  --post: var(--method-post-fg);
 }
 
 @theme inline {
-  --color-sidebar-accent: var(--active);
-  --color-sidebar: var(--sidebar);
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-surface-subtle: var(--surface-subtle);
+  --color-surface-raised: var(--surface-raised);
   --color-input: var(--input);
   --color-code: var(--code);
+  --color-sidebar: var(--sidebar);
+  --color-hover: var(--hover);
+  --color-active: var(--active);
+
+  --color-color-primary: var(--text-color-primary);
+  --color-color-secondary: var(--text-color-secondary);
+  --color-color-muted: var(--text-color-muted);
+  --color-color-inverse: var(--text-color-inverse);
+  --color-color-accent: var(--text-color-accent);
+  --color-color-disabled: var(--text-color-disabled);
+  --color-color-code: var(--text-color-code);
+
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-border-focus: var(--border-focus);
+  --color-border-error: var(--border-error);
+
+  --color-action-primary: var(--action-primary);
+  --color-action-primary-hover: var(--action-primary-hover);
+  --color-action-primary-pressed: var(--action-primary-pressed);
+  --color-action-primary-text: var(--action-primary-text);
+  --color-action-secondary: var(--action-secondary);
+  --color-action-secondary-hover: var(--action-secondary-hover);
+  --color-action-destructive: var(--action-destructive);
+  --color-action-destructive-hover: var(--action-destructive-hover);
+
+  --color-code-key: var(--code-key);
+  --color-code-string: var(--code-string);
+  --color-code-number: var(--code-number);
+
+  --color-overlay-scrim: var(--overlay-scrim);
+
+  --color-status-success-fg: var(--status-success-fg);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-warning-fg: var(--status-warning-fg);
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-error-fg: var(--status-error-fg);
+  --color-status-error-bg: var(--status-error-bg);
+  --color-status-info-fg: var(--status-info-fg);
+  --color-status-info-bg: var(--status-info-bg);
+
+  --color-method-get-fg: var(--method-get-fg);
+  --color-method-get-bg: var(--method-get-bg);
+  --color-method-post-fg: var(--method-post-fg);
+  --color-method-post-bg: var(--method-post-bg);
+  --color-method-put-fg: var(--method-put-fg);
+  --color-method-put-bg: var(--method-put-bg);
+  --color-method-patch-fg: var(--method-patch-fg);
+  --color-method-patch-bg: var(--method-patch-bg);
+  --color-method-delete-fg: var(--method-delete-fg);
+  --color-method-delete-bg: var(--method-delete-bg);
+
+  /* Compatibility aliases for existing utility classes. */
+  --color-sidebar-accent: var(--active);
+  --color-sidebar-accent-foreground: var(--text-color-primary);
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
-  --color-border: var(--border);
   --color-focus: var(--focus);
   --color-success: var(--success);
   --color-error: var(--error);
   --color-get: var(--get);
   --color-post: var(--post);
-  --color-action-primary: var(--action-primary);
-  --color-action-primary-hover: var(--action-primary-hover);
-  --color-action-primary-pressed: var(--action-primary-pressed);
-  --color-action-secondary: var(--action-secondary);
-  --color-action-secondary-hover: var(--action-secondary-hover);
-  --color-action-destructive: var(--action-destructive);
-  --color-action-destructive-hover: var(--action-destructive-hover);
 
   --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono:
