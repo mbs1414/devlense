@@ -7,7 +7,9 @@ const App = () => {
     <>
       <SidebarProvider>
         <AppSidebar />
-        <Outlet />
+        <main className="min-h-svh min-w-0 flex-1 p-6 bg-canvas">
+          <Outlet />
+        </main>
       </SidebarProvider>
     </>
   )

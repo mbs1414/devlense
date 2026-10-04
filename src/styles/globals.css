@@ -114,7 +114,7 @@
   --surface: var(--color-devlens-neutral-900);
   --surface-subtle: var(--color-devlens-neutral-850);
   --surface-raised: var(--color-devlens-neutral-800);
-  --input: var(--color-devlens-neutral-900);
+  --input: var(--color-devlens-neutral-700);
   --code: var(--color-devlens-neutral-950);
   --sidebar: var(--color-devlens-slate-900);
   --hover: var(--color-devlens-neutral-850);
@@ -239,6 +239,8 @@
   --color-method-patch-bg: var(--method-patch-bg);
   --color-method-delete-fg: var(--method-delete-fg);
   --color-method-delete-bg: var(--method-delete-bg);
+
+  --color-ring: var(--color-border);
 
   /* Compatibility aliases for existing utility classes. */
   --color-sidebar-accent: var(--active);
