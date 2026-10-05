@@ -1,4 +1,4 @@
-import { Field, FieldGroup } from "@/components/ui/field"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -21,47 +21,51 @@ export const Route = createFileRoute("/request")({
       { value: "PATCH", className: "text-method-patch-fg" },
       { value: "DELETE", className: "text-method-delete-fg" },
     ]
+    const tabs = [
+      { value: "params", label: "Params" },
+      { value: "headers", label: "Headers" },
+      { value: "body", label: "Body" },
+      { value: "auth", label: "Auth" },
+    ]
     const [method, setMethod] = useState("GET")
     const selectedMethod = methods.find((item) => item.value === method)
 
     return (
       <div>
         <h1 className="text-color-primary font-semibold text-2xl">Request</h1>
-        <div className="flex gap-2 my-4">
-          <FieldGroup className="w-full max-w-xs">
-            <Field>
-              <Select value={method} onValueChange={setMethod}>
-                <SelectTrigger className="p-3">
-                  <SelectValue>
-                    <span className={selectedMethod?.className}>{method}</span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent
-                  position="item-aligned"
-                  className="bg-input ring ring-ring"
-                >
-                  <SelectGroup>
-                    {methods.map((method) => (
-                      <SelectItem
-                        value={method.value}
-                        className={`${method.className} focus:bg-hover`}
-                        key={method.value}
-                      >
-                        {method.value}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-          </FieldGroup>
-          <Input placeholder="{{baseUrl}}/users" />
+        <div className="flex gap-2 my-4 items-center">
+          <Select value={method} onValueChange={setMethod}>
+            <SelectTrigger>
+              <SelectValue>
+                <span className={`${selectedMethod?.className} font-mono w-14`}>
+                  {method}
+                </span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent position="popper">
+              <SelectGroup>
+                {methods.map((method) => (
+                  <SelectItem
+                    value={method.value}
+                    className={`${method.className} focus:bg-hover`}
+                    key={method.value}
+                  >
+                    {method.value}
+                  </SelectItem>
+                ))}{" "}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Input className="font-mono w-" placeholder="{{baseUrl}}/users" />
+          <Button size="lg">Send</Button>
         </div>
-        <Tabs defaultValue="overview">
+        <Tabs defaultValue="params">
           <TabsList variant="line">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
       </div>

@@ -7,6 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
 } from "../ui/sidebar"
+import { Link } from "@tanstack/react-router"
 
 const AppSidebar = () => {
   return (
@@ -24,8 +25,11 @@ const AppSidebar = () => {
               <SidebarMenuButton
                 key={route.name}
                 className="text-color-secondary py-4.5"
+                asChild
               >
-                <Icon /> <span>{route.name}</span>
+                <Link to={route.to} className="flex items-center gap-2">
+                  <Icon /> <span>{route.name}</span>
+                </Link>
               </SidebarMenuButton>
             )
           })}
