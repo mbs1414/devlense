@@ -24,18 +24,24 @@ export const Route = createFileRoute("/request")({
       { value: "PATCH", className: "text-method-patch-fg" },
       { value: "DELETE", className: "text-method-delete-fg" },
     ]
+
     const tabs = [
       { value: "params", label: "Params" },
       { value: "headers", label: "Headers" },
       { value: "body", label: "Body" },
       { value: "auth", label: "Auth" },
     ]
+
     const [method, setMethod] = useState("GET")
+
     const selectedMethod = methods.find((item) => item.value === method)
 
     return (
-      <div>
-        <h1 className="text-color-primary font-semibold text-2xl">Request</h1>
+      <div className="h-full flex flex-col">
+        <h1 className="text-color-primary font-semibold text-page-title">
+          Request
+        </h1>
+
         <div className="flex gap-2 my-4 items-center">
           <Select value={method} onValueChange={setMethod}>
             <SelectTrigger>
@@ -45,6 +51,7 @@ export const Route = createFileRoute("/request")({
                 </span>
               </SelectValue>
             </SelectTrigger>
+
             <SelectContent position="popper">
               <SelectGroup>
                 {methods.map((method) => (
@@ -55,60 +62,70 @@ export const Route = createFileRoute("/request")({
                   >
                     {method.value}
                   </SelectItem>
-                ))}{" "}
+                ))}
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Input className="font-mono w-" placeholder="{{baseUrl}}/users" />
+
+          <Input className="h-11" placeholder="{{baseUrl}}/users" />
+
           <Button size="lg">Send</Button>
         </div>
-        <Tabs defaultValue="params">
-          <TabsList variant="line" className="mb-4">
-            {tabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <TabsContent value="params">
-            <Card className="bg-background">
-              <CardHeader>
-                <CardTitle className="text-sm">Params</CardTitle>
-              </CardHeader>
 
-              <CardContent className="space-y-3">
-                {/* Table header */}
-                <div className="grid grid-cols-[40px_1fr_1fr_1.5fr_40px] gap-2 text-sm text-muted-foreground">
-                  <div>Enabled</div>
-                  <div>Key</div>
-                  <div>Value</div>
-                  <div>Description</div>
-                  <div />
-                </div>
+        <div className="flex flex-col gap-4 flex-1 min-h-0">
+          <Tabs defaultValue="params">
+            <TabsList variant="line">
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-                {/* Param row */}
-                <div className="grid grid-cols-[40px_1fr_1fr_1.5fr_40px] items-center gap-2 rounded-md border bg-muted/20 p-2">
-                  <Checkbox />
+            <TabsContent value="params">
+              <Card className="bg-surface my-4">
+                <CardHeader>
+                  <CardTitle className="text-section-title font-semibold">
+                    Params
+                  </CardTitle>
+                </CardHeader>
 
-                  <Input defaultValue="page" className="h-8" />
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-[64px_repeat(3,minmax(0,1fr))_32px] gap-2 items-center p-2 text-caption text-color-muted">
+                    <div>Enabled</div>
+                    <div>Key</div>
+                    <div>Value</div>
+                    <div>Description</div>
+                    <div />
+                  </div>
 
-                  <Input defaultValue="1" className="h-8" />
+                  <div className="grid grid-cols-[20px_repeat(3,minmax(0,1fr))_32px] gap-2 items-center p-2 bg-surface-subtle border border-border-subtle rounded-md">
+                    <Checkbox />
 
-                  <Input defaultValue="Pagination page" className="h-8" />
+                    <Input placeholder="page" />
 
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Trash2 className="h-4 w-4" />
+                    <Input placeholder="1" />
+
+                    <Input placeholder="Pagination page" />
+
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <Button variant="secondary" size="lg">
+                    <Plus className="h-4 w-4" />
+                    Add parameter
                   </Button>
-                </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
 
-                <Button variant="secondary" size="sm" className="mt-2">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add parameter
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          <Card className="bg-surface flex-1 min-h-0">
+            <CardContent className="h-full">test</CardContent>
+          </Card>
+        </div>
       </div>
     )
   },
