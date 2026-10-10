@@ -1,6 +1,7 @@
+import RequestFieldsCard from "@/components/forms/RequestFieldsCard"
+import JsonEditor from "@/components/JsonEditor"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -11,8 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { createFileRoute } from "@tanstack/react-router"
-import { Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 
 export const Route = createFileRoute("/request")({
@@ -30,6 +31,21 @@ export const Route = createFileRoute("/request")({
       { value: "headers", label: "Headers" },
       { value: "body", label: "Body" },
       { value: "auth", label: "Auth" },
+    ]
+
+    const bodyTypes = [
+      {
+        value: "none",
+        label: "None",
+      },
+      {
+        value: "json",
+        label: "JSON",
+      },
+      {
+        value: "text",
+        label: "Text",
+      },
     ]
 
     const [method, setMethod] = useState("GET")
@@ -67,7 +83,7 @@ export const Route = createFileRoute("/request")({
             </SelectContent>
           </Select>
 
-          <Input className="h-11" placeholder="{{baseUrl}}/users" />
+          <Input className="h-11 font-mono" placeholder="{{baseUrl}}/users" />
 
           <Button size="lg">Send</Button>
         </div>
@@ -76,54 +92,72 @@ export const Route = createFileRoute("/request")({
           <Tabs defaultValue="params">
             <TabsList variant="line">
               {tabs.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value}>
+                <TabsTrigger
+                  className="after:bg-action-primary"
+                  key={tab.value}
+                  value={tab.value}
+                >
                   {tab.label}
                 </TabsTrigger>
               ))}
             </TabsList>
 
             <TabsContent value="params">
+              <RequestFieldsCard addButtonLabel="Add parameter" />
+            </TabsContent>
+
+            <TabsContent value="headers">
+              <RequestFieldsCard addButtonLabel="Add header" />
+            </TabsContent>
+
+            <TabsContent value="body">
               <Card className="bg-surface my-4">
                 <CardHeader>
                   <CardTitle className="text-section-title font-semibold">
-                    Params
+                    Body
                   </CardTitle>
                 </CardHeader>
 
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-[64px_repeat(3,minmax(0,1fr))_32px] gap-2 items-center p-2 text-caption text-color-muted">
-                    <div>Enabled</div>
-                    <div>Key</div>
-                    <div>Value</div>
-                    <div>Description</div>
-                    <div />
-                  </div>
-
-                  <div className="grid grid-cols-[20px_repeat(3,minmax(0,1fr))_32px] gap-2 items-center p-2 bg-surface-subtle border border-border-subtle rounded-md">
-                    <Checkbox />
-
-                    <Input placeholder="page" />
-
-                    <Input placeholder="1" />
-
-                    <Input placeholder="Pagination page" />
-
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  <Button variant="secondary" size="lg">
-                    <Plus className="h-4 w-4" />
-                    Add parameter
-                  </Button>
+                <CardContent>
+                  <ToggleGroup
+                    type="single"
+                    size="lg"
+                    defaultValue="json"
+                    variant="default"
+                    spacing={1}
+                    className="mb-4"
+                  >
+                    {bodyTypes.map((bodyType) => (
+                      <ToggleGroupItem
+                        key={bodyType.value}
+                        value={bodyType.value}
+                        aria-label={bodyType.label}
+                        className="bg-action-secondary data-[state=on]:bg-action-primary"
+                      >
+                        {bodyType.label}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                  <JsonEditor />
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
 
           <Card className="bg-surface flex-1 min-h-0">
-            <CardContent className="h-full">test</CardContent>
+            <CardContent className="h-full flex flex-col gap-2 rounded-lg justify-center items-center mx-4 border border-border-subtle">
+              <p className="font-semibold text-color-primary text-base">
+                No response yet
+              </p>
+
+              <p className="text-color-secondary text-caption">
+                Send a request to inspect status, timing, headers, and body.
+              </p>
+
+              <Button variant="secondary" size="lg">
+                Try again
+              </Button>
+            </CardContent>
           </Card>
         </div>
       </div>
