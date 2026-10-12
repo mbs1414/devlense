@@ -48,6 +48,25 @@ export const Route = createFileRoute("/request")({
       },
     ]
 
+    const authTypes = [
+      {
+        value: "no auth",
+        label: "No Auth",
+      },
+      {
+        value: "bearer",
+        label: "Bearer",
+      },
+      {
+        value: "Basic",
+        label: "basic",
+      },
+      {
+        value: "api key",
+        label: "API Key",
+      },
+    ]
+
     const [method, setMethod] = useState("GET")
 
     const selectedMethod = methods.find((item) => item.value === method)
@@ -142,9 +161,39 @@ export const Route = createFileRoute("/request")({
                 </CardContent>
               </Card>
             </TabsContent>
+            <TabsContent value="auth">
+              <Card className="bg-surface my-4">
+                <CardHeader>
+                  <CardTitle className="text-section-title font-semibold">
+                    Auth · Bearer
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ToggleGroup
+                    type="single"
+                    size="lg"
+                    defaultValue="bearer"
+                    variant="default"
+                    spacing={1}
+                    className="mb-4"
+                  >
+                    {authTypes.map((bodyType) => (
+                      <ToggleGroupItem
+                        key={bodyType.value}
+                        value={bodyType.value}
+                        aria-label={bodyType.label}
+                        className="bg-action-secondary data-[state=on]:bg-action-primary"
+                      >
+                        {bodyType.label}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
 
-          <Card className="bg-surface flex-1 min-h-0">
+          <Card className="bg-surface flex-1 min-h-56">
             <CardContent className="h-full flex flex-col gap-2 rounded-lg justify-center items-center mx-4 border border-border-subtle">
               <p className="font-semibold text-color-primary text-base">
                 No response yet

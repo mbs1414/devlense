@@ -73,6 +73,15 @@
   --code-key: var(--color-devlens-violet-300);
   --code-string: var(--color-devlens-teal-500);
   --code-number: var(--color-devlens-amber-500);
+  --code-boolean: var(--color-devlens-blue-500);
+  --code-null: var(--color-devlens-red-500);
+  --code-punctuation: var(--color-devlens-neutral-400);
+  --code-selection: color-mix(in srgb, var(--action-primary) 20%, transparent);
+  --code-line-highlight: color-mix(
+    in srgb,
+    var(--text-color-code) 3%,
+    transparent
+  );
 
   --overlay-scrim: var(--color-devlens-black-64);
 
@@ -156,6 +165,15 @@
   --code-key: var(--color-devlens-violet-300);
   --code-string: var(--color-devlens-teal-500);
   --code-number: var(--color-devlens-amber-500);
+  --code-boolean: var(--color-devlens-blue-500);
+  --code-null: var(--color-devlens-red-500);
+  --code-punctuation: var(--color-devlens-neutral-400);
+  --code-selection: color-mix(in srgb, var(--action-primary) 20%, transparent);
+  --code-line-highlight: color-mix(
+    in srgb,
+    var(--text-color-code) 3%,
+    transparent
+  );
 
   --overlay-scrim: var(--color-devlens-black-64);
 
@@ -237,6 +255,11 @@
   --color-code-key: var(--code-key);
   --color-code-string: var(--code-string);
   --color-code-number: var(--code-number);
+  --color-code-boolean: var(--code-boolean);
+  --color-code-null: var(--code-null);
+  --color-code-punctuation: var(--code-punctuation);
+  --color-code-selection: var(--code-selection);
+  --color-code-line-highlight: var(--code-line-highlight);
 
   --color-overlay-scrim: var(--overlay-scrim);
 
@@ -287,6 +310,7 @@
   --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono:
     "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+
   --text-page-title: 1.375rem;
   --text-page-title--line-height: 1.75rem;
   --text-page-title--font-weight: 600;

@@ -7,9 +7,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
 } from "../ui/sidebar"
-import { Link } from "@tanstack/react-router"
+import { Link, useLocation } from "@tanstack/react-router"
 
 const AppSidebar = () => {
+  const pathname = useLocation({
+    select: (location) => location.pathname,
+  })
+
   return (
     <Sidebar className="bg-sidebar border-border-subtle">
       <SidebarHeader className="flex-row items-center px-4 py-5 gap-2.5">
@@ -21,10 +25,12 @@ const AppSidebar = () => {
         <SidebarMenu className="flex flex-col gap-1">
           {routes.map((route) => {
             const Icon = route.icon
+
             return (
               <SidebarMenuButton
                 key={route.name}
-                className="text-color-secondary py-4.5"
+                isActive={pathname === route.to}
+                className="text-color-secondary py-4.5 data-[active=true]:bg-sidebar-accent data-[active=true]:text-color-primary data-[active=true]:font-semibold"
                 asChild
               >
                 <Link to={route.to} className="flex items-center gap-2">
