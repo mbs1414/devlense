@@ -72,6 +72,7 @@ export const Route = createFileRoute("/request")({
 
     const [method, setMethod] = useState("GET")
     const [authType, setAuthType] = useState("bearer")
+    const [response, setResponse] = useState(false)
 
     const selectedMethod = methods.find((item) => item.value === method)
 
@@ -134,7 +135,7 @@ export const Route = createFileRoute("/request")({
             </TabsContent>
 
             <TabsContent value="body">
-              <Card className="bg-surface my-4">
+              <Card className="bg-surface mt-4">
                 <CardHeader>
                   <CardTitle className="text-section-title font-semibold">
                     Body
@@ -166,7 +167,7 @@ export const Route = createFileRoute("/request")({
               </Card>
             </TabsContent>
             <TabsContent value="auth">
-              <Card className="bg-surface my-4">
+              <Card className="bg-surface mt-4">
                 <CardHeader>
                   <CardTitle className="text-section-title font-semibold">
                     Auth · Bearer
@@ -297,6 +298,35 @@ export const Route = createFileRoute("/request")({
               </Card>
             </TabsContent>
           </Tabs>
+
+          {response && (
+            <Card className="bg-surface mt-4">
+              <CardHeader>
+                <CardTitle className="text-section-title font-semibold">
+                  Request configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-color-secondary text-body mb-4">
+                  2 query parameters · 2 headers · No request body · Bearer auth
+                </p>
+                <p className="text-color-accent font-mono text-label">{`{{baseUrl}}/users?page=1&limit=20`}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card className="bg-surface flex-1 min-h-56">
+            <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-2 p-2">
+              <div className="text-status-success-fg flex items-center gap-2">
+                <div className="rounded-full size-2 bg-success"></div>
+                <div>200 OK</div>
+              </div>
+              <div className="text-color-secondary text-caption flex gap-4">
+                <div>184 ms</div>
+                <div>1.24 KB</div>
+              </div>
+            </div>
+          </Card>
 
           <Card className="bg-surface flex-1 min-h-56">
             <CardContent className="h-full flex flex-col gap-2 rounded-lg justify-center items-center mx-4 border border-border-subtle">

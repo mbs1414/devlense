@@ -10,7 +10,7 @@ interface Props {
 
 const RequestFieldsCard = ({ addButtonLabel }: Props) => {
   return (
-    <Card className="bg-surface my-4">
+    <Card className="bg-surface mt-4">
       <CardHeader>
         <CardTitle className="text-section-title font-semibold">
           Params
