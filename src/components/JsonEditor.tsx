@@ -6,7 +6,6 @@ import { Copy, Trash2 } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 const editorTheme = createTheme({
   theme: "dark",
@@ -33,7 +32,11 @@ const editorTheme = createTheme({
   ],
 })
 
-export default function JsonEditor() {
+interface Props {
+  readOnly: boolean
+}
+
+export default function JsonEditor({ readOnly = false }: Props) {
   const [value, setValue] = useState(`{
   "name": "DevLens",
   "version": "1.0.0",
@@ -42,8 +45,6 @@ export default function JsonEditor() {
     "API Testing"
   ]
 }`)
-
-  const [isEditing, setIsEditing] = useState(false)
 
   function formatJson() {
     try {
@@ -58,32 +59,14 @@ export default function JsonEditor() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-surface-subtle">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-surface-subtle font-mono">
       <div className="flex flex-wrap items-center justify-between gap-2 p-2">
-        <ToggleGroup
-          type="single"
-          size="sm"
-          spacing={1}
-          value={isEditing ? "edit" : "json"}
-          onValueChange={(mode) => {
-            if (mode) setIsEditing(mode === "edit")
-          }}
-          aria-label="Editor mode"
-        >
-          <ToggleGroupItem
-            value="json"
-            className="data-[state=on]:bg-active data-[state=on]:text-color-primary"
-          >
-            JSON
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="edit"
-            aria-label="Edit JSON"
-            className="data-[state=on]:bg-active data-[state=on]:text-color-primary"
-          >
-            Edit
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <div className="flex gap-3">
+          <div className="text-color-code">JSON</div>
+          <div className="text-color-muted">
+            {readOnly ? "Read-only" : "Edit"}
+          </div>
+        </div>
 
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={formatJson}>
@@ -119,13 +102,20 @@ export default function JsonEditor() {
         height="256px"
         className="h-64"
         onChange={(newValue) => setValue(newValue)}
-        readOnly={!isEditing}
-        editable={isEditing}
+        readOnly={readOnly}
+        editable={!readOnly}
         basicSetup={{
           lineNumbers: true,
           foldGutter: true,
         }}
       />
+
+      {/* loading */}
+      {/* <div className="flex items-center justify-center bg-code">
+        <span className="animate-pulse text-sm text-code-punctuation h-32">
+          Sending request...
+        </span>
+      </div> */}
     </div>
   )
 }

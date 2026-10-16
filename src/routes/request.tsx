@@ -51,6 +51,13 @@ export const Route = createFileRoute("/request")({
       },
     ]
 
+    const responseTypes = [
+      { value: "body", label: "Body" },
+      { value: "headers", label: "Headers" },
+      { value: "pretty", label: "Pretty" },
+      { value: "raw", label: "Raw" },
+    ]
+
     const authTypes = [
       {
         value: "no auth",
@@ -107,8 +114,10 @@ export const Route = createFileRoute("/request")({
             </SelectContent>
           </Select>
 
-          <Input className="h-11 font-mono" placeholder="{{baseUrl}}/users" />
-
+          <Input
+            className="h-11 font-mono bg-input"
+            placeholder="{{baseUrl}}/users"
+          />
           <Button size="lg">Send</Button>
         </div>
 
@@ -162,10 +171,11 @@ export const Route = createFileRoute("/request")({
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
-                  <JsonEditor />
+                  <JsonEditor readOnly={false} />
                 </CardContent>
               </Card>
             </TabsContent>
+
             <TabsContent value="auth">
               <Card className="bg-surface mt-4">
                 <CardHeader>
@@ -194,6 +204,7 @@ export const Route = createFileRoute("/request")({
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
+
                   {authType === "bearer" && (
                     <>
                       <Field>
@@ -211,6 +222,7 @@ export const Route = createFileRoute("/request")({
                       </Field>
                     </>
                   )}
+
                   {authType === "basic" && (
                     <>
                       <FieldGroup className="flex flex-row">
@@ -239,6 +251,7 @@ export const Route = createFileRoute("/request")({
                       </FieldGroup>
                     </>
                   )}
+
                   {authType === "api key" && (
                     <>
                       <FieldGroup className="flex flex-row">
@@ -264,6 +277,7 @@ export const Route = createFileRoute("/request")({
                           />
                         </Field>
                       </FieldGroup>
+
                       <div className="flex items-center gap-2 mt-4 text-color-secondary">
                         <span className="shrink-0 text-sm font-medium">
                           Add to:
@@ -315,21 +329,57 @@ export const Route = createFileRoute("/request")({
             </Card>
           )}
 
-          <Card className="bg-surface flex-1 min-h-56">
-            <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-2 p-2">
-              <div className="text-status-success-fg flex items-center gap-2">
-                <div className="rounded-full size-2 bg-success"></div>
+          <Card className="bg-surface flex-1 min-h-72">
+            <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2">
+              {/* SUCCESS */}
+              {/* <div className="text-status-success-fg flex items-center gap-2">
+                <div className="rounded-full size-2 bg-status-success-fg"></div>
                 <div>200 OK</div>
+              </div> */}
+
+              {/* ERROR */}
+              {/* <div className="text-status-error-fg flex items-center gap-2">
+                <div className="rounded-full size-2 bg-status-error-fg"></div>
+                <div>422 Unprocessable Entity</div>
+              </div> */}
+
+              {/* LOADING */}
+              <div className="text-status-info-fg flex items-center gap-2">
+                <div className="rounded-full size-2 bg-status-info-fg"></div>
+                <div>Loading</div>
               </div>
+
               <div className="text-color-secondary text-caption flex gap-4">
                 <div>184 ms</div>
                 <div>1.24 KB</div>
               </div>
             </div>
+
+            <CardContent>
+              <Tabs defaultValue="body">
+                <TabsList variant="line">
+                  {responseTypes.map((responseTab) => (
+                    <TabsTrigger
+                      className="after:bg-action-primary"
+                      key={responseTab.value}
+                      value={responseTab.value}
+                    >
+                      {responseTab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                {/* success response */}
+                <TabsContent value="body" className="mt-4">
+                  <JsonEditor readOnly={true} />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
           </Card>
 
-          <Card className="bg-surface flex-1 min-h-56">
-            <CardContent className="h-full flex flex-col gap-2 rounded-lg justify-center items-center mx-4 border border-border-subtle">
+          {/* no request */}
+          {/* <Card className="bg-surface flex-1 min-h-56">
+            <CardContent className="h-full flex flex-col gap-4 rounded-lg justify-center items-center mx-4 border border-border-subtle">
               <p className="font-semibold text-color-primary text-base">
                 No response yet
               </p>
@@ -342,7 +392,24 @@ export const Route = createFileRoute("/request")({
                 Try again
               </Button>
             </CardContent>
-          </Card>
+          </Card> */}
+
+          {/* request failing */}
+          {/* <Card className="bg-surface flex-1 min-h-56">
+            <CardContent className="h-full flex flex-col gap-4 rounded-lg justify-center items-center mx-4 border border-border-subtle">
+              <p className="font-semibold text-color-primary text-base">
+                Network error
+              </p>
+
+              <p className="text-color-secondary text-caption">
+                Check your connection, proxy, or API host and try again.
+              </p>
+
+              <Button variant="secondary" size="lg">
+                Try again
+              </Button>
+            </CardContent>
+          </Card> */}
         </div>
       </div>
     )
