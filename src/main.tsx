@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
 import { routeTree } from "./routeTree.gen"
 import "./styles/globals.css"
+import { ThemeProvider } from "next-themes"
 
 const router = createRouter({
   routeTree,
@@ -20,8 +21,10 @@ declare module "@tanstack/react-router" {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <TooltipProvider>
-      <RouterProvider router={router} />
-    </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <TooltipProvider>
+        <RouterProvider router={router} />
+      </TooltipProvider>
+    </ThemeProvider>
   </StrictMode>,
 )

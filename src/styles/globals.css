@@ -53,7 +53,7 @@
   --text-color-inverse: var(--color-devlens-white);
   --text-color-accent: var(--color-devlens-violet-700);
   --text-color-disabled: var(--color-devlens-neutral-400);
-  --text-color-code: var(--color-devlens-neutral-100);
+  --text-color-code: var(--color-devlens-neutral-500);
 
   --border: var(--color-devlens-neutral-300);
   --border-subtle: var(--color-devlens-neutral-200);

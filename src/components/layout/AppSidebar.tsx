@@ -8,11 +8,14 @@ import {
   SidebarMenuButton,
 } from "../ui/sidebar"
 import { Link, useLocation } from "@tanstack/react-router"
+import { useTheme } from "next-themes"
 
 const AppSidebar = () => {
   const pathname = useLocation({
     select: (location) => location.pathname,
   })
+
+  const { theme } = useTheme()
 
   return (
     <Sidebar className="bg-sidebar border-border-subtle">
@@ -43,7 +46,7 @@ const AppSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter className="px-4 py-5 text-caption">
-        <div className="text-color-secondary">Theme · Dark</div>
+        <div className="text-color-secondary">Theme · {theme}</div>
         <div className="text-color-muted">Open-source project</div>
       </SidebarFooter>
     </Sidebar>

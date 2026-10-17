@@ -18,7 +18,7 @@ const RequestFieldsCard = ({ addButtonLabel }: Props) => {
       </CardHeader>
 
       <CardContent className="space-y-3">
-        <div className="grid grid-cols-[64px_repeat(3,minmax(0,1fr))_32px] gap-2 items-center p-2 text-caption text-color-muted">
+        <div className="grid grid-cols-[64px_repeat(3,minmax(0,1fr))_32px] gap-2 items-center p-1 text-caption text-color-muted">
           <div>Enabled</div>
           <div>Key</div>
           <div>Value</div>
@@ -36,12 +36,12 @@ const RequestFieldsCard = ({ addButtonLabel }: Props) => {
           <Input placeholder="Pagination page" />
 
           <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="size-4" />
           </Button>
         </div>
 
         <Button variant="secondary" size="lg">
-          <Plus className="h-4 w-4" />
+          <Plus className="size-4" />
           {addButtonLabel}
         </Button>
       </CardContent>
