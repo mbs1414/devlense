@@ -80,6 +80,13 @@ export const Route = createFileRoute("/request")({
     const [method, setMethod] = useState("GET")
     const [authType, setAuthType] = useState("bearer")
     const [response, setResponse] = useState(false)
+    const [request, setRequest] = useState("")
+
+    const sendRequest = () => {
+      fetch(request, {
+        method: method,
+      })
+    }
 
     const selectedMethod = methods.find((item) => item.value === method)
 
@@ -117,8 +124,11 @@ export const Route = createFileRoute("/request")({
           <Input
             className="h-11 font-mono bg-input"
             placeholder="{{baseUrl}}/users"
+            onChange={(e) => setRequest(e.target.value)}
           />
-          <Button size="lg">Send</Button>
+          <Button size="lg" onClick={sendRequest}>
+            Send
+          </Button>
         </div>
 
         <div className="flex flex-col gap-4 flex-1 min-h-0">
