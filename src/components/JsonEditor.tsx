@@ -3,7 +3,7 @@ import { tags } from "@lezer/highlight"
 import { createTheme } from "@uiw/codemirror-themes"
 import CodeMirror from "@uiw/react-codemirror"
 import { Copy, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 
@@ -34,17 +34,16 @@ const editorTheme = createTheme({
 
 interface Props {
   readOnly: boolean
+  loading?: boolean
+  data?: string
 }
 
-export default function JsonEditor({ readOnly = false }: Props) {
-  const [value, setValue] = useState(`{
-  "name": "DevLens",
-  "version": "1.0.0",
-  "features": [
-    "JSON Editor",
-    "API Testing"
-  ]
-}`)
+export default function JsonEditor({
+  readOnly = false,
+  loading = false,
+  data,
+}: Props) {
+  const [value, setValue] = useState(data || "")
 
   function formatJson() {
     try {
@@ -95,27 +94,29 @@ export default function JsonEditor({ readOnly = false }: Props) {
         </div>
       </div>
 
-      <CodeMirror
-        value={value}
-        extensions={[json()]}
-        theme={editorTheme}
-        height="256px"
-        className="h-64"
-        onChange={(newValue) => setValue(newValue)}
-        readOnly={readOnly}
-        editable={!readOnly}
-        basicSetup={{
-          lineNumbers: true,
-          foldGutter: true,
-        }}
-      />
-
       {/* loading */}
-      {/* <div className="flex items-center justify-center bg-code">
-        <span className="animate-pulse text-sm text-code-punctuation h-32">
-          Sending request...
-        </span>
-      </div> */}
+      {loading ? (
+        <div className="flex items-center justify-center bg-code">
+          <span className="animate-pulse text-sm text-code-punctuation h-32">
+            Sending request...
+          </span>
+        </div>
+      ) : (
+        <CodeMirror
+          value={value || data}
+          extensions={[json()]}
+          theme={editorTheme}
+          height="256px"
+          className="h-64"
+          onChange={(newValue) => setValue(newValue)}
+          readOnly={readOnly}
+          editable={!readOnly}
+          basicSetup={{
+            lineNumbers: true,
+            foldGutter: true,
+          }}
+        />
+      )}
     </div>
   )
 }

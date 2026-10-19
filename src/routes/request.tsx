@@ -17,7 +17,26 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { createFileRoute } from "@tanstack/react-router"
+import { Loader2Icon } from "lucide-react"
 import { useState } from "react"
+
+export interface ResponseInfo {
+  duration: number
+  size: string
+  status: string
+  body: string
+}
+
+const statusLabels: Record<number, string> = {
+  200: "OK",
+  201: "Created",
+  204: "No Content",
+  400: "Bad Request",
+  401: "Unauthorized",
+  403: "Forbidden",
+  404: "Not Found",
+  500: "Internal Server Error",
+}
 
 export const Route = createFileRoute("/request")({
   component: function RequestPage() {
@@ -37,18 +56,9 @@ export const Route = createFileRoute("/request")({
     ]
 
     const bodyTypes = [
-      {
-        value: "none",
-        label: "None",
-      },
-      {
-        value: "json",
-        label: "JSON",
-      },
-      {
-        value: "text",
-        label: "Text",
-      },
+      { value: "none", label: "None" },
+      { value: "json", label: "JSON" },
+      { value: "text", label: "Text" },
     ]
 
     const responseTypes = [
@@ -59,33 +69,53 @@ export const Route = createFileRoute("/request")({
     ]
 
     const authTypes = [
-      {
-        value: "no auth",
-        label: "No Auth",
-      },
-      {
-        value: "bearer",
-        label: "Bearer",
-      },
-      {
-        value: "basic",
-        label: "Basic",
-      },
-      {
-        value: "api key",
-        label: "API Key",
-      },
+      { value: "no auth", label: "No Auth" },
+      { value: "bearer", label: "Bearer" },
+      { value: "basic", label: "Basic" },
+      { value: "api key", label: "API Key" },
     ]
 
     const [method, setMethod] = useState("GET")
     const [authType, setAuthType] = useState("bearer")
-    const [response, setResponse] = useState(false)
+    const [responseInfo, setResponseInfo] = useState<ResponseInfo | null>(null)
     const [request, setRequest] = useState("")
+    const [loading, setLoading] = useState(false)
 
-    const sendRequest = () => {
-      fetch(request, {
-        method: method,
-      })
+    const [queryParams, setQueryParams] = useState<
+      { key: string; value: string }[]
+    >([])
+
+    const [headers, setHeaders] = useState<{ key: string; value: string }[]>([])
+
+    const [requestBody, setRequestBody] = useState("")
+
+    const sendRequest = async () => {
+      setLoading(true)
+      setResponseInfo(null)
+
+      const startTime = performance.now()
+
+      try {
+        const response = await fetch(request, {
+          method,
+        })
+
+        const body = await response.text()
+
+        const statusText =
+          response.statusText || statusLabels[response.status] || ""
+
+        setResponseInfo({
+          duration: Math.round(performance.now() - startTime),
+          size: (new Blob([body]).size / 1024).toFixed(2),
+          status: `${response.status} ${statusText}`,
+          body,
+        })
+      } catch (error) {
+        console.log(error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     const selectedMethod = methods.find((item) => item.value === method)
@@ -124,10 +154,12 @@ export const Route = createFileRoute("/request")({
           <Input
             className="h-11 font-mono bg-input"
             placeholder="{{baseUrl}}/users"
-            onChange={(e) => setRequest(e.target.value)}
+            onChange={(event) => setRequest(event.target.value)}
           />
-          <Button size="lg" onClick={sendRequest}>
-            Send
+
+          <Button size="lg" onClick={sendRequest} disabled={loading}>
+            {loading && <Loader2Icon className="size-4 animate-spin" />}
+            {loading ? "Sending..." : "Send"}
           </Button>
         </div>
 
@@ -181,6 +213,7 @@ export const Route = createFileRoute("/request")({
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
+
                   <JsonEditor readOnly={false} />
                 </CardContent>
               </Card>
@@ -193,6 +226,7 @@ export const Route = createFileRoute("/request")({
                     Auth · Bearer
                   </CardTitle>
                 </CardHeader>
+
                 <CardContent>
                   <ToggleGroup
                     type="single"
@@ -203,63 +237,59 @@ export const Route = createFileRoute("/request")({
                     spacing={1}
                     className="mb-4"
                   >
-                    {authTypes.map((bodyType) => (
+                    {authTypes.map((auth) => (
                       <ToggleGroupItem
-                        key={bodyType.value}
-                        value={bodyType.value}
-                        aria-label={bodyType.label}
+                        key={auth.value}
+                        value={auth.value}
+                        aria-label={auth.label}
                         className="bg-action-secondary data-[state=on]:bg-action-primary"
                       >
-                        {bodyType.label}
+                        {auth.label}
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
 
                   {authType === "bearer" && (
-                    <>
-                      <Field>
-                        <FieldLabel
-                          className="text-label text-color-secondary"
-                          htmlFor="token"
-                        >
-                          Token
-                        </FieldLabel>
-                        <Input
-                          id="token"
-                          className="font-mono text-color-accent h-11"
-                          placeholder="{{token}}"
-                        />
-                      </Field>
-                    </>
+                    <Field>
+                      <FieldLabel
+                        className="text-label text-color-secondary"
+                        htmlFor="token"
+                      >
+                        Token
+                      </FieldLabel>
+
+                      <Input
+                        id="token"
+                        className="font-mono text-color-accent h-11"
+                        placeholder="{{token}}"
+                      />
+                    </Field>
                   )}
 
                   {authType === "basic" && (
-                    <>
-                      <FieldGroup className="flex flex-row">
-                        <Field>
-                          <FieldLabel
-                            className="text-label text-color-secondary"
-                            htmlFor="username"
-                          >
-                            Username
-                          </FieldLabel>
-                          <Input id="username" className="h-11" />
-                        </Field>
-                        <Field>
-                          <FieldLabel
-                            className="text-label text-color-secondary"
-                            htmlFor="password"
-                          >
-                            Password
-                          </FieldLabel>
-                          <Input
-                            id="password"
-                            type="password"
-                            className="h-11"
-                          />
-                        </Field>
-                      </FieldGroup>
-                    </>
+                    <FieldGroup className="flex flex-row">
+                      <Field>
+                        <FieldLabel
+                          className="text-label text-color-secondary"
+                          htmlFor="username"
+                        >
+                          Username
+                        </FieldLabel>
+
+                        <Input id="username" className="h-11" />
+                      </Field>
+
+                      <Field>
+                        <FieldLabel
+                          className="text-label text-color-secondary"
+                          htmlFor="password"
+                        >
+                          Password
+                        </FieldLabel>
+
+                        <Input id="password" type="password" className="h-11" />
+                      </Field>
+                    </FieldGroup>
                   )}
 
                   {authType === "api key" && (
@@ -272,8 +302,10 @@ export const Route = createFileRoute("/request")({
                           >
                             Key
                           </FieldLabel>
+
                           <Input id="key" className="h-11" />
                         </Field>
+
                         <Field>
                           <FieldLabel
                             className="text-label text-color-secondary"
@@ -281,6 +313,7 @@ export const Route = createFileRoute("/request")({
                           >
                             Value
                           </FieldLabel>
+
                           <Input
                             id="value"
                             className="font-mono text-color-accent h-11"
@@ -323,47 +356,65 @@ export const Route = createFileRoute("/request")({
             </TabsContent>
           </Tabs>
 
-          {response && (
+          {responseInfo && (
             <Card className="bg-surface mt-4">
               <CardHeader>
                 <CardTitle className="text-section-title font-semibold">
                   Request configuration
                 </CardTitle>
               </CardHeader>
+
               <CardContent>
                 <p className="text-color-secondary text-body mb-4">
-                  2 query parameters · 2 headers · No request body · Bearer auth
+                  {queryParams.filter((item) => item.key.trim()).length} query
+                  parameters ·{" "}
+                  {headers.filter((item) => item.key.trim()).length} headers ·{" "}
+                  {requestBody.trim() ? "Request body" : "No request body"} ·{" "}
+                  {
+                    {
+                      "no auth": "No auth",
+                      bearer: "Bearer auth",
+                      basic: "Basic auth",
+                      "api key": "API key auth",
+                    }[authType]
+                  }
                 </p>
-                <p className="text-color-accent font-mono text-label">{`{{baseUrl}}/users?page=1&limit=20`}</p>
+
+                <p className="text-color-accent font-mono text-label">
+                  {request}
+                </p>
               </CardContent>
             </Card>
           )}
 
           <Card className="bg-surface flex-1 min-h-72">
-            <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2">
-              {/* SUCCESS */}
-              {/* <div className="text-status-success-fg flex items-center gap-2">
-                <div className="rounded-full size-2 bg-status-success-fg"></div>
-                <div>200 OK</div>
-              </div> */}
+            {responseInfo && (
+              <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2">
+                <div className="text-status-success-fg flex items-center gap-2">
+                  <div className="rounded-full size-2 bg-status-success-fg" />
+                  <div>{responseInfo.status}</div>
+                </div>
 
-              {/* ERROR */}
-              {/* <div className="text-status-error-fg flex items-center gap-2">
-                <div className="rounded-full size-2 bg-status-error-fg"></div>
-                <div>422 Unprocessable Entity</div>
-              </div> */}
-
-              {/* LOADING */}
-              <div className="text-status-info-fg flex items-center gap-2">
-                <div className="rounded-full size-2 bg-status-info-fg"></div>
-                <div>Loading</div>
+                <div className="text-color-secondary text-caption flex gap-4">
+                  <div>{`${responseInfo.duration} ms`}</div>
+                  <div>{`${responseInfo.size} KB`}</div>
+                </div>
               </div>
+            )}
 
-              <div className="text-color-secondary text-caption flex gap-4">
-                <div>184 ms</div>
-                <div>1.24 KB</div>
+            {loading && (
+              <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2">
+                <div className="text-status-info-fg flex items-center gap-2">
+                  <div className="rounded-full size-2 bg-status-info-fg" />
+                  <div>Loading</div>
+                </div>
+
+                <div className="text-color-secondary text-caption flex gap-4">
+                  <div>— ms</div>
+                  <div>— KB</div>
+                </div>
               </div>
-            </div>
+            )}
 
             <CardContent>
               <Tabs defaultValue="body">
@@ -379,47 +430,16 @@ export const Route = createFileRoute("/request")({
                   ))}
                 </TabsList>
 
-                {/* success response */}
                 <TabsContent value="body" className="mt-4">
-                  <JsonEditor readOnly={true} />
+                  <JsonEditor
+                    data={responseInfo?.body}
+                    loading={loading}
+                    readOnly
+                  />
                 </TabsContent>
               </Tabs>
             </CardContent>
           </Card>
-
-          {/* no request */}
-          {/* <Card className="bg-surface flex-1 min-h-56">
-            <CardContent className="h-full flex flex-col gap-4 rounded-lg justify-center items-center mx-4 border border-border-subtle">
-              <p className="font-semibold text-color-primary text-base">
-                No response yet
-              </p>
-
-              <p className="text-color-secondary text-caption">
-                Send a request to inspect status, timing, headers, and body.
-              </p>
-
-              <Button variant="secondary" size="lg">
-                Try again
-              </Button>
-            </CardContent>
-          </Card> */}
-
-          {/* request failing */}
-          {/* <Card className="bg-surface flex-1 min-h-56">
-            <CardContent className="h-full flex flex-col gap-4 rounded-lg justify-center items-center mx-4 border border-border-subtle">
-              <p className="font-semibold text-color-primary text-base">
-                Network error
-              </p>
-
-              <p className="text-color-secondary text-caption">
-                Check your connection, proxy, or API host and try again.
-              </p>
-
-              <Button variant="secondary" size="lg">
-                Try again
-              </Button>
-            </CardContent>
-          </Card> */}
         </div>
       </div>
     )
