@@ -78,6 +78,7 @@ export const Route = createFileRoute("/request")({
     const [method, setMethod] = useState("GET")
     const [authType, setAuthType] = useState("bearer")
     const [responseInfo, setResponseInfo] = useState<ResponseInfo | null>(null)
+    const [requestError, setRequestError] = useState<string | null>(null)
     const [request, setRequest] = useState("")
     const [loading, setLoading] = useState(false)
 
@@ -112,7 +113,9 @@ export const Route = createFileRoute("/request")({
           body,
         })
       } catch (error) {
-        console.log(error)
+        setRequestError(
+          error instanceof Error ? error.message : "Something went wrong",
+        )
       } finally {
         setLoading(false)
       }
@@ -386,6 +389,25 @@ export const Route = createFileRoute("/request")({
               </CardContent>
             </Card>
           )}
+        
+          {/* {requestError && (
+            <div className="mx-4 rounded-md border border-status-error-fg p-4">
+              <p className="font-semibold text-status-error-fg">
+                Network error
+              </p>
+
+              <p className="mt-2 text-color-secondary">{requestError}</p>
+
+              <Button
+                variant="secondary"
+                size="lg"
+                className="mt-4"
+                onClick={sendRequest}
+              >
+                Try again
+              </Button>
+            </div>
+          )} */}
 
           <Card className="bg-surface flex-1 min-h-72">
             {responseInfo && (
