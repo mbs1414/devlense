@@ -19,6 +19,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { createFileRoute } from "@tanstack/react-router"
 import { Loader2Icon } from "lucide-react"
 import { useState } from "react"
+import { getReasonPhrase } from "http-status-codes"
 
 export interface ResponseInfo {
   duration: number
@@ -27,15 +28,12 @@ export interface ResponseInfo {
   body: string
 }
 
-const statusLabels: Record<number, string> = {
-  200: "OK",
-  201: "Created",
-  204: "No Content",
-  400: "Bad Request",
-  401: "Unauthorized",
-  403: "Forbidden",
-  404: "Not Found",
-  500: "Internal Server Error",
+export interface QueryParam {
+  id: string
+  key: string
+  value: string
+  description: string
+  enabled: boolean
 }
 
 export const Route = createFileRoute("/request")({
@@ -81,35 +79,42 @@ export const Route = createFileRoute("/request")({
     const [requestError, setRequestError] = useState<string | null>(null)
     const [request, setRequest] = useState("")
     const [loading, setLoading] = useState(false)
-
-    const [queryParams, setQueryParams] = useState<
-      { key: string; value: string }[]
-    >([])
-
+    const [queryParams, setQueryParams] = useState<QueryParam[]>([])
     const [headers, setHeaders] = useState<{ key: string; value: string }[]>([])
-
     const [requestBody, setRequestBody] = useState("")
+
+    const selectedMethod = methods.find((item) => item.value === method)
+
+    function getStatusLabel(code: number): string {
+      try {
+        return getReasonPhrase(code)
+      } catch {
+        return "Unknown Status"
+      }
+    }
 
     const sendRequest = async () => {
       setLoading(true)
       setResponseInfo(null)
+      setRequestError(null)
 
       const startTime = performance.now()
-
       try {
-        const response = await fetch(request, {
-          method,
-        })
+        const url = new URL(request)
 
+        queryParams
+          .filter((param) => param.enabled && param.key.trim())
+          .forEach((param) => {
+            url.searchParams.append(param.key, param.value)
+          })
+
+        const response = await fetch(url, { method })
         const body = await response.text()
-
-        const statusText =
-          response.statusText || statusLabels[response.status] || ""
 
         setResponseInfo({
           duration: Math.round(performance.now() - startTime),
           size: (new Blob([body]).size / 1024).toFixed(2),
-          status: `${response.status} ${statusText}`,
+          status: `${response.status} ${getStatusLabel(response.status)}`,
           body,
         })
       } catch (error) {
@@ -121,7 +126,36 @@ export const Route = createFileRoute("/request")({
       }
     }
 
-    const selectedMethod = methods.find((item) => item.value === method)
+    function addParam() {
+      setQueryParams((previous) => [
+        ...previous,
+        {
+          id: crypto.randomUUID(),
+          key: "",
+          value: "",
+          description: "",
+          enabled: true,
+        },
+      ])
+    }
+
+    function removeParam(paramId: string) {
+      setQueryParams((previous) =>
+        previous.filter((param) => param.id !== paramId),
+      )
+    }
+
+    function updateParam<K extends keyof Omit<QueryParam, "id">>(
+      id: string,
+      field: K,
+      value: QueryParam[K],
+    ) {
+      setQueryParams((previous) =>
+        previous.map((param) =>
+          param.id === id ? { ...param, [field]: value } : param,
+        ),
+      )
+    }
 
     return (
       <div className="h-full flex flex-col">
@@ -129,6 +163,7 @@ export const Route = createFileRoute("/request")({
           Request
         </h1>
 
+        {/* Request bar */}
         <div className="flex gap-2 my-4 items-center">
           <Select value={method} onValueChange={setMethod}>
             <SelectTrigger>
@@ -138,7 +173,6 @@ export const Route = createFileRoute("/request")({
                 </span>
               </SelectValue>
             </SelectTrigger>
-
             <SelectContent position="popper">
               <SelectGroup>
                 {methods.map((method) => (
@@ -167,6 +201,7 @@ export const Route = createFileRoute("/request")({
         </div>
 
         <div className="flex flex-col gap-4 flex-1 min-h-0">
+          {/* Request configuration tabs */}
           <Tabs defaultValue="params">
             <TabsList variant="line">
               {tabs.map((tab) => (
@@ -180,14 +215,23 @@ export const Route = createFileRoute("/request")({
               ))}
             </TabsList>
 
+            {/* Params tab */}
             <TabsContent value="params">
-              <RequestFieldsCard addButtonLabel="Add parameter" />
+              <RequestFieldsCard
+                params={queryParams}
+                addParam={addParam}
+                removeParam={removeParam}
+                updateParam={updateParam}
+                addButtonLabel="Add parameter"
+              />
             </TabsContent>
 
+            {/* Headers tab */}
             <TabsContent value="headers">
               <RequestFieldsCard addButtonLabel="Add header" />
             </TabsContent>
 
+            {/* Body tab */}
             <TabsContent value="body">
               <Card className="bg-surface mt-4">
                 <CardHeader>
@@ -195,7 +239,6 @@ export const Route = createFileRoute("/request")({
                     Body
                   </CardTitle>
                 </CardHeader>
-
                 <CardContent>
                   <ToggleGroup
                     type="single"
@@ -216,12 +259,12 @@ export const Route = createFileRoute("/request")({
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
-
                   <JsonEditor readOnly={false} />
                 </CardContent>
               </Card>
             </TabsContent>
 
+            {/* Auth tab */}
             <TabsContent value="auth">
               <Card className="bg-surface mt-4">
                 <CardHeader>
@@ -229,7 +272,6 @@ export const Route = createFileRoute("/request")({
                     Auth · Bearer
                   </CardTitle>
                 </CardHeader>
-
                 <CardContent>
                   <ToggleGroup
                     type="single"
@@ -252,6 +294,7 @@ export const Route = createFileRoute("/request")({
                     ))}
                   </ToggleGroup>
 
+                  {/* Bearer auth */}
                   {authType === "bearer" && (
                     <Field>
                       <FieldLabel
@@ -260,7 +303,6 @@ export const Route = createFileRoute("/request")({
                       >
                         Token
                       </FieldLabel>
-
                       <Input
                         id="token"
                         className="font-mono text-color-accent h-11"
@@ -269,6 +311,7 @@ export const Route = createFileRoute("/request")({
                     </Field>
                   )}
 
+                  {/* Basic auth */}
                   {authType === "basic" && (
                     <FieldGroup className="flex flex-row">
                       <Field>
@@ -278,10 +321,8 @@ export const Route = createFileRoute("/request")({
                         >
                           Username
                         </FieldLabel>
-
                         <Input id="username" className="h-11" />
                       </Field>
-
                       <Field>
                         <FieldLabel
                           className="text-label text-color-secondary"
@@ -289,12 +330,12 @@ export const Route = createFileRoute("/request")({
                         >
                           Password
                         </FieldLabel>
-
                         <Input id="password" type="password" className="h-11" />
                       </Field>
                     </FieldGroup>
                   )}
 
+                  {/* API key auth */}
                   {authType === "api key" && (
                     <>
                       <FieldGroup className="flex flex-row">
@@ -305,10 +346,8 @@ export const Route = createFileRoute("/request")({
                           >
                             Key
                           </FieldLabel>
-
                           <Input id="key" className="h-11" />
                         </Field>
-
                         <Field>
                           <FieldLabel
                             className="text-label text-color-secondary"
@@ -316,7 +355,6 @@ export const Route = createFileRoute("/request")({
                           >
                             Value
                           </FieldLabel>
-
                           <Input
                             id="value"
                             className="font-mono text-color-accent h-11"
@@ -328,7 +366,6 @@ export const Route = createFileRoute("/request")({
                         <span className="shrink-0 text-sm font-medium">
                           Add to:
                         </span>
-
                         <RadioGroup
                           defaultValue="header"
                           className="flex items-center gap-4"
@@ -337,7 +374,6 @@ export const Route = createFileRoute("/request")({
                             <RadioGroupItem id="header" value="header" />
                             <Label htmlFor="header">Header</Label>
                           </div>
-
                           <div className="flex items-center gap-1">
                             <RadioGroupItem
                               id="query-params"
@@ -359,6 +395,7 @@ export const Route = createFileRoute("/request")({
             </TabsContent>
           </Tabs>
 
+          {/* Request configuration summary */}
           {responseInfo && (
             <Card className="bg-surface mt-4">
               <CardHeader>
@@ -366,7 +403,6 @@ export const Route = createFileRoute("/request")({
                   Request configuration
                 </CardTitle>
               </CardHeader>
-
               <CardContent>
                 <p className="text-color-secondary text-body mb-4">
                   {queryParams.filter((item) => item.key.trim()).length} query
@@ -382,22 +418,20 @@ export const Route = createFileRoute("/request")({
                     }[authType]
                   }
                 </p>
-
                 <p className="text-color-accent font-mono text-label">
                   {request}
                 </p>
               </CardContent>
             </Card>
           )}
-        
-          {/* {requestError && (
+
+          {/* Network error */}
+          {requestError && (
             <div className="mx-4 rounded-md border border-status-error-fg p-4">
               <p className="font-semibold text-status-error-fg">
                 Network error
               </p>
-
               <p className="mt-2 text-color-secondary">{requestError}</p>
-
               <Button
                 variant="secondary"
                 size="lg"
@@ -407,16 +441,17 @@ export const Route = createFileRoute("/request")({
                 Try again
               </Button>
             </div>
-          )} */}
+          )}
 
+          {/* Response card */}
           <Card className="bg-surface flex-1 min-h-72">
+            {/* Response status bar */}
             {responseInfo && (
               <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2">
                 <div className="text-status-success-fg flex items-center gap-2">
                   <div className="rounded-full size-2 bg-status-success-fg" />
                   <div>{responseInfo.status}</div>
                 </div>
-
                 <div className="text-color-secondary text-caption flex gap-4">
                   <div>{`${responseInfo.duration} ms`}</div>
                   <div>{`${responseInfo.size} KB`}</div>
@@ -424,13 +459,13 @@ export const Route = createFileRoute("/request")({
               </div>
             )}
 
+            {/* Loading state bar */}
             {loading && (
               <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2">
                 <div className="text-status-info-fg flex items-center gap-2">
                   <div className="rounded-full size-2 bg-status-info-fg" />
                   <div>Loading</div>
                 </div>
-
                 <div className="text-color-secondary text-caption flex gap-4">
                   <div>— ms</div>
                   <div>— KB</div>
