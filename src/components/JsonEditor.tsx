@@ -3,7 +3,6 @@ import { tags } from "@lezer/highlight"
 import { createTheme } from "@uiw/codemirror-themes"
 import CodeMirror from "@uiw/react-codemirror"
 import { Copy, Trash2 } from "lucide-react"
-import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 
@@ -36,18 +35,20 @@ interface Props {
   readOnly: boolean
   loading?: boolean
   data?: string
+  onChange?: (value: string) => void
 }
 
 export default function JsonEditor({
   readOnly = false,
   loading = false,
   data,
+  onChange,
 }: Props) {
-  const [value, setValue] = useState(data || "")
+  const value = data ?? ""
 
   function formatJson() {
     try {
-      setValue(JSON.stringify(JSON.parse(value), null, 2))
+      onChange?.(JSON.stringify(JSON.parse(value), null, 2))
     } catch {
       // Keep the current value if the JSON is invalid.
     }
@@ -85,7 +86,7 @@ export default function JsonEditor({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setValue("")}
+            onClick={() => onChange?.("")}
             aria-label="Clear JSON"
             title="Clear JSON"
           >
@@ -103,12 +104,12 @@ export default function JsonEditor({
         </div>
       ) : (
         <CodeMirror
-          value={value || data}
+          value={value}
           extensions={[json()]}
           theme={editorTheme}
           height="256px"
           className="h-64"
-          onChange={(newValue) => setValue(newValue)}
+          onChange={(newValue) => onChange?.(newValue)}
           readOnly={readOnly}
           editable={!readOnly}
           basicSetup={{

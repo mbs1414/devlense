@@ -1,4 +1,4 @@
-import { routes } from "@/config/sidebar-items"
+import { routes } from "@/constants/sidebar-items"
 import {
   Sidebar,
   SidebarContent,

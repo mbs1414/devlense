@@ -3,26 +3,25 @@ import { Button } from "../ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Checkbox } from "../ui/checkbox"
 import { Input } from "../ui/input"
-import type { QueryParam } from "@/routes/request"
 
 interface Props {
   addButtonLabel: string
-  params: QueryParam[]
-  addParam: () => void
-  removeParam: (paramId: string) => void
-  updateParam: <K extends keyof Omit<QueryParam, "id">>(
+  fields: RequestField[]
+  addField: () => void
+  removeField: (paramId: string) => void
+  updateField: <K extends keyof Omit<RequestField, "id">>(
     id: string,
     field: K,
-    value: QueryParam[K],
+    value: RequestField[K],
   ) => void
 }
 
 const RequestFieldsCard = ({
   addButtonLabel,
-  params,
-  addParam,
-  removeParam,
-  updateParam,
+  fields,
+  addField,
+  removeField,
+  updateField,
 }: Props) => {
   return (
     <Card className="bg-surface mt-4">
@@ -41,35 +40,35 @@ const RequestFieldsCard = ({
           <div />
         </div>
 
-        {params.map((param) => (
+        {fields.map((field) => (
           <div
             className="grid grid-cols-[20px_repeat(3,minmax(0,1fr))_32px] gap-2 items-center p-2 bg-surface-subtle border border-border-subtle rounded-md"
-            key={param.id}
+            key={field.id}
           >
             <Checkbox
-              checked={param.enabled}
+              checked={field.enabled}
               onCheckedChange={(checked) =>
-                updateParam(param.id, "enabled", checked === true)
+                updateField(field.id, "enabled", checked === true)
               }
             />
 
             <Input
               placeholder="page"
-              value={param.key}
-              onChange={(e) => updateParam(param.id, "key", e.target.value)}
+              value={field.key}
+              onChange={(e) => updateField(field.id, "key", e.target.value)}
             />
 
             <Input
               placeholder="1"
-              value={param.value}
-              onChange={(e) => updateParam(param.id, "value", e.target.value)}
+              value={field.value}
+              onChange={(e) => updateField(field.id, "value", e.target.value)}
             />
 
             <Input
               placeholder="Pagination page"
-              value={param.description}
+              value={field.description}
               onChange={(e) =>
-                updateParam(param.id, "description", e.target.value)
+                updateField(field.id, "description", e.target.value)
               }
             />
 
@@ -77,14 +76,14 @@ const RequestFieldsCard = ({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => removeParam(param.id)}
+              onClick={() => removeField(field.id)}
             >
               <Trash2 className="size-4" />
             </Button>
           </div>
         ))}
 
-        <Button variant="secondary" size="lg" onClick={addParam}>
+        <Button variant="secondary" size="lg" onClick={addField}>
           <Plus className="size-4" />
           {addButtonLabel}
         </Button>

@@ -18,89 +18,58 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { createFileRoute } from "@tanstack/react-router"
 import { Loader2Icon } from "lucide-react"
-import { useState } from "react"
+import { useState, type Dispatch, type SetStateAction } from "react"
 import { getReasonPhrase } from "http-status-codes"
-
-export interface ResponseInfo {
-  duration: number
-  size: string
-  status: string
-  body: string
-}
-
-export interface QueryParam {
-  id: string
-  key: string
-  value: string
-  description: string
-  enabled: boolean
-}
+import ResponseStatusBar from "@/components/ResponseStatusBar"
+import PlaceholderState from "@/components/PlaceholderState"
+import {
+  methods,
+  tabs,
+  bodyTypes,
+  responseTypes,
+  authTypes,
+} from "@/constants/request"
+import { Textarea } from "@/components/ui/textarea"
 
 export const Route = createFileRoute("/request")({
   component: function RequestPage() {
-    const methods = [
-      { value: "GET", className: "text-method-get-fg" },
-      { value: "POST", className: "text-method-post-fg" },
-      { value: "PUT", className: "text-method-put-fg" },
-      { value: "PATCH", className: "text-method-patch-fg" },
-      { value: "DELETE", className: "text-method-delete-fg" },
-    ]
-
-    const tabs = [
-      { value: "params", label: "Params" },
-      { value: "headers", label: "Headers" },
-      { value: "body", label: "Body" },
-      { value: "auth", label: "Auth" },
-    ]
-
-    const bodyTypes = [
-      { value: "none", label: "None" },
-      { value: "json", label: "JSON" },
-      { value: "text", label: "Text" },
-    ]
-
-    const responseTypes = [
-      { value: "body", label: "Body" },
-      { value: "headers", label: "Headers" },
-      { value: "pretty", label: "Pretty" },
-      { value: "raw", label: "Raw" },
-    ]
-
-    const authTypes = [
-      { value: "no auth", label: "No Auth" },
-      { value: "bearer", label: "Bearer" },
-      { value: "basic", label: "Basic" },
-      { value: "api key", label: "API Key" },
-    ]
-
     const [method, setMethod] = useState("GET")
     const [authType, setAuthType] = useState("bearer")
     const [responseInfo, setResponseInfo] = useState<ResponseInfo | null>(null)
-    const [requestError, setRequestError] = useState<string | null>(null)
     const [request, setRequest] = useState("")
     const [loading, setLoading] = useState(false)
-    const [queryParams, setQueryParams] = useState<QueryParam[]>([])
-    const [headers, setHeaders] = useState<{ key: string; value: string }[]>([])
     const [requestBody, setRequestBody] = useState("")
+    const [submittedUrl, setSubmittedUrl] = useState("")
+    const [requestSummary, setRequestSummary] = useState("")
+    const [bodyType, setBodyType] = useState("json")
+    const [queryParams, setQueryParams] = useState<RequestField[]>(() => [
+      {
+        id: crypto.randomUUID(),
+        key: "",
+        value: "",
+        description: "",
+        enabled: false,
+      },
+    ])
+    const [headers, setHeaders] = useState<RequestField[]>(() => [
+      {
+        id: crypto.randomUUID(),
+        key: "",
+        value: "",
+        description: "",
+        enabled: false,
+      },
+    ])
 
     const selectedMethod = methods.find((item) => item.value === method)
-
-    function getStatusLabel(code: number): string {
-      try {
-        return getReasonPhrase(code)
-      } catch {
-        return "Unknown Status"
-      }
-    }
-
     const sendRequest = async () => {
       setLoading(true)
       setResponseInfo(null)
-      setRequestError(null)
 
       const startTime = performance.now()
       try {
         const url = new URL(request)
+        const requestHeaders = new Headers()
 
         queryParams
           .filter((param) => param.enabled && param.key.trim())
@@ -108,26 +77,64 @@ export const Route = createFileRoute("/request")({
             url.searchParams.append(param.key, param.value)
           })
 
-        const response = await fetch(url, { method })
+        headers
+          .filter((header) => header.enabled && header.key.trim())
+          .forEach((header) => {
+            requestHeaders.append(header.key.trim(), header.value)
+          })
+
+        const canSendBody =
+          method !== "GET" && method !== "HEAD" && bodyType !== "none"
+
+        if (canSendBody && !requestHeaders.has("Content-Type")) {
+          requestHeaders.set(
+            "Content-Type",
+            bodyType === "json" ? "application/json" : "text/plain",
+          )
+        }
+
+        setSubmittedUrl(url.toString())
+        const paramCount = url.searchParams.size
+        const headerCount = Array.from(requestHeaders.keys()).length
+        const bodyLabel =
+          canSendBody && requestBody.length > 0
+            ? "Request body"
+            : "No request body"
+        const authorization = requestHeaders.get("Authorization") ?? ""
+        const authLabel = /^Bearer\s+\S+/i.test(authorization)
+          ? "Bearer auth"
+          : /^Basic\s+\S+/i.test(authorization)
+            ? "Basic auth"
+            : authorization
+              ? "Authorization header"
+              : "No auth"
+
+        setRequestSummary(
+          `${paramCount} query parameters · ${headerCount} headers · ${bodyLabel} · ${authLabel}`,
+        )
+        const response = await fetch(url, {
+          method,
+          headers: requestHeaders,
+          ...(canSendBody ? { body: requestBody } : {}),
+        })
         const body = await response.text()
 
         setResponseInfo({
           duration: Math.round(performance.now() - startTime),
           size: (new Blob([body]).size / 1024).toFixed(2),
-          status: `${response.status} ${getStatusLabel(response.status)}`,
+          statusLabel: `${response.status} ${getStatusLabel(response.status)}`,
+          statusCode: response.status,
           body,
         })
       } catch (error) {
-        setRequestError(
-          error instanceof Error ? error.message : "Something went wrong",
-        )
+        console.log(error)
       } finally {
         setLoading(false)
       }
     }
 
-    function addParam() {
-      setQueryParams((previous) => [
+    const addField = (setFields: Dispatch<SetStateAction<RequestField[]>>) => {
+      setFields((previous) => [
         ...previous,
         {
           id: crypto.randomUUID(),
@@ -139,22 +146,32 @@ export const Route = createFileRoute("/request")({
       ])
     }
 
-    function removeParam(paramId: string) {
-      setQueryParams((previous) =>
-        previous.filter((param) => param.id !== paramId),
+    const removeField = (
+      fieldId: string,
+      setFields: Dispatch<SetStateAction<RequestField[]>>,
+    ) => {
+      setFields((previous) => previous.filter((field) => field.id !== fieldId))
+    }
+
+    const updateField = <K extends keyof Omit<RequestField, "id">>(
+      setFields: Dispatch<SetStateAction<RequestField[]>>,
+      id: string,
+      field: K,
+      value: RequestField[K],
+    ) => {
+      setFields((previous) =>
+        previous.map((item) =>
+          item.id === id ? { ...item, [field]: value } : item,
+        ),
       )
     }
 
-    function updateParam<K extends keyof Omit<QueryParam, "id">>(
-      id: string,
-      field: K,
-      value: QueryParam[K],
-    ) {
-      setQueryParams((previous) =>
-        previous.map((param) =>
-          param.id === id ? { ...param, [field]: value } : param,
-        ),
-      )
+    const getStatusLabel = (code: number): string => {
+      try {
+        return getReasonPhrase(code)
+      } catch {
+        return "Unknown Status"
+      }
     }
 
     return (
@@ -218,17 +235,27 @@ export const Route = createFileRoute("/request")({
             {/* Params tab */}
             <TabsContent value="params">
               <RequestFieldsCard
-                params={queryParams}
-                addParam={addParam}
-                removeParam={removeParam}
-                updateParam={updateParam}
+                fields={queryParams}
+                addField={() => addField(setQueryParams)}
+                removeField={(fieldId) => removeField(fieldId, setQueryParams)}
+                updateField={(id, field, value) =>
+                  updateField(setQueryParams, id, field, value)
+                }
                 addButtonLabel="Add parameter"
               />
             </TabsContent>
 
             {/* Headers tab */}
             <TabsContent value="headers">
-              <RequestFieldsCard addButtonLabel="Add header" />
+              <RequestFieldsCard
+                fields={headers}
+                addField={() => addField(setHeaders)}
+                removeField={(fieldId) => removeField(fieldId, setHeaders)}
+                updateField={(id, field, value) =>
+                  updateField(setHeaders, id, field, value)
+                }
+                addButtonLabel="Add header"
+              />
             </TabsContent>
 
             {/* Body tab */}
@@ -243,7 +270,8 @@ export const Route = createFileRoute("/request")({
                   <ToggleGroup
                     type="single"
                     size="lg"
-                    defaultValue="json"
+                    value={bodyType}
+                    onValueChange={(value) => value && setBodyType(value)}
                     variant="default"
                     spacing={1}
                     className="mb-4"
@@ -259,7 +287,28 @@ export const Route = createFileRoute("/request")({
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
-                  <JsonEditor readOnly={false} />
+                  {bodyType === "none" && (
+                    <PlaceholderState
+                      variant="inline"
+                      title="This request has no body"
+                      description="Select JSON or Text to include a body with your request."
+                    />
+                  )}
+                  {bodyType === "json" && (
+                    <JsonEditor
+                      readOnly={false}
+                      data={requestBody}
+                      onChange={setRequestBody}
+                    />
+                  )}
+                  {bodyType === "text" && (
+                    <Textarea
+                      value={requestBody}
+                      onChange={(event) => setRequestBody(event.target.value)}
+                      placeholder="Enter your request body..."
+                      className="min-h-64 bg-canvas border-border font-mono resize-none"
+                    />
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -405,98 +454,58 @@ export const Route = createFileRoute("/request")({
               </CardHeader>
               <CardContent>
                 <p className="text-color-secondary text-body mb-4">
-                  {queryParams.filter((item) => item.key.trim()).length} query
-                  parameters ·{" "}
-                  {headers.filter((item) => item.key.trim()).length} headers ·{" "}
-                  {requestBody.trim() ? "Request body" : "No request body"} ·{" "}
-                  {
-                    {
-                      "no auth": "No auth",
-                      bearer: "Bearer auth",
-                      basic: "Basic auth",
-                      "api key": "API key auth",
-                    }[authType]
-                  }
+                  {requestSummary}
                 </p>
                 <p className="text-color-accent font-mono text-label">
-                  {request}
+                  {submittedUrl}
                 </p>
               </CardContent>
             </Card>
           )}
 
-          {/* Network error */}
-          {requestError && (
-            <div className="mx-4 rounded-md border border-status-error-fg p-4">
-              <p className="font-semibold text-status-error-fg">
-                Network error
-              </p>
-              <p className="mt-2 text-color-secondary">{requestError}</p>
-              <Button
-                variant="secondary"
-                size="lg"
-                className="mt-4"
-                onClick={sendRequest}
-              >
-                Try again
-              </Button>
-            </div>
+          {responseInfo ? (
+            <Card className="bg-surface flex-1 min-h-72">
+              <ResponseStatusBar
+                loading={loading}
+                responseInfo={responseInfo}
+              />
+
+              <CardContent>
+                <Tabs defaultValue="body">
+                  <TabsList variant="line">
+                    {responseTypes.map((responseTab) => (
+                      <TabsTrigger
+                        className="after:bg-action-primary"
+                        key={responseTab.value}
+                        value={responseTab.value}
+                      >
+                        {responseTab.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  <TabsContent value="body" className="mt-4">
+                    <JsonEditor
+                      data={responseInfo?.body}
+                      onChange={(body) =>
+                        setResponseInfo((previous) =>
+                          previous ? { ...previous, body } : previous,
+                        )
+                      }
+                      loading={loading}
+                      readOnly
+                    />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          ) : (
+            <PlaceholderState
+              variant="panel"
+              title="No response yet"
+              description="Send a request to inspect status, timing, headers, and body."
+            />
           )}
-
-          {/* Response card */}
-          <Card className="bg-surface flex-1 min-h-72">
-            {/* Response status bar */}
-            {responseInfo && (
-              <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2">
-                <div className="text-status-success-fg flex items-center gap-2">
-                  <div className="rounded-full size-2 bg-status-success-fg" />
-                  <div>{responseInfo.status}</div>
-                </div>
-                <div className="text-color-secondary text-caption flex gap-4">
-                  <div>{`${responseInfo.duration} ms`}</div>
-                  <div>{`${responseInfo.size} KB`}</div>
-                </div>
-              </div>
-            )}
-
-            {/* Loading state bar */}
-            {loading && (
-              <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2">
-                <div className="text-status-info-fg flex items-center gap-2">
-                  <div className="rounded-full size-2 bg-status-info-fg" />
-                  <div>Loading</div>
-                </div>
-                <div className="text-color-secondary text-caption flex gap-4">
-                  <div>— ms</div>
-                  <div>— KB</div>
-                </div>
-              </div>
-            )}
-
-            <CardContent>
-              <Tabs defaultValue="body">
-                <TabsList variant="line">
-                  {responseTypes.map((responseTab) => (
-                    <TabsTrigger
-                      className="after:bg-action-primary"
-                      key={responseTab.value}
-                      value={responseTab.value}
-                    >
-                      {responseTab.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-
-                <TabsContent value="body" className="mt-4">
-                  <JsonEditor
-                    data={responseInfo?.body}
-                    loading={loading}
-                    readOnly
-                  />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
         </div>
       </div>
     )
