@@ -17,7 +17,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { createFileRoute } from "@tanstack/react-router"
-import { Loader2Icon } from "lucide-react"
+import { Loader2Icon, ShieldOff } from "lucide-react"
 import { useState, type Dispatch, type SetStateAction } from "react"
 import { getReasonPhrase } from "http-status-codes"
 import ResponseStatusBar from "@/components/ResponseStatusBar"
@@ -34,7 +34,7 @@ import { Textarea } from "@/components/ui/textarea"
 export const Route = createFileRoute("/request")({
   component: function RequestPage() {
     const [method, setMethod] = useState("GET")
-    const [authType, setAuthType] = useState("bearer")
+    const [authType, setAuthType] = useState("no auth")
     const [responseInfo, setResponseInfo] = useState<ResponseInfo | null>(null)
     const [request, setRequest] = useState("")
     const [loading, setLoading] = useState(false)
@@ -60,6 +60,14 @@ export const Route = createFileRoute("/request")({
         enabled: false,
       },
     ])
+    const [auth, setAuth] = useState({
+      token: "",
+      username: "",
+      password: "",
+      apiKeyName: "",
+      apiKeyValue: "",
+      apiKeyLocation: "header" as "header" | "query-params",
+    })
 
     const selectedMethod = methods.find((item) => item.value === method)
     const sendRequest = async () => {
@@ -82,6 +90,42 @@ export const Route = createFileRoute("/request")({
           .forEach((header) => {
             requestHeaders.append(header.key.trim(), header.value)
           })
+
+        switch (authType) {
+          case "bearer":
+            requestHeaders.set("Authorization", `Bearer ${auth.token.trim()}`)
+            break
+
+          case "basic": {
+            const credentials = `${auth.username}:${auth.password}`
+            const bytes = new TextEncoder().encode(credentials)
+            const encoded = btoa(
+              Array.from(bytes, (byte) => String.fromCharCode(byte)).join(""),
+            )
+
+            requestHeaders.set("Authorization", `Basic ${encoded}`)
+            break
+          }
+
+          case "api key": {
+            const key = auth.apiKeyName.trim()
+
+            if (!key) {
+              throw new Error("API key name is required")
+            }
+
+            if (auth.apiKeyLocation === "header") {
+              requestHeaders.set(key, auth.apiKeyValue)
+            } else {
+              url.searchParams.set(key, auth.apiKeyValue)
+            }
+
+            break
+          }
+
+          case "no auth":
+            break
+        }
 
         const canSendBody =
           method !== "GET" && method !== "HEAD" && bodyType !== "none"
@@ -172,6 +216,16 @@ export const Route = createFileRoute("/request")({
       } catch {
         return "Unknown Status"
       }
+    }
+
+    const handleAuthChange = <K extends keyof typeof auth>(
+      field: K,
+      value: (typeof auth)[K],
+    ) => {
+      setAuth((previous) => ({
+        ...previous,
+        [field]: value,
+      }))
     }
 
     return (
@@ -343,6 +397,16 @@ export const Route = createFileRoute("/request")({
                     ))}
                   </ToggleGroup>
 
+                  {/* no auth */}
+                  {authType === "no auth" && (
+                    <PlaceholderState
+                      title="No authentication required"
+                      description="This request will be sent without authentication credentials."
+                      icon={ShieldOff}
+                      variant="inline"
+                    />
+                  )}
+
                   {/* Bearer auth */}
                   {authType === "bearer" && (
                     <Field>
@@ -353,9 +417,13 @@ export const Route = createFileRoute("/request")({
                         Token
                       </FieldLabel>
                       <Input
-                        id="token"
                         className="font-mono text-color-accent h-11"
                         placeholder="{{token}}"
+                        id="token"
+                        value={auth.token}
+                        onChange={(e) =>
+                          handleAuthChange("token", e.target.value)
+                        }
                       />
                     </Field>
                   )}
@@ -370,7 +438,14 @@ export const Route = createFileRoute("/request")({
                         >
                           Username
                         </FieldLabel>
-                        <Input id="username" className="h-11" />
+                        <Input
+                          id="username"
+                          className="h-11"
+                          value={auth.username}
+                          onChange={(e) =>
+                            handleAuthChange("username", e.target.value)
+                          }
+                        />
                       </Field>
                       <Field>
                         <FieldLabel
@@ -379,7 +454,15 @@ export const Route = createFileRoute("/request")({
                         >
                           Password
                         </FieldLabel>
-                        <Input id="password" type="password" className="h-11" />
+                        <Input
+                          id="password"
+                          type="password"
+                          className="h-11"
+                          value={auth.password}
+                          onChange={(e) =>
+                            handleAuthChange("password", e.target.value)
+                          }
+                        />
                       </Field>
                     </FieldGroup>
                   )}
@@ -395,7 +478,14 @@ export const Route = createFileRoute("/request")({
                           >
                             Key
                           </FieldLabel>
-                          <Input id="key" className="h-11" />
+                          <Input
+                            id="key"
+                            className="h-11"
+                            value={auth.apiKeyName}
+                            onChange={(e) =>
+                              handleAuthChange("apiKeyName", e.target.value)
+                            }
+                          />
                         </Field>
                         <Field>
                           <FieldLabel
@@ -407,6 +497,10 @@ export const Route = createFileRoute("/request")({
                           <Input
                             id="value"
                             className="font-mono text-color-accent h-11"
+                            value={auth.apiKeyValue}
+                            onChange={(e) =>
+                              handleAuthChange("apiKeyValue", e.target.value)
+                            }
                           />
                         </Field>
                       </FieldGroup>
@@ -418,6 +512,11 @@ export const Route = createFileRoute("/request")({
                         <RadioGroup
                           defaultValue="header"
                           className="flex items-center gap-4"
+                          value={auth.apiKeyLocation}
+                          onValueChange={(value) =>
+                            (value === "header" || value === "query-params") &&
+                            handleAuthChange("apiKeyLocation", value)
+                          }
                         >
                           <div className="flex items-center gap-1">
                             <RadioGroupItem id="header" value="header" />
