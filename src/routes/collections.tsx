@@ -1,45 +1,30 @@
+import PlaceholderState from "@/components/PlaceholderState"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import CollectionList from "@/components/collections/CollectionList"
+import {
+  filterItems,
+  isPostmanCollection,
+  type ImportedCollection,
+} from "@/lib/collections"
 import { createFileRoute } from "@tanstack/react-router"
-import { Plus } from "lucide-react"
+import { Layers3, Plus, Search, X } from "lucide-react"
 import { useRef, useState, type ChangeEvent } from "react"
-
-type PostmanCollection = {
-  info: {
-    name: string
-    schema: string
-  }
-  item: unknown[]
-}
-
-type ImportedCollection = {
-  id: string
-  data: PostmanCollection
-}
-
-const isPostmanCollection = (data: unknown): data is PostmanCollection => {
-  if (typeof data !== "object" || data === null) return false
-
-  if (!("info" in data) || !("item" in data)) return false
-
-  const { info, item } = data
-
-  if (typeof info !== "object" || info === null) return false
-
-  return (
-    "name" in info &&
-    typeof info.name === "string" &&
-    info.name.trim().length > 0 &&
-    "schema" in info &&
-    typeof info.schema === "string" &&
-    Array.isArray(item)
-  )
-}
 
 export const Route = createFileRoute("/collections")({
   component: function CollectionsComponent() {
     const [collections, setCollections] = useState<ImportedCollection[]>([])
+    const [search, setSearch] = useState("")
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const query = search.trim().toLowerCase()
+    const visibleCollections = collections.flatMap(({ id, data }) => {
+      const matchesCollection = data.info.name.toLowerCase().includes(query)
+      const items =
+        !query || matchesCollection ? data.item : filterItems(data.item, query)
+      return !query || matchesCollection || items.length > 0
+        ? [{ id, data, items }]
+        : []
+    })
 
     const handleImport = async (file: File) => {
       try {
@@ -73,106 +58,106 @@ export const Route = createFileRoute("/collections")({
       }
     }
 
-    function CollectionItems({ items }: { items: unknown[] }) {
-      return (
-        <ul className="space-y-2">
-          {items.map((item, index) => {
-            if (
-              typeof item !== "object" ||
-              item === null ||
-              !("name" in item) ||
-              typeof item.name !== "string"
-            ) {
-              return null
-            }
-
-            // Folder: render its children recursively.
-            if ("item" in item && Array.isArray(item.item)) {
-              return (
-                <li key={index}>
-                  <details>
-                    <summary className="cursor-pointer font-medium">
-                      {item.name}
-                    </summary>
-
-                    <div className="mt-2 border-l pl-4">
-                      <CollectionItems items={item.item} />
-                    </div>
-                  </details>
-                </li>
-              )
-            }
-
-            if (!("request" in item)) return null
-
-            const request = item.request
-            const method =
-              typeof request === "object" &&
-              request !== null &&
-              "method" in request &&
-              typeof request.method === "string"
-                ? request.method
-                : "Request"
-
-            return (
-              <li key={index} className="flex items-center gap-3">
-                <span className="font-mono text-sm text-color-accent">
-                  {method}
-                </span>
-                <span>{item.name}</span>
-              </li>
-            )
-          })}
-        </ul>
-      )
-    }
-
     return (
-      <div className="h-full flex flex-col">
-        <h1 className="text-color-primary font-semibold text-page-title">
-          Collections
-        </h1>
-
-        <div className="flex items-center justify-between my-4">
-          <p className="text-color-secondary text-body">
+      <section
+        aria-labelledby="collections-title"
+        className="mx-auto flex min-h-[calc(100svh-5.25rem)] w-full max-w-7xl min-w-0 flex-col gap-6 md:min-h-[calc(100svh-3rem)] md:gap-8"
+      >
+        <header className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 md:gap-y-4">
+          <h1
+            id="collections-title"
+            className="text-page-title font-semibold text-color-primary md:col-span-2"
+          >
+            Collections
+          </h1>
+          <p className="hidden text-body text-color-secondary md:block">
             Saved requests are grouped by purpose, not placed in the global
             sidebar.
           </p>
-
           <input
             ref={fileInputRef}
             type="file"
             accept=".json,application/json"
+            aria-label="Import a Postman collection"
             hidden
             onChange={handleFileChange}
           />
-          <Button onClick={() => fileInputRef.current?.click()}>
-            <Plus className="h-4 w-4" />
-            <span>Import Collection</span>
+          <Button
+            aria-label="Import Collection"
+            className="h-9 gap-1.5 px-3 text-label"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Plus className="size-4" aria-hidden="true" />
+            <span className="sm:hidden">Import</span>
+            <span className="hidden sm:inline">Import Collection</span>
           </Button>
-        </div>
+        </header>
 
-        <Card className="flex-1 bg-surface">
-          <CardContent className="space-y-4">
-            {collections.length === 0 ? (
-              <p>Import a Postman collection to get started.</p>
-            ) : (
-              collections.map(({ id, data }) => (
-                <div key={id} className="rounded-lg border p-4">
-                  <h2 className="font-semibold">{data.info.name}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {data.item.length} top-level items
-                  </p>
-                  <div key={id} className="rounded-lg border p-4">
-                    <h2 className="mb-4 font-semibold">{data.info.name}</h2>
-                    <CollectionItems items={data.item} />
-                  </div>
+        <div className="min-w-0 flex-1">
+          {collections.length === 0 ? (
+            <div className="rounded-xl bg-surface text-center [&>div]:min-h-80 [&>div]:px-5 [&>div]:py-8">
+              <PlaceholderState
+                variant="inline"
+                icon={Layers3}
+                title="No collections yet"
+                description="Import a Postman collection to organize your requests."
+              />
+            </div>
+          ) : (
+            <>
+              <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <h2 className="text-section-title font-semibold text-color-primary">
+                  Your collections
+                </h2>
+                <div className="relative w-full sm:max-w-80">
+                  <Search
+                    className="pointer-events-none absolute top-3 left-3 size-4 text-color-muted"
+                    aria-hidden="true"
+                  />
+                  <Input
+                    type="search"
+                    aria-label="Search collections or requests"
+                    placeholder="Search collections or requests…"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    className="h-10 bg-surface pr-10 pl-9 [&::-webkit-search-cancel-button]:appearance-none"
+                  />
+                  {search && (
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute top-1.5 right-1.5"
+                      aria-label="Clear search"
+                      onClick={() => setSearch("")}
+                    >
+                      <X className="size-3.5" aria-hidden="true" />
+                    </Button>
+                  )}
                 </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              </div>
+              <p className="sr-only" role="status">
+                {visibleCollections.length} matching{" "}
+                {visibleCollections.length === 1 ? "collection" : "collections"}
+              </p>
+              {visibleCollections.length === 0 ? (
+                <div className="text-center [&>div]:min-h-64 [&>div]:px-5">
+                  <PlaceholderState
+                    variant="inline"
+                    icon={Search}
+                    title="No matching collections"
+                    description="Try another collection or request name."
+                  />
+                </div>
+              ) : (
+                <CollectionList
+                  collections={visibleCollections}
+                  searching={!!query}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </section>
     )
   },
 })
