@@ -1,4 +1,3 @@
-import CollectionsPicker from "@/components/collections/CollectionsPicker"
 import RequestFieldsCard from "@/components/forms/RequestFieldsCard"
 import JsonEditor from "@/components/JsonEditor"
 import { Button } from "@/components/ui/button"
@@ -230,7 +229,7 @@ export const Route = createFileRoute("/request")({
     }
 
     return (
-      <div className="h-full flex flex-col pb-16">
+      <div className="h-full flex flex-col">
         <h1 className="text-color-primary font-semibold text-page-title">
           Request
         </h1>
@@ -607,7 +606,6 @@ export const Route = createFileRoute("/request")({
             />
           )}
         </div>
-        <CollectionsPicker />
       </div>
     )
   },
