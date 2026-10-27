@@ -1,17 +1,14 @@
-import PlaceholderState from "@/components/PlaceholderState"
+import MethodBadge from "@/components/MethodBadge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { createFileRoute } from "@tanstack/react-router"
-import { FolderOpen, Plus } from "lucide-react"
-import { useRef, useState, type ChangeEvent } from "react"
-
-type PostmanCollection = {
-  info: {
-    name: string
-    schema: string
-  }
-  item: unknown[]
-}
+import { ChevronRightIcon, FileIcon, FolderIcon, Plus } from "lucide-react"
+import { useRef, useState, type ChangeEvent, type ReactNode } from "react"
 
 export const Route = createFileRoute("/collections")({
   component: function CollectionsComponent() {
@@ -63,6 +60,53 @@ export const Route = createFileRoute("/collections")({
       }
     }
 
+    const renderItems = (items: PostmanItem[]): ReactNode => {
+      return (
+        <div className="flex flex-col gap-1">
+          {items.map(({ name, item, request }, index) =>
+            item ? (
+              <Collapsible key={index}>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="group w-full justify-start gap-2 transition-none"
+                  >
+                    <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
+                    <FolderIcon />
+                    <span className="truncate">{name}</span>
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-1 ml-5">
+                  {renderItems(item)}
+                </CollapsibleContent>
+              </Collapsible>
+            ) : (
+              <Button
+                variant="outline"
+                key={index}
+                className="w-full justify-start gap-2 text-foreground"
+              >
+                {typeof request === "object" &&
+                  request !== null &&
+                  request.method && <MethodBadge method={request.method} />}
+                <span className="truncate">{name}</span>
+              </Button>
+            ),
+          )}
+        </div>
+      )
+    }
+
+    const processCollection = (importedCollection: PostmanCollection[]) => {
+      return importedCollection.map((collection, index) => (
+        <div key={collection.info._postman_id ?? index}>
+          <h1 className="text-page-title">{collection.info.name}</h1>
+          {renderItems(collection.item)}
+        </div>
+      ))
+    }
+
     return (
       <div className="h-full flex flex-col">
         <h1 className="text-color-primary font-semibold text-page-title">
@@ -88,16 +132,17 @@ export const Route = createFileRoute("/collections")({
           </Button>
         </div>
 
-        {/* <Card className="flex-1 bg-surface">
-          <CardContent>
+        <Card className="flex-1 bg-surface">
+          <CardContent className="grid grid-cols-[30rem_1fr]">
+            <div className="px-2 border border-red-50">{processCollection(collections)}</div>
           </CardContent>
-        </Card> */}
-        <PlaceholderState
+        </Card>
+        {/* <PlaceholderState
           variant="panel"
           icon={FolderOpen}
           title="No collection yet"
           description="Import a Postman collection to get started."
-        />
+        /> */}
       </div>
     )
   },
