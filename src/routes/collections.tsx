@@ -6,8 +6,21 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { Field } from "@/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
+import { Separator } from "@/components/ui/separator"
 import { createFileRoute } from "@tanstack/react-router"
-import { ChevronRightIcon, FileIcon, FolderIcon, Plus } from "lucide-react"
+import {
+  ChevronRightIcon,
+  ChevronsDownUp,
+  FolderIcon,
+  Plus,
+  Search,
+} from "lucide-react"
 import { useRef, useState, type ChangeEvent, type ReactNode } from "react"
 
 export const Route = createFileRoute("/collections")({
@@ -68,7 +81,7 @@ export const Route = createFileRoute("/collections")({
               <Collapsible key={index}>
                 <CollapsibleTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="collectionFolder"
                     size="sm"
                     className="group w-full justify-start gap-2 transition-none"
                   >
@@ -83,14 +96,14 @@ export const Route = createFileRoute("/collections")({
               </Collapsible>
             ) : (
               <Button
-                variant="outline"
+                variant="collectionApi"
                 key={index}
                 className="w-full justify-start gap-2 text-foreground"
               >
                 {typeof request === "object" &&
                   request !== null &&
                   request.method && <MethodBadge method={request.method} />}
-                <span className="truncate">{name}</span>
+                <span className="truncate text-caption">{name}</span>
               </Button>
             ),
           )}
@@ -100,10 +113,22 @@ export const Route = createFileRoute("/collections")({
 
     const processCollection = (importedCollection: PostmanCollection[]) => {
       return importedCollection.map((collection, index) => (
-        <div key={collection.info._postman_id ?? index}>
-          <h1 className="text-page-title">{collection.info.name}</h1>
-          {renderItems(collection.item)}
-        </div>
+        <Collapsible key={collection.info._postman_id ?? index} defaultOpen>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="collectionFolder"
+              size="sm"
+              className="group w-full justify-start gap-2 transition-none"
+            >
+              <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
+              <FolderIcon />
+              <span className="truncate">{collection.info.name}</span>
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-1 ml-5">
+            {renderItems(collection.item)}
+          </CollapsibleContent>
+        </Collapsible>
       ))
     }
 
@@ -132,9 +157,29 @@ export const Route = createFileRoute("/collections")({
           </Button>
         </div>
 
-        <Card className="flex-1 bg-surface">
-          <CardContent className="grid grid-cols-[30rem_1fr]">
-            <div className="px-2 border border-red-50">{processCollection(collections)}</div>
+        <Card className="h-[60svh] min-h-96 bg-surface py-0">
+          <CardContent className="grid min-h-0 flex-1 grid-cols-[30rem_1fr] p-0">
+            <section className="p-5 flex flex-col gap-5 min-h-0">
+              <div className="flex justify-between">
+                <h1 className="text-color-primary">All collections</h1>
+                <div className="flex items-center gap-2">
+                  <div className="text-color-muted text-body">3</div>
+                  <ChevronsDownUp className="size-4 text-color-secondary" />
+                </div>
+              </div>
+              <Field>
+                <InputGroup className="border-border">
+                  <InputGroupInput placeholder="Search collections or requests" />
+                  <InputGroupAddon align="inline-start">
+                    <Search />
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                {processCollection(collections)}
+              </div>
+            </section>
+            <Separator orientation="vertical" />
           </CardContent>
         </Card>
         {/* <PlaceholderState
