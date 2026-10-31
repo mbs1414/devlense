@@ -21,12 +21,125 @@ import {
   Plus,
   Search,
 } from "lucide-react"
-import { useRef, useState, type ChangeEvent, type ReactNode } from "react"
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactNode,
+} from "react"
+
+const DB_NAME = "postman-collections-db"
+const DB_VERSION = 1
+const STORE_NAME = "collections"
+
+// 1. Open the IndexedDB database
+function openCollectionsDatabase(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION)
+
+    request.onupgradeneeded = () => {
+      const db = request.result
+
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, {
+          autoIncrement: true,
+        })
+      }
+    }
+
+    request.onsuccess = () => {
+      resolve(request.result)
+    }
+
+    request.onerror = () => {
+      reject(request.error)
+    }
+  })
+}
+
+// 2. Save a collection into IndexedDB
+async function saveCollectionToIndexedDB(
+  collection: PostmanCollection,
+): Promise<void> {
+  const db = await openCollectionsDatabase()
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readwrite")
+
+    transaction.objectStore(STORE_NAME).add(collection)
+
+    transaction.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+
+    transaction.onabort = () => {
+      db.close()
+      reject(transaction.error ?? new Error("Save failed"))
+    }
+  })
+}
+
+// 3. Load all previously saved collections
+async function loadCollectionsFromIndexedDB(): Promise<PostmanCollection[]> {
+  const db = await openCollectionsDatabase()
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readonly")
+    const request = transaction.objectStore(STORE_NAME).getAll()
+
+    let collections: PostmanCollection[] = []
+
+    request.onsuccess = () => {
+      collections = request.result as PostmanCollection[]
+    }
+
+    transaction.oncomplete = () => {
+      db.close()
+      resolve(collections)
+    }
+
+    transaction.onabort = () => {
+      db.close()
+      reject(transaction.error ?? new Error("Load failed"))
+    }
+  })
+}
 
 export const Route = createFileRoute("/collections")({
   component: function CollectionsComponent() {
     const [collections, setCollections] = useState<PostmanCollection[]>([])
+    const [isLoadingCollections, setIsLoadingCollections] = useState(true)
+
     const collectionFileInputRef = useRef<HTMLInputElement>(null)
+
+    // Load saved collections when the component opens
+    useEffect(() => {
+      let cancelled = false
+
+      const loadSavedCollections = async () => {
+        try {
+          const savedCollections = await loadCollectionsFromIndexedDB()
+
+          if (!cancelled) {
+            setCollections(savedCollections)
+          }
+        } catch (error) {
+          console.error("Failed to load collections:", error)
+        } finally {
+          if (!cancelled) {
+            setIsLoadingCollections(false)
+          }
+        }
+      }
+
+      void loadSavedCollections()
+
+      return () => {
+        cancelled = true
+      }
+    }, [])
 
     const openCollectionFilePicker = () => {
       collectionFileInputRef.current?.click()
@@ -55,21 +168,33 @@ export const Route = createFileRoute("/collections")({
       event: ChangeEvent<HTMLInputElement>,
     ) => {
       const file = event.target.files?.[0]
-      event.currentTarget.value = "" // Allow selecting the same file again
+
+      event.currentTarget.value = ""
 
       if (!file) return
+
       try {
+        // Step 1: Read the selected JSON file
         const text = await file.text()
+
+        // Step 2: Convert JSON text into an object
         const collection: unknown = JSON.parse(text)
 
+        // Step 3: Validate the Postman collection
         if (!isPostmanCollection(collection)) {
           console.error("Please select a valid Postman collection.")
           return
         }
 
+        // Step 4: Save the collection into IndexedDB
+        await saveCollectionToIndexedDB(collection)
+
+        // Step 5: Update React state to show the collection
         setCollections((previous) => [...previous, collection])
+
+        console.log("Collection saved successfully!")
       } catch (error) {
-        console.log(error)
+        console.error("Failed to import collection:", error)
       }
     }
 
@@ -151,7 +276,10 @@ export const Route = createFileRoute("/collections")({
             hidden
             onChange={handleCollectionFileChange}
           />
-          <Button onClick={openCollectionFilePicker}>
+          <Button
+            onClick={openCollectionFilePicker}
+            disabled={isLoadingCollections}
+          >
             <Plus className="h-4 w-4" />
             <span>Import Collection</span>
           </Button>
@@ -163,7 +291,9 @@ export const Route = createFileRoute("/collections")({
               <div className="flex justify-between">
                 <h1 className="text-color-primary">All collections</h1>
                 <div className="flex items-center gap-2">
-                  <div className="text-color-muted text-body">3</div>
+                  <div className="text-color-muted text-body">
+                    {collections.length}
+                  </div>
                   <ChevronsDownUp className="size-4 text-color-secondary" />
                 </div>
               </div>
