@@ -25,8 +25,9 @@ export default function MethodBadge({
       {...props}
       variant={variant}
       className={cn(
-        "font-mono p-3 rounded-md",
+        "font-mono p-2 rounded-md bg-surface-subtle",
         methodStyle?.className,
+        methodStyle?.border,
         className,
       )}
     >

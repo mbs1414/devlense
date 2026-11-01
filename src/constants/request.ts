@@ -1,9 +1,13 @@
 export const methods = [
-  { value: "GET", className: "text-method-get-fg" },
-  { value: "POST", className: "text-method-post-fg" },
-  { value: "PUT", className: "text-method-put-fg" },
-  { value: "PATCH", className: "text-method-patch-fg" },
-  { value: "DELETE", className: "text-method-delete-fg" },
+  { value: "GET", className: "text-method-get-fg", border: "border-success" },
+  { value: "POST", className: "text-method-post-fg", border: "border-post" },
+  { value: "PUT", className: "text-method-put-fg", border: "border-put" },
+  { value: "PATCH", className: "text-method-patch-fg", border: "border-patch" },
+  {
+    value: "DELETE",
+    className: "text-method-delete-fg",
+    border: "border-delete",
+  },
 ]
 
 export const tabs = [

@@ -1,6 +1,7 @@
 import MethodBadge from "@/components/MethodBadge"
+import PlaceholderState from "@/components/PlaceholderState"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import {
   Collapsible,
   CollapsibleContent,
@@ -16,15 +17,18 @@ import { Separator } from "@/components/ui/separator"
 import { createFileRoute } from "@tanstack/react-router"
 import {
   ChevronRightIcon,
-  ChevronsDownUp,
   FolderIcon,
+  FolderPlus,
   Plus,
   Search,
+  SearchX,
 } from "lucide-react"
 import {
   useEffect,
   useRef,
   useState,
+  useMemo,
+  useCallback,
   type ChangeEvent,
   type ReactNode,
 } from "react"
@@ -111,8 +115,26 @@ export const Route = createFileRoute("/collections")({
   component: function CollectionsComponent() {
     const [collections, setCollections] = useState<PostmanCollection[]>([])
     const [isLoadingCollections, setIsLoadingCollections] = useState(true)
+    const [searchQuery, setSearchQuery] = useState("")
+    const [debouncedSearch, setDebouncedSearch] = useState("")
 
     const collectionFileInputRef = useRef<HTMLInputElement>(null)
+
+    const requestCount = useMemo(() => {
+      const countRequests = (items: PostmanItem[]): number =>
+        items.reduce(
+          (total, item) =>
+            total +
+            (item.request != null ? 1 : 0) +
+            (item.item ? countRequests(item.item) : 0),
+          0,
+        )
+
+      return collections.reduce(
+        (total, collection) => total + countRequests(collection.item),
+        0,
+      )
+    }, [collections])
 
     // Load saved collections when the component opens
     useEffect(() => {
@@ -140,6 +162,16 @@ export const Route = createFileRoute("/collections")({
         cancelled = true
       }
     }, [])
+
+    useEffect(() => {
+      const timeout = setTimeout(() => {
+        setDebouncedSearch(searchQuery)
+      }, 300)
+
+      return () => {
+        clearTimeout(timeout)
+      }
+    }, [searchQuery])
 
     const openCollectionFilePicker = () => {
       collectionFileInputRef.current?.click()
@@ -198,64 +230,142 @@ export const Route = createFileRoute("/collections")({
       }
     }
 
-    const renderItems = (items: PostmanItem[]): ReactNode => {
-      return (
-        <div className="flex flex-col gap-1">
-          {items.map(({ name, item, request }, index) =>
-            item ? (
-              <Collapsible key={index}>
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="collectionFolder"
-                    size="sm"
-                    className="group w-full justify-start gap-2 transition-none"
-                  >
-                    <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
-                    <FolderIcon />
-                    <span className="truncate">{name}</span>
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-1 ml-5">
-                  {renderItems(item)}
-                </CollapsibleContent>
-              </Collapsible>
-            ) : (
-              <Button
-                variant="collectionApi"
-                key={index}
-                className="w-full justify-start gap-2 text-foreground"
-              >
-                {typeof request === "object" &&
-                  request !== null &&
-                  request.method && <MethodBadge method={request.method} />}
-                <span className="truncate text-caption">{name}</span>
-              </Button>
-            ),
-          )}
-        </div>
-      )
-    }
+    const normalizedSearch = debouncedSearch.trim().toLowerCase()
 
-    const processCollection = (importedCollection: PostmanCollection[]) => {
-      return importedCollection.map((collection, index) => (
-        <Collapsible key={collection.info._postman_id ?? index} defaultOpen>
-          <CollapsibleTrigger asChild>
-            <Button
-              variant="collectionFolder"
-              size="sm"
-              className="group w-full justify-start gap-2 transition-none"
+    const isSearching = normalizedSearch.length > 0
+
+    const filteredCollections = useMemo(() => {
+      // No search? Return the original collections.
+      if (!normalizedSearch) {
+        return collections
+      }
+
+      const filterItems = (items: PostmanItem[]): PostmanItem[] => {
+        return items.reduce<PostmanItem[]>((result, currentItem) => {
+          const nameMatches = (currentItem.name ?? "")
+            .toLowerCase()
+            .includes(normalizedSearch)
+
+          if (nameMatches) {
+            result.push(currentItem)
+            return result
+          }
+
+          if (currentItem.item) {
+            const matchingChildren = filterItems(currentItem.item)
+
+            if (matchingChildren.length > 0) {
+              result.push({
+                ...currentItem,
+                item: matchingChildren,
+              })
+            }
+          }
+
+          return result
+        }, [])
+      }
+
+      return collections.reduce<PostmanCollection[]>((result, collection) => {
+        const collectionMatches = collection.info.name
+          .toLowerCase()
+          .includes(normalizedSearch)
+
+        if (collectionMatches) {
+          result.push(collection)
+          return result
+        }
+
+        const matchingItems = filterItems(collection.item)
+
+        if (matchingItems.length > 0) {
+          result.push({
+            ...collection,
+            item: matchingItems,
+          })
+        }
+
+        return result
+      }, [])
+    }, [collections, normalizedSearch])
+
+    const renderItems = useCallback(
+      (items: PostmanItem[]): ReactNode => {
+        return (
+          <div className="flex flex-col gap-1">
+            {items.map(({ name, item, request }, index) =>
+              item ? (
+                <Collapsible
+                  key={`${index}-${isSearching}`}
+                  defaultOpen={isSearching}
+                >
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="collectionFolder"
+                      size="sm"
+                      className="group w-full justify-start gap-2 transition-none"
+                    >
+                      <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
+                      <FolderIcon />
+                      <span className="truncate">{name}</span>
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-1 ml-5">
+                    {renderItems(item)}
+                  </CollapsibleContent>
+                </Collapsible>
+              ) : (
+                <Button
+                  variant="collectionApi"
+                  key={index}
+                  className="w-full justify-start gap-2 text-foreground"
+                >
+                  {typeof request === "object" &&
+                    request !== null &&
+                    request.method && <MethodBadge method={request.method} />}
+                  <span className="truncate text-caption">{name}</span>
+                </Button>
+              ),
+            )}
+          </div>
+        )
+      },
+      [isSearching],
+    )
+
+    const processCollection = useCallback(
+      (importedCollection: PostmanCollection[]) => {
+        return importedCollection.map((collection, index) => {
+          return (
+            <Collapsible
+              key={`${collection.info._postman_id ?? collection.info.name}-${index}`}
+              defaultOpen
             >
-              <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
-              <FolderIcon />
-              <span className="truncate">{collection.info.name}</span>
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-1 ml-5">
-            {renderItems(collection.item)}
-          </CollapsibleContent>
-        </Collapsible>
-      ))
-    }
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="collectionFolder"
+                  size="sm"
+                  className="group w-full justify-start gap-2 transition-none"
+                >
+                  <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
+                  <FolderIcon />
+                  <span className="truncate">{collection.info.name}</span>
+                </Button>
+              </CollapsibleTrigger>
+
+              <CollapsibleContent className="mt-1 ml-5">
+                {renderItems(collection.item)}
+              </CollapsibleContent>
+            </Collapsible>
+          )
+        })
+      },
+      [renderItems],
+    )
+
+    const renderedCollections = useMemo(() => {
+      return processCollection(filteredCollections)
+    }, [filteredCollections, processCollection])
 
     return (
       <div className="h-full flex flex-col">
@@ -285,31 +395,66 @@ export const Route = createFileRoute("/collections")({
           </Button>
         </div>
 
-        <Card className="h-[60svh] min-h-96 bg-surface py-0">
-          <CardContent className="grid min-h-0 flex-1 grid-cols-[30rem_1fr] p-0">
-            <section className="p-5 flex flex-col gap-5 min-h-0">
+        <Card className="h-[calc(100svh-152px)] min-h-96 bg-surface py-0">
+          <CardContent className="grid min-h-0 flex-1 grid-cols-[30rem_auto_1fr] p-0">
+            <section className="px-5 pt-5 flex flex-col gap-5 min-h-0">
               <div className="flex justify-between">
                 <h1 className="text-color-primary">All collections</h1>
-                <div className="flex items-center gap-2">
-                  <div className="text-color-muted text-body">
-                    {collections.length}
-                  </div>
-                  <ChevronsDownUp className="size-4 text-color-secondary" />
-                </div>
               </div>
               <Field>
                 <InputGroup className="border-border">
-                  <InputGroupInput placeholder="Search collections or requests" />
+                  <InputGroupInput
+                    placeholder="Search collections or requests"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                  />
                   <InputGroupAddon align="inline-start">
                     <Search />
                   </InputGroupAddon>
                 </InputGroup>
               </Field>
               <div className="min-h-0 flex-1 overflow-y-auto">
-                {processCollection(collections)}
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  {isLoadingCollections ? (
+                    <p className="text-color-secondary">
+                      Loading collections...
+                    </p>
+                  ) : filteredCollections.length === 0 ? (
+                    <PlaceholderState
+                      title={
+                        normalizedSearch
+                          ? "No matching results"
+                          : "No collections yet"
+                      }
+                      description={
+                        normalizedSearch
+                          ? "Try adjusting your search."
+                          : "Import a Postman collection to get started."
+                      }
+                      variant="inline"
+                      icon={normalizedSearch ? SearchX : FolderPlus}
+                      showBorder={false}
+                    />
+                  ) : (
+                    renderedCollections
+                  )}
+                </div>
+              </div>
+              <CardFooter className="shrink-0 border-t-surface-subtle text-caption text-color-muted">
+                {collections.length}{" "}
+                {collections.length === 1 ? "collection" : "collections"}
+                {" · "}
+                {requestCount} {requestCount === 1 ? "request" : "requests"}
+              </CardFooter>
+            </section>
+            <Separator orientation="vertical" className="bg-surface-subtle" />
+            <section className="p-5">
+              <div>
+                <p className="text-color-secondary text-caption">
+                  Commerce API / Products
+                </p>
               </div>
             </section>
-            <Separator orientation="vertical" />
           </CardContent>
         </Card>
         {/* <PlaceholderState
