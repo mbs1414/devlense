@@ -85,7 +85,7 @@ export const Route = createFileRoute("/collections")({
               collections={collections}
               isLoadingCollections={isLoadingCollections}
             />
-            <Separator orientation="vertical" className="bg-surface-subtle" />
+            <Separator orientation="vertical" className="bg-border-subtle" />
             <CollectionRequestDetails />
           </CardContent>
         </Card>

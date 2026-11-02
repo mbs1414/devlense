@@ -86,7 +86,7 @@ export default function CollectionsPanel({
           )}
         </div>
       </div>
-      <CardFooter className="shrink-0 border-t-surface-subtle text-caption text-color-muted">
+      <CardFooter className="shrink-0 border-t-border-subtle text-caption text-color-muted">
         {collections.length}{" "}
         {collections.length === 1 ? "collection" : "collections"}
         {" · "}
