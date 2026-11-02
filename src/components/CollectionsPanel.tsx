@@ -13,12 +13,14 @@ import { useMemo } from "react"
 
 interface Props {
   collections: PostmanCollection[]
-  isLoadingCollections: boolean
+  isLoadingCollections: boolean,
+  onSelectRequest?: (request: PostmanRequest) => void
 }
 
 export default function CollectionsPanel({
   collections,
   isLoadingCollections,
+  onSelectRequest,
 }: Props) {
   const {
     searchQuery,
@@ -82,6 +84,7 @@ export default function CollectionsPanel({
             <CollectionTree
               filteredCollections={filteredCollections}
               isSearching={isSearching}
+              onSelectRequest={onSelectRequest}
             />
           )}
         </div>

@@ -13,6 +13,7 @@ import { Loader2Icon } from "lucide-react"
 
 interface Props {
   method: string
+  request: string
   setMethod: (method: string) => void
   setRequest: (request: string) => void
   sendRequest: () => Promise<void>
@@ -22,6 +23,7 @@ interface Props {
 export default function RequestBar({
   method,
   setMethod,
+  request,
   setRequest,
   sendRequest,
   loading,
@@ -55,6 +57,7 @@ export default function RequestBar({
       <Input
         className="h-11 font-mono bg-input"
         placeholder="{{baseUrl}}/users"
+        value={request}
         onChange={(event) => setRequest(event.target.value)}
       />
 

@@ -26,7 +26,7 @@ export const Route = createFileRoute("/request")({
     const headerFields = useRequestFields()
     const { fields: queryParams } = queryParamFields
     const { fields: headers } = headerFields
-    const { authType, setAuthType, auth, handleAuthChange } = useRequestAuth()
+    const { authType, setAuthType, auth, handleAuthChange, setAuth } = useRequestAuth()
     const {
       sendRequest,
       responseInfo,
@@ -45,6 +45,97 @@ export const Route = createFileRoute("/request")({
       auth,
     })
 
+    const handleSelectRequest = (selectedRequest: PostmanRequest) => {
+      console.log("Selected request:", selectedRequest)
+      const toFields = (entries: PostmanHeader[]): RequestField[] =>
+        entries.map((entry) => ({
+          id: crypto.randomUUID(),
+          key: entry.key,
+          value: entry.value,
+          description: entry.description ?? "",
+          enabled: !entry.disabled,
+        }))
+
+      const url =
+        typeof selectedRequest === "string"
+          ? selectedRequest
+          : selectedRequest.url
+
+      const rawUrl = typeof url === "string" ? url : (url?.raw ?? "")
+
+      const importedHeaders =
+        typeof selectedRequest !== "string" &&
+        Array.isArray(selectedRequest.header)
+          ? selectedRequest.header
+          : []
+
+      const importedQuery =
+        typeof url === "object" && url?.query
+          ? url.query
+          : Array.from(
+              new URLSearchParams(rawUrl.match(/\?([^#]*)/)?.[1] ?? ""),
+              ([key, value]) => ({ key, value }),
+            )
+
+      const body =
+        typeof selectedRequest === "string" ? undefined : selectedRequest.body
+
+      // Local typing because PostmanRequest currently doesn't declare auth.
+      const importedAuth =
+        typeof selectedRequest === "string"
+          ? undefined
+          : (
+              selectedRequest as {
+                auth?: {
+                  type?: string
+                  bearer?: { key: string; value: unknown }[]
+                }
+              }
+            ).auth
+
+      const bearerToken = importedAuth?.bearer?.find(
+        (entry) => entry.key === "token",
+      )?.value
+
+      const contentType = importedHeaders.find(
+        (header) =>
+          !header.disabled && header.key.toLowerCase() === "content-type",
+      )?.value
+
+      setMethod(
+        typeof selectedRequest === "string"
+          ? "GET"
+          : (selectedRequest.method ?? "GET"),
+      )
+
+      // Query parameters are supplied separately through queryParamFields.
+      setRequest(rawUrl.replace(/\?[^#]*/, ""))
+
+      headerFields.setFields(toFields(importedHeaders))
+      queryParamFields.setFields(toFields(importedQuery))
+
+      setRequestBody(body?.raw ?? "")
+      setBodyType(
+        body?.mode === "raw"
+          ? contentType?.toLowerCase().includes("json")
+            ? "json"
+            : "text"
+          : "none",
+      )
+
+      setAuthType(importedAuth?.type === "bearer" ? "bearer" : "no auth")
+      setAuth({
+        token: typeof bearerToken === "string" ? bearerToken : "",
+        username: "",
+        password: "",
+        apiKeyName: "",
+        apiKeyValue: "",
+        apiKeyLocation: "header",
+      })
+
+      setResponseInfo(null)
+    }
+
     return (
       <div className="h-full flex flex-col">
         <h1 className="text-color-primary font-semibold text-page-title">
@@ -55,6 +146,7 @@ export const Route = createFileRoute("/request")({
         <RequestBar
           method={method}
           setMethod={setMethod}
+          request={request}
           setRequest={setRequest}
           sendRequest={sendRequest}
           loading={loading}
@@ -65,6 +157,7 @@ export const Route = createFileRoute("/request")({
               <CollectionsPanel
                 collections={collections}
                 isLoadingCollections={isLoadingCollections}
+                onSelectRequest={handleSelectRequest}
               />
             </CardContent>
           </Card>

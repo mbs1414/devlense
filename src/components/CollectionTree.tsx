@@ -11,11 +11,13 @@ import { useCallback, useMemo, type ReactNode } from "react"
 interface Props {
   filteredCollections: PostmanCollection[]
   isSearching: boolean
+  onSelectRequest?: (request: PostmanRequest) => void
 }
 
 export default function CollectionTree({
   filteredCollections,
   isSearching,
+  onSelectRequest,
 }: Props) {
   const renderItems = useCallback(
     function renderItems(items: PostmanItem[]): ReactNode {
@@ -47,6 +49,11 @@ export default function CollectionTree({
                 variant="collectionApi"
                 key={index}
                 className="w-full justify-start gap-2 text-foreground"
+                onClick={() => {
+                  if (request) {
+                    onSelectRequest?.(request)
+                  }
+                }}
               >
                 {typeof request === "object" &&
                   request !== null &&
@@ -58,7 +65,7 @@ export default function CollectionTree({
         </div>
       )
     },
-    [isSearching],
+    [isSearching, onSelectRequest],
   )
 
   const processCollection = useCallback(
