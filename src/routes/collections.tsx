@@ -3,53 +3,19 @@ import CollectionsPanel from "@/components/CollectionsPanel"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { useCollections } from "@/hooks/useCollections"
 import { useImportPostmanCollection } from "@/hooks/useImportPostmanCollection"
-import { useIndexedDB } from "@/hooks/useIndexedDB"
 import { createFileRoute } from "@tanstack/react-router"
 import { Plus } from "lucide-react"
-import { useEffect, useState } from "react"
 
 export const Route = createFileRoute("/collections")({
   component: function CollectionsComponent() {
-    const [collections, setCollections] = useState<PostmanCollection[]>([])
-    const [isLoadingCollections, setIsLoadingCollections] = useState(true)
-    const { saveCollectionToIndexedDB, loadCollectionsFromIndexedDB } =
-      useIndexedDB<PostmanCollection>()
+    const { collections, isLoadingCollections, addCollection } = useCollections()
     const {
       collectionFileInputRef,
       openCollectionFilePicker,
       handleCollectionFileChange,
-    } = useImportPostmanCollection(async (collection) => {
-      await saveCollectionToIndexedDB(collection)
-      setCollections((previous) => [...previous, collection])
-    })
-
-    // Load saved collections when the component opens
-    useEffect(() => {
-      let cancelled = false
-
-      const loadSavedCollections = async () => {
-        try {
-          const savedCollections = await loadCollectionsFromIndexedDB()
-
-          if (!cancelled) {
-            setCollections(savedCollections)
-          }
-        } catch (error) {
-          console.error("Failed to load collections:", error)
-        } finally {
-          if (!cancelled) {
-            setIsLoadingCollections(false)
-          }
-        }
-      }
-
-      void loadSavedCollections()
-
-      return () => {
-        cancelled = true
-      }
-    }, [loadCollectionsFromIndexedDB])
+    } = useImportPostmanCollection(addCollection)
 
     return (
       <div className="h-full flex flex-col">
