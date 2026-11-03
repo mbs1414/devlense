@@ -4,7 +4,11 @@ import { Button } from "./ui/button"
 import { Separator } from "./ui/separator"
 import { RequestFieldsTable } from "./RequestFieldsTable"
 
-export default function CollectionRequestDetails() {
+interface Props {
+  request: PostmanRequest | null
+}
+
+export default function CollectionRequestDetails({ request }: Props) {
   return (
     <section className="flex-1 min-h-0 overflow-y-auto p-5">
       <div>

@@ -7,15 +7,25 @@ import { useCollections } from "@/hooks/useCollections"
 import { useImportPostmanCollection } from "@/hooks/useImportPostmanCollection"
 import { createFileRoute } from "@tanstack/react-router"
 import { Plus } from "lucide-react"
+import { useState } from "react"
 
 export const Route = createFileRoute("/collections")({
   component: function CollectionsComponent() {
-    const { collections, isLoadingCollections, addCollection } = useCollections()
+    const { collections, isLoadingCollections, addCollection } =
+      useCollections()
     const {
       collectionFileInputRef,
       openCollectionFilePicker,
       handleCollectionFileChange,
     } = useImportPostmanCollection(addCollection)
+
+    const [selectedRequest, setSelectedRequest] =
+      useState<PostmanRequest | null>(null)
+
+    const handleSelectRequest = (selectedRequest: PostmanRequest) => {
+      console.log("Selected request:", selectedRequest)
+      setSelectedRequest(selectedRequest)
+    }
 
     return (
       <div className="h-full flex flex-col">
@@ -50,9 +60,10 @@ export const Route = createFileRoute("/collections")({
             <CollectionsPanel
               collections={collections}
               isLoadingCollections={isLoadingCollections}
+              onSelectRequest={handleSelectRequest}
             />
             <Separator orientation="vertical" className="bg-border-subtle" />
-            <CollectionRequestDetails />
+            <CollectionRequestDetails request={selectedRequest}/>
           </CardContent>
         </Card>
         {/* <PlaceholderState
