@@ -153,7 +153,7 @@ export const Route = createFileRoute("/environments")({
     }
 
     return (
-      <div className="flex h-[calc(100dvh-48px)] min-h-0 flex-col">
+      <div className="flex min-h-[calc(100dvh-48px)] flex-col">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-color-primary font-semibold text-page-title">
@@ -274,7 +274,7 @@ export const Route = createFileRoute("/environments")({
             </div>
           </CardHeader>
 
-          <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
+          <CardContent className="flex min-h-80 flex-1 flex-col overflow-hidden p-4">
             <div className="flex h-full min-h-0 flex-col">
               {isLoadingEnvironments ? (
                 <p className="text-color-secondary">Loading environments...</p>

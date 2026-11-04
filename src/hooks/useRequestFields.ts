@@ -1,15 +1,7 @@
 import { useState } from "react"
 
 export function useRequestFields() {
-  const [fields, setFields] = useState<RequestField[]>(() => [
-    {
-      id: crypto.randomUUID(),
-      key: "",
-      value: "",
-      description: "",
-      enabled: false,
-    },
-  ])
+  const [fields, setFields] = useState<RequestField[]>([])
   const addField = () => {
     setFields((previous) => [
       ...previous,

@@ -180,6 +180,7 @@ export const Route = createFileRoute("/request")({
               <TabsContent value="params">
                 <RequestFieldsCard
                   fields={queryParams}
+                  title="Params"
                   addField={queryParamFields.addField}
                   removeField={queryParamFields.removeField}
                   updateField={queryParamFields.updateField}
@@ -191,6 +192,7 @@ export const Route = createFileRoute("/request")({
               <TabsContent value="headers">
                 <RequestFieldsCard
                   fields={headers}
+                  title="Headers"
                   addField={headerFields.addField}
                   removeField={headerFields.removeField}
                   updateField={headerFields.updateField}
