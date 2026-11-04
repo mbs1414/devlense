@@ -19,12 +19,17 @@ export const Route = createFileRoute("/collections")({
       handleCollectionFileChange,
     } = useImportPostmanCollection(addCollection)
 
-    const [selectedRequest, setSelectedRequest] =
-      useState<PostmanRequest | null>(null)
+    const [selectedRequest, setSelectedRequest] = useState<{
+      item: PostmanItem
+      path: string
+    } | null>(null)
 
-    const handleSelectRequest = (selectedRequest: PostmanRequest) => {
-      console.log("Selected request:", selectedRequest)
-      setSelectedRequest(selectedRequest)
+    const handleSelectRequest = (
+      _request: PostmanRequest,
+      item: PostmanItem,
+      path: string,
+    ) => {
+      setSelectedRequest({ item, path })
     }
 
     return (
@@ -63,7 +68,10 @@ export const Route = createFileRoute("/collections")({
               onSelectRequest={handleSelectRequest}
             />
             <Separator orientation="vertical" className="bg-border-subtle" />
-            <CollectionRequestDetails request={selectedRequest}/>
+            <CollectionRequestDetails
+              item={selectedRequest?.item ?? null}
+              path={selectedRequest?.path ?? ""}
+            />
           </CardContent>
         </Card>
         {/* <PlaceholderState

@@ -49,12 +49,12 @@ export function RequestFieldsTable({
 
       const row = (
         <TableRow key={path} className="border-0 hover:bg-transparent">
-          <TableCell className="h-12 px-3 text-color-primary">
+          <TableCell className="h-12 overflow-hidden px-3 text-color-primary">
             <div
-              className="flex items-center gap-1"
+              className="flex min-w-0 items-center gap-1"
               style={{ paddingLeft: depth * 16 }}
             >
-              {hasChildren ? (
+              {hasChildren && (
                 <button
                   type="button"
                   onClick={() => toggleRow(path)}
@@ -68,20 +68,18 @@ export function RequestFieldsTable({
                     <ChevronRight className="size-3.5" />
                   )}
                 </button>
-              ) : (
-                <span className="size-5 shrink-0" />
               )}
 
-              <span>{field.key}</span>
+              <span className="truncate">{field.key}</span>
             </div>
           </TableCell>
 
-          <TableCell className="px-3 font-mono text-(length:--text-code) text-color-secondary">
-            {field.value}
+          <TableCell className="overflow-hidden px-3 font-mono text-(length:--text-code) text-color-secondary">
+            <span className="block truncate">{field.value}</span>
           </TableCell>
 
-          <TableCell className="px-3 text-color-secondary">
-            {field.description}
+          <TableCell className="overflow-hidden px-3 text-color-secondary">
+            <span className="block truncate">{field.description}</span>
           </TableCell>
         </TableRow>
       )
@@ -95,16 +93,16 @@ export function RequestFieldsTable({
   }
 
   return (
-    <Table className="border-separate border-spacing-0 text-label">
+    <Table className="table-fixed border-separate border-spacing-0 text-label">
       <TableHeader>
         <TableRow className="border-0 hover:bg-transparent">
-          <TableHead className="h-8 w-[21%] px-3 text-(length:--text-caption) text-color-muted">
+          <TableHead className="h-8 w-[35%] truncate px-3 text-(length:--text-caption) text-color-muted">
             Key
           </TableHead>
-          <TableHead className="h-8 w-[21%] px-3 text-(length:--text-caption) text-color-muted">
+          <TableHead className="h-8 w-[35%] truncate px-3 text-(length:--text-caption) text-color-muted">
             Value
           </TableHead>
-          <TableHead className="h-8 px-3 text-(length:--text-caption) text-color-muted">
+          <TableHead className="h-8 truncate px-3 text-(length:--text-caption) text-color-muted">
             Description
           </TableHead>
         </TableRow>

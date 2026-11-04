@@ -11,7 +11,11 @@ import { useCallback, useMemo, type ReactNode } from "react"
 interface Props {
   filteredCollections: PostmanCollection[]
   isSearching: boolean
-  onSelectRequest?: (request: PostmanRequest) => void
+  onSelectRequest?: (
+    request: PostmanRequest,
+    item: PostmanItem,
+    path: string,
+  ) => void
 }
 
 export default function CollectionTree({
@@ -20,11 +24,12 @@ export default function CollectionTree({
   onSelectRequest,
 }: Props) {
   const renderItems = useCallback(
-    function renderItems(items: PostmanItem[]): ReactNode {
+    function renderItems(items: PostmanItem[], path: string): ReactNode {
       return (
         <div className="flex flex-col gap-1">
-          {items.map(({ name, item, request }, index) =>
-            item ? (
+          {items.map((requestItem, index) => {
+            const { name, item, request } = requestItem
+            return item ? (
               <Collapsible
                 key={`${index}-${isSearching}`}
                 defaultOpen={isSearching}
@@ -41,7 +46,7 @@ export default function CollectionTree({
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-1 ml-5">
-                  {renderItems(item)}
+                  {renderItems(item, `${path} / ${name ?? "Untitled folder"}`)}
                 </CollapsibleContent>
               </Collapsible>
             ) : (
@@ -50,8 +55,8 @@ export default function CollectionTree({
                 key={index}
                 className="w-full justify-start gap-2 text-foreground"
                 onClick={() => {
-                  if (request) {
-                    onSelectRequest?.(request)
+                  if (request != null) {
+                    onSelectRequest?.(request, requestItem, path)
                   }
                 }}
               >
@@ -60,8 +65,8 @@ export default function CollectionTree({
                   request.method && <MethodBadge method={request.method} />}
                 <span className="truncate text-caption">{name}</span>
               </Button>
-            ),
-          )}
+            )
+          })}
         </div>
       )
     },
@@ -89,7 +94,7 @@ export default function CollectionTree({
             </CollapsibleTrigger>
 
             <CollapsibleContent className="mt-1 ml-5">
-              {renderItems(collection.item)}
+              {renderItems(collection.item, collection.info.name)}
             </CollapsibleContent>
           </Collapsible>
         )

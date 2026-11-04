@@ -13,8 +13,12 @@ import { useMemo } from "react"
 
 interface Props {
   collections: PostmanCollection[]
-  isLoadingCollections: boolean,
-  onSelectRequest?: (request: PostmanRequest) => void
+  isLoadingCollections: boolean
+  onSelectRequest?: (
+    request: PostmanRequest,
+    item: PostmanItem,
+    path: string,
+  ) => void
 }
 
 export default function CollectionsPanel({

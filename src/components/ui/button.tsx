@@ -25,6 +25,7 @@ const buttonVariants = cva(
 
         collectionFolder:
           "bg-transparent text-foreground hover:bg-muted data-[selected=true]:bg-transparent data-[selected=true]:hover:bg-muted",
+        softOutline: "border border-border bg-input text-foreground hover:bg-muted hover:text-foreground dark:hover:bg-input/80 transition-colors duration-150",
       },
       size: {
         default:

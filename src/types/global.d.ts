@@ -54,6 +54,8 @@ type PostmanBody = {
   }
 }
 
+type PostmanDescription = string | { content?: string }
+
 type PostmanRequest =
   | string
   | {
@@ -61,7 +63,7 @@ type PostmanRequest =
       url?: PostmanUrl
       header?: PostmanHeader[] | string
       body?: PostmanBody
-      description?: string
+      description?: PostmanDescription
     }
 
 type PostmanResponse = {
@@ -88,7 +90,7 @@ type PostmanResponse = {
 type PostmanItem = {
   id?: string
   name?: string
-  description?: string
+  description?: PostmanDescription
   request?: PostmanRequest
   response?: PostmanResponse[]
   item?: PostmanItem[]
@@ -102,4 +104,9 @@ type PostmanCollection = {
     description?: string
   }
   item: PostmanItem[]
+}
+
+type Environment = {
+  id: string
+  name: string
 }

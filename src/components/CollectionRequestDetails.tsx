@@ -1,37 +1,75 @@
 import { Copy } from "lucide-react"
+import { toast } from "sonner"
+
+import { getRequestDetails } from "@/lib/getRequestDetails"
+
 import MethodBadge from "./MethodBadge"
+import PlaceholderState from "./PlaceholderState"
+import { RequestFieldsTable } from "./RequestFieldsTable"
 import { Button } from "./ui/button"
 import { Separator } from "./ui/separator"
-import { RequestFieldsTable } from "./RequestFieldsTable"
 
 interface Props {
-  request: PostmanRequest | null
+  item: PostmanItem | null
+  path: string
 }
 
-export default function CollectionRequestDetails({ request }: Props) {
-  return (
-    <section className="flex-1 min-h-0 overflow-y-auto p-5">
-      <div>
-        <p className="text-color-secondary text-caption mb-4">
-          Commerce API / Products
-        </p>
+export default function CollectionRequestDetails({ item, path }: Props) {
+  if (!item || item.request == null) {
+    return (
+      <section className="flex-1 min-h-0 overflow-y-auto p-5">
+        <PlaceholderState
+          title="Select a request"
+          description="Choose an API from a collection to view its details."
+          showBorder={false}
+        />
+      </section>
+    )
+  }
 
-        <div className="flex justify-between items-center mb-4">
+  const {
+    name,
+    method,
+    rawUrl,
+    queryParams,
+    headers,
+    headerText,
+    bodyFields,
+    bodyText,
+  } = getRequestDetails(item)
+
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(rawUrl)
+      toast.success("URL copied")
+    } catch {
+      toast.error("Unable to copy URL")
+    }
+  }
+
+  return (
+    <section className="flex-1 min-w-0 min-h-0 overflow-y-auto p-5">
+      <div>
+        <p className="text-color-secondary text-caption mb-4">{path}</p>
+        <div className="flex justify-between items-center gap-4 mb-4">
           <div>
-            <h2 className="text-color-primary text-page-title mb-2">
-              List products
-            </h2>
-            <p className="text-color-secondary text-body">
-              Retrieve a paginated list of products.
-            </p>
+            <h2 className="text-color-primary text-page-title mb-2">{name}</h2>
           </div>
           <Button size="lg">Open in Request</Button>
         </div>
 
         <div className="flex justify-between items-center bg-canvas p-2 gap-2 border border-border-subtle rounded-md">
-          <MethodBadge method="GET" />
-          <p className="flex-1 font-mono text-(length:--text-code) text-color-secondary">{`{{baseUrl}}/products`}</p>
-          <Button variant="ghost" size="icon">
+          <MethodBadge method={method} />
+          <p className="flex-1 min-w-0 break-all font-mono text-(length:--text-code) text-color-secondary">
+            {rawUrl || "No URL provided"}
+          </p>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Copy URL"
+            disabled={!rawUrl}
+            onClick={copyUrl}
+          >
             <Copy className="size-4 text-color-secondary" />
           </Button>
         </div>
@@ -43,84 +81,40 @@ export default function CollectionRequestDetails({ request }: Props) {
         <h3 className="text-section-title text-color-primary mb-2">
           Query parameters
         </h3>
-        <RequestFieldsTable
-          fields={[
-            { key: "page", value: "1", description: "Page number." },
-            { key: "limit", value: "20", description: "Results per page." },
-          ]}
-        />
+        {queryParams.length > 0 ? (
+          <RequestFieldsTable fields={queryParams} />
+        ) : (
+          <p className="text-color-muted text-caption">No query parameters.</p>
+        )}
       </div>
 
       <div className="mb-5">
         <h3 className="text-section-title text-color-primary mb-2">Headers</h3>
-        <RequestFieldsTable
-          fields={[
-            {
-              key: "Accept",
-              value: "application/json",
-            },
-            {
-              key: "Authorization",
-              value: "Bearer token",
-            },
-          ]}
-        />
+        {headerText ? (
+          <pre className="whitespace-pre-wrap break-all text-color-secondary text-caption">
+            {headerText}
+          </pre>
+        ) : headers.length > 0 ? (
+          <RequestFieldsTable fields={headers} />
+        ) : (
+          <p className="text-color-muted text-caption">No headers.</p>
+        )}
       </div>
 
       <div>
-        <div className="flex justify-between items-center">
-          <h3 className="text-section-title text-color-primary mb-2">
-            Request body
-          </h3>
-          <p className="text-color-muted text-caption">application/json</p>
-        </div>
+        <h3 className="text-section-title text-color-primary mb-2">
+          Request body
+        </h3>
+        {bodyFields.length > 0 ? (
+          <RequestFieldsTable fields={bodyFields} />
+        ) : bodyText ? (
+          <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-md border border-border-subtle bg-canvas p-3 font-mono text-(length:--text-code) text-color-secondary">
+            {bodyText}
+          </pre>
+        ) : (
+          <p className="text-color-muted text-caption">No request body.</p>
+        )}
       </div>
-      <RequestFieldsTable
-        body={[
-          {
-            key: "name",
-            value: "string",
-            description: "Product name",
-          },
-          {
-            key: "price",
-            value: "number",
-            description: "Product price",
-          },
-          {
-            key: "category",
-            value: "object",
-            children: [
-              {
-                key: "id",
-                value: "number",
-              },
-              {
-                key: "name",
-                value: "string",
-              },
-            ],
-          },
-          {
-            key: "variants",
-            value: "array<object>",
-            children: [
-              {
-                key: "sku",
-                value: "string",
-              },
-              {
-                key: "attributes",
-                value: "object",
-                children: [
-                  { key: "color", value: "string" },
-                  { key: "size", value: "string" },
-                ],
-              },
-            ],
-          },
-        ]}
-      />
     </section>
   )
 }
