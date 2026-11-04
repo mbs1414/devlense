@@ -1,7 +1,7 @@
 import { json } from "@codemirror/lang-json"
 import { tags } from "@lezer/highlight"
 import { createTheme } from "@uiw/codemirror-themes"
-import CodeMirror from "@uiw/react-codemirror"
+import CodeMirror, { EditorView } from "@uiw/react-codemirror"
 import { Copy, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -59,7 +59,7 @@ export default function JsonEditor({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-surface-subtle font-mono">
+    <div className="flex h-full w-full min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-surface-subtle font-mono">
       <div className="flex flex-wrap items-center justify-between gap-2 p-2">
         <div className="flex gap-3">
           <div className="text-color-code">JSON</div>
@@ -105,10 +105,12 @@ export default function JsonEditor({
       ) : (
         <CodeMirror
           value={value}
-          extensions={[json()]}
+          extensions={[json(), EditorView.lineWrapping]}
           theme={editorTheme}
           height="256px"
-          className="h-64"
+          width="100%"
+          maxWidth="100%"
+          className="h-64 min-w-0"
           onChange={(newValue) => onChange?.(newValue)}
           readOnly={readOnly}
           editable={!readOnly}

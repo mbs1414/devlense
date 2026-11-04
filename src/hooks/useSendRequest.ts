@@ -2,7 +2,6 @@ import { useCallback, useState } from "react"
 import { getReasonPhrase } from "http-status-codes"
 import type { RequestAuth } from "@/hooks/useRequestAuth"
 import { resolveVariables } from "@/lib/resolveVariables"
-import { toast } from "sonner"
 import { useHistory } from "@/hooks/useHistory"
 
 interface Options {
@@ -46,11 +45,13 @@ export function useSendRequest({
   const [loading, setLoading] = useState(false)
   const [submittedUrl, setSubmittedUrl] = useState("")
   const [requestSummary, setRequestSummary] = useState("")
+  const [error, setError] = useState("")
   const { saveHistoryToIndexedDB } = useHistory()
 
   const sendRequest = useCallback(async () => {
+    setError("")
     if (!variablesReady) {
-      toast.error("Environments are not ready. Try again after they load.")
+      setError("Environments are not ready. Try again after they load.")
       return
     }
     setLoading(true)
@@ -179,7 +180,7 @@ export function useSendRequest({
       historyEntry.statusLabel = responseDetails.statusLabel
       historyEntry.size = responseDetails.size
     } catch (error) {
-      toast.error(
+      setError(
         error instanceof Error ? error.message : "Unable to send request",
       )
     } finally {
@@ -189,7 +190,11 @@ export function useSendRequest({
         try {
           await saveHistoryToIndexedDB(historyEntry)
         } catch {
-          toast.error("Unable to save request history")
+          setError((previous) =>
+            previous
+              ? `${previous} Unable to save request history.`
+              : "Unable to save request history.",
+          )
         }
       }
       setLoading(false)
@@ -217,5 +222,7 @@ export function useSendRequest({
     loading,
     submittedUrl,
     requestSummary,
+    error,
+    setError,
   }
 }

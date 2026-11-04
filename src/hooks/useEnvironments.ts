@@ -4,10 +4,13 @@ import { toast } from "sonner"
 import { useIndexedDB } from "@/hooks/useIndexedDB"
 import { getCollectionEnvironment } from "@/lib/getCollectionEnvironment"
 
-export function useEnvironments() {
+export function useEnvironments({
+  showToasts = true,
+}: { showToasts?: boolean } = {}) {
   const [environments, setEnvironments] = useState<Environment[]>([])
   const [isLoadingEnvironments, setIsLoadingEnvironments] = useState(true)
   const [hasLoaded, setHasLoaded] = useState(false)
+  const [error, setError] = useState("")
   const { openDatabase } = useIndexedDB<Environment>()
 
   useEffect(() => {
@@ -65,7 +68,10 @@ export function useEnvironments() {
           setHasLoaded(true)
         }
       } catch {
-        if (!cancelled) toast.error("Unable to load environments")
+        if (!cancelled) {
+          setError("Unable to load environments")
+          if (showToasts) toast.error("Unable to load environments")
+        }
       } finally {
         if (!cancelled) setIsLoadingEnvironments(false)
       }
@@ -76,7 +82,7 @@ export function useEnvironments() {
     return () => {
       cancelled = true
     }
-  }, [openDatabase])
+  }, [openDatabase, showToasts])
 
   useEffect(() => {
     if (!hasLoaded) return
@@ -111,18 +117,21 @@ export function useEnvironments() {
             reject(transaction.error ?? new Error("Save failed"))
           }
         })
+        setError("")
       } catch {
-        toast.error("Unable to save environments")
+        setError("Unable to save environments")
+        if (showToasts) toast.error("Unable to save environments")
       }
     }
 
     void saveEnvironments()
-  }, [environments, hasLoaded, openDatabase])
+  }, [environments, hasLoaded, openDatabase, showToasts])
 
   return {
     environments,
     setEnvironments,
     isLoadingEnvironments,
     hasLoaded,
+    error,
   }
 }

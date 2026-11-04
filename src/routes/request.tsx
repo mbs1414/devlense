@@ -20,7 +20,11 @@ import { useState } from "react"
 export const Route = createFileRoute("/request")({
   component: function RequestPage() {
     const { collections, isLoadingCollections } = useCollections()
-    const { environments, hasLoaded } = useEnvironments()
+    const {
+      environments,
+      hasLoaded,
+      error: environmentError,
+    } = useEnvironments({ showToasts: false })
     const [selectedCollectionId, setSelectedCollectionId] = useState("")
     const [requestName, setRequestName] = useState("")
     const collectionName =
@@ -45,6 +49,8 @@ export const Route = createFileRoute("/request")({
       loading,
       submittedUrl,
       requestSummary,
+      error: requestError,
+      setError: setRequestError,
     } = useSendRequest({
       method,
       request,
@@ -68,6 +74,7 @@ export const Route = createFileRoute("/request")({
     ) => {
       setSelectedCollectionId(collection.databaseId ?? "")
       setRequestName(item.name ?? "")
+      setRequestError("")
 
       const toFields = (entries: PostmanHeader[]): RequestField[] =>
         entries.map((entry) => ({
@@ -153,7 +160,7 @@ export const Route = createFileRoute("/request")({
     }
 
     return (
-      <div className="h-full flex flex-col">
+      <div className="h-full min-w-0 flex flex-col">
         <h1 className="text-color-primary font-semibold text-page-title">
           Request
         </h1>
@@ -168,7 +175,7 @@ export const Route = createFileRoute("/request")({
           loading={loading}
           disabled={!hasLoaded}
         />
-        <div className="grid grid-cols-[30rem_1fr] gap-6 flex-1">
+        <div className="grid grid-cols-[30rem_minmax(0,1fr)] gap-6 flex-1 min-w-0">
           <Card className="h-[calc(100svh-152px)] min-h-96 bg-surface py-0">
             <CardContent className="grid min-h-0 flex-1 p-0">
               <CollectionsPanel
@@ -178,9 +185,9 @@ export const Route = createFileRoute("/request")({
               />
             </CardContent>
           </Card>
-          <div className="flex flex-col gap-4 flex-1 min-h-0">
+          <div className="flex flex-col gap-4 flex-1 min-h-0 min-w-0">
             {/* Request configuration tabs */}
-            <Tabs defaultValue="params">
+            <Tabs defaultValue="params" className="min-w-0">
               <TabsList variant="line">
                 {tabs.map((tab) => (
                   <TabsTrigger
@@ -218,7 +225,7 @@ export const Route = createFileRoute("/request")({
               </TabsContent>
 
               {/* Body tab */}
-              <TabsContent value="body">
+              <TabsContent value="body" className="min-w-0">
                 <RequestBodyCard
                   bodyType={bodyType}
                   setBodyType={setBodyType}
@@ -244,6 +251,15 @@ export const Route = createFileRoute("/request")({
                 requestSummary={requestSummary}
                 submittedUrl={submittedUrl}
               />
+            )}
+
+            {(environmentError || requestError) && (
+              <p
+                role="alert"
+                className="text-caption text-status-error-fg break-words"
+              >
+                {environmentError || requestError}
+              </p>
             )}
 
             <ResponsePanel

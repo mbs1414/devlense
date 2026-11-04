@@ -19,11 +19,11 @@ export default function RequestBodyCard({
   setRequestBody,
 }: Props) {
   return (
-    <Card className="bg-surface mt-4">
+    <Card className="bg-surface mt-4 min-w-0">
       <CardHeader>
         <CardTitle className="text-section-title font-semibold">Body</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-w-0">
         <ToggleGroup
           type="single"
           size="lg"
