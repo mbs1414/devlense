@@ -9,15 +9,20 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { tabs } from "@/constants/request"
 import { useCollections } from "@/hooks/useCollections"
+import { useEnvironments } from "@/hooks/useEnvironments"
 import { useRequestFields } from "@/hooks/useRequestFields"
 import { useRequestAuth } from "@/hooks/useRequestAuth"
 import { useSendRequest } from "@/hooks/useSendRequest"
+import { getRequestVariables } from "@/lib/getRequestVariables"
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
 export const Route = createFileRoute("/request")({
   component: function RequestPage() {
     const { collections, isLoadingCollections } = useCollections()
+    const { environments, hasLoaded } = useEnvironments()
+    const [selectedCollectionId, setSelectedCollectionId] = useState("")
+    const variables = getRequestVariables(environments, selectedCollectionId)
     const [method, setMethod] = useState("GET")
     const [request, setRequest] = useState("")
     const [requestBody, setRequestBody] = useState("")
@@ -26,7 +31,8 @@ export const Route = createFileRoute("/request")({
     const headerFields = useRequestFields()
     const { fields: queryParams } = queryParamFields
     const { fields: headers } = headerFields
-    const { authType, setAuthType, auth, handleAuthChange, setAuth } = useRequestAuth()
+    const { authType, setAuthType, auth, handleAuthChange, setAuth } =
+      useRequestAuth()
     const {
       sendRequest,
       responseInfo,
@@ -43,10 +49,18 @@ export const Route = createFileRoute("/request")({
       headers,
       authType,
       auth,
+      variables,
+      variablesReady: hasLoaded,
     })
 
-    const handleSelectRequest = (selectedRequest: PostmanRequest) => {
-      console.log("Selected request:", selectedRequest)
+    const handleSelectRequest = (
+      selectedRequest: PostmanRequest,
+      _item: PostmanItem,
+      _path: string,
+      collection: PostmanCollection,
+    ) => {
+      setSelectedCollectionId(collection.databaseId ?? "")
+
       const toFields = (entries: PostmanHeader[]): RequestField[] =>
         entries.map((entry) => ({
           id: crypto.randomUUID(),
@@ -80,18 +94,12 @@ export const Route = createFileRoute("/request")({
       const body =
         typeof selectedRequest === "string" ? undefined : selectedRequest.body
 
-      // Local typing because PostmanRequest currently doesn't declare auth.
+      const requestAuth =
+        typeof selectedRequest === "string" ? undefined : selectedRequest.auth
       const importedAuth =
-        typeof selectedRequest === "string"
-          ? undefined
-          : (
-              selectedRequest as {
-                auth?: {
-                  type?: string
-                  bearer?: { key: string; value: unknown }[]
-                }
-              }
-            ).auth
+        !requestAuth || requestAuth.type === "inherit"
+          ? collection.auth
+          : requestAuth
 
       const bearerToken = importedAuth?.bearer?.find(
         (entry) => entry.key === "token",
@@ -150,6 +158,7 @@ export const Route = createFileRoute("/request")({
           setRequest={setRequest}
           sendRequest={sendRequest}
           loading={loading}
+          disabled={!hasLoaded}
         />
         <div className="grid grid-cols-[30rem_1fr] gap-6 flex-1">
           <Card className="h-[calc(100svh-152px)] min-h-96 bg-surface py-0">

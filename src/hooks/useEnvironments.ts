@@ -50,13 +50,6 @@ export function useEnvironments() {
                 )
               })
 
-              if (
-                !environments.some((environment) => environment.active) &&
-                environments[0]
-              ) {
-                environments[0].active = true
-              }
-
               resolve(environments)
             }
 

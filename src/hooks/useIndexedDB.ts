@@ -85,6 +85,7 @@ export function useIndexedDB<T>({
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, "readonly")
       const request = transaction.objectStore(storeName).getAll()
+      const keysRequest = transaction.objectStore(storeName).getAllKeys()
 
       let collections: T[] = []
 
@@ -94,7 +95,12 @@ export function useIndexedDB<T>({
 
       transaction.oncomplete = () => {
         db.close()
-        resolve(collections)
+        resolve(
+          collections.map((collection, index) => ({
+            ...collection,
+            databaseId: String(keysRequest.result[index]),
+          })),
+        )
       }
 
       transaction.onabort = () => {

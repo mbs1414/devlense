@@ -2,10 +2,12 @@ import { Outlet } from "@tanstack/react-router"
 import AppSidebar from "./components/layout/AppSidebar"
 import { SidebarProvider } from "./components/ui/sidebar"
 import AppHeader from "./components/layout/AppHeader"
+import { Toaster } from "./components/ui/sonner"
 
 const App = () => {
   return (
     <>
+      <Toaster />
       <SidebarProvider>
         <AppSidebar />
 

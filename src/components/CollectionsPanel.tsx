@@ -18,6 +18,7 @@ interface Props {
     request: PostmanRequest,
     item: PostmanItem,
     path: string,
+    collection: PostmanCollection,
   ) => void
 }
 

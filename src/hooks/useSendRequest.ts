@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react"
 import { getReasonPhrase } from "http-status-codes"
 import type { RequestAuth } from "@/hooks/useRequestAuth"
+import { resolveVariables } from "@/lib/resolveVariables"
+import { toast } from "sonner"
 
 interface Options {
   method: string
@@ -11,6 +13,8 @@ interface Options {
   headers: RequestField[]
   authType: string
   auth: RequestAuth
+  variables: EnvironmentVariable[]
+  variablesReady: boolean
 }
 
 const getStatusLabel = (code: number): string => {
@@ -30,6 +34,8 @@ export function useSendRequest({
   headers,
   authType,
   auth,
+  variables,
+  variablesReady,
 }: Options) {
   const [responseInfo, setResponseInfo] = useState<ResponseInfo | null>(null)
   const [loading, setLoading] = useState(false)
@@ -37,33 +43,44 @@ export function useSendRequest({
   const [requestSummary, setRequestSummary] = useState("")
 
   const sendRequest = useCallback(async () => {
+    if (!variablesReady) {
+      toast.error("Environments are not ready. Try again after they load.")
+      return
+    }
     setLoading(true)
     setResponseInfo(null)
 
     const startTime = performance.now()
     try {
-      const url = new URL(request)
+      const resolve = (value: string) => resolveVariables(value, variables)
+      const url = new URL(resolve(request))
       const requestHeaders = new Headers()
 
       queryParams
         .filter((param) => param.enabled && param.key.trim())
         .forEach((param) => {
-          url.searchParams.append(param.key, param.value)
+          url.searchParams.append(resolve(param.key), resolve(param.value))
         })
 
       headers
         .filter((header) => header.enabled && header.key.trim())
         .forEach((header) => {
-          requestHeaders.append(header.key.trim(), header.value)
+          requestHeaders.append(
+            resolve(header.key).trim(),
+            resolve(header.value),
+          )
         })
 
       switch (authType) {
         case "bearer":
-          requestHeaders.set("Authorization", `Bearer ${auth.token.trim()}`)
+          requestHeaders.set(
+            "Authorization",
+            `Bearer ${resolve(auth.token).trim()}`,
+          )
           break
 
         case "basic": {
-          const credentials = `${auth.username}:${auth.password}`
+          const credentials = `${resolve(auth.username)}:${resolve(auth.password)}`
           const bytes = new TextEncoder().encode(credentials)
           const encoded = btoa(
             Array.from(bytes, (byte) => String.fromCharCode(byte)).join(""),
@@ -74,16 +91,16 @@ export function useSendRequest({
         }
 
         case "api key": {
-          const key = auth.apiKeyName.trim()
+          const key = resolve(auth.apiKeyName).trim()
 
           if (!key) {
             throw new Error("API key name is required")
           }
 
           if (auth.apiKeyLocation === "header") {
-            requestHeaders.set(key, auth.apiKeyValue)
+            requestHeaders.set(key, resolve(auth.apiKeyValue))
           } else {
-            url.searchParams.set(key, auth.apiKeyValue)
+            url.searchParams.set(key, resolve(auth.apiKeyValue))
           }
 
           break
@@ -95,6 +112,7 @@ export function useSendRequest({
 
       const canSendBody =
         method !== "GET" && method !== "HEAD" && bodyType !== "none"
+      const resolvedBody = canSendBody ? resolve(requestBody) : ""
 
       if (canSendBody && !requestHeaders.has("Content-Type")) {
         requestHeaders.set(
@@ -107,7 +125,7 @@ export function useSendRequest({
       const paramCount = url.searchParams.size
       const headerCount = Array.from(requestHeaders.keys()).length
       const bodyLabel =
-        canSendBody && requestBody.length > 0
+        canSendBody && resolvedBody.length > 0
           ? "Request body"
           : "No request body"
       const authorization = requestHeaders.get("Authorization") ?? ""
@@ -125,7 +143,7 @@ export function useSendRequest({
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
-        ...(canSendBody ? { body: requestBody } : {}),
+        ...(canSendBody ? { body: resolvedBody } : {}),
       })
       const body = await response.text()
 
@@ -137,7 +155,9 @@ export function useSendRequest({
         body,
       })
     } catch (error) {
-      console.log(error)
+      toast.error(
+        error instanceof Error ? error.message : "Unable to send request",
+      )
     } finally {
       setLoading(false)
     }
@@ -150,6 +170,8 @@ export function useSendRequest({
     headers,
     authType,
     auth,
+    variables,
+    variablesReady,
   ])
 
   return {

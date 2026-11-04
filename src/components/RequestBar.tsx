@@ -18,6 +18,7 @@ interface Props {
   setRequest: (request: string) => void
   sendRequest: () => Promise<void>
   loading: boolean
+  disabled?: boolean
 }
 
 export default function RequestBar({
@@ -27,6 +28,7 @@ export default function RequestBar({
   setRequest,
   sendRequest,
   loading,
+  disabled,
 }: Props) {
   const selectedMethod = methods.find((item) => item.value === method)
   return (
@@ -61,7 +63,7 @@ export default function RequestBar({
         onChange={(event) => setRequest(event.target.value)}
       />
 
-      <Button size="lg" onClick={sendRequest} disabled={loading}>
+      <Button size="lg" onClick={sendRequest} disabled={loading || disabled}>
         {loading && <Loader2Icon className="size-4 animate-spin" />}
         {loading ? "Sending..." : "Send"}
       </Button>

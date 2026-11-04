@@ -31,7 +31,7 @@ export default function RequestAuthCard({
         <ToggleGroup
           type="single"
           size="lg"
-          defaultValue={authType}
+          value={authType}
           onValueChange={(value) => value && setAuthType(value)}
           variant="default"
           spacing={1}

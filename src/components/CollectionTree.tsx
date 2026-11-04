@@ -15,6 +15,7 @@ interface Props {
     request: PostmanRequest,
     item: PostmanItem,
     path: string,
+    collection: PostmanCollection,
   ) => void
 }
 
@@ -24,7 +25,11 @@ export default function CollectionTree({
   onSelectRequest,
 }: Props) {
   const renderItems = useCallback(
-    function renderItems(items: PostmanItem[], path: string): ReactNode {
+    function renderItems(
+      items: PostmanItem[],
+      path: string,
+      collection: PostmanCollection,
+    ): ReactNode {
       return (
         <div className="flex flex-col gap-1">
           {items.map((requestItem, index) => {
@@ -46,7 +51,11 @@ export default function CollectionTree({
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-1 ml-5">
-                  {renderItems(item, `${path} / ${name ?? "Untitled folder"}`)}
+                  {renderItems(
+                    item,
+                    `${path} / ${name ?? "Untitled folder"}`,
+                    collection,
+                  )}
                 </CollapsibleContent>
               </Collapsible>
             ) : (
@@ -56,7 +65,7 @@ export default function CollectionTree({
                 className="w-full justify-start gap-2 text-foreground"
                 onClick={() => {
                   if (request != null) {
-                    onSelectRequest?.(request, requestItem, path)
+                    onSelectRequest?.(request, requestItem, path, collection)
                   }
                 }}
               >
@@ -94,7 +103,7 @@ export default function CollectionTree({
             </CollapsibleTrigger>
 
             <CollapsibleContent className="mt-1 ml-5">
-              {renderItems(collection.item, collection.info.name)}
+              {renderItems(collection.item, collection.info.name, collection)}
             </CollapsibleContent>
           </Collapsible>
         )

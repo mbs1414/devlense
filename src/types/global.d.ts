@@ -64,6 +64,7 @@ type PostmanRequest =
       header?: PostmanHeader[] | string
       body?: PostmanBody
       description?: PostmanDescription
+      auth?: PostmanAuth
     }
 
 type PostmanResponse = {
@@ -97,6 +98,7 @@ type PostmanItem = {
 }
 
 type PostmanCollection = {
+  databaseId?: string
   info: {
     name: string
     schema: string
@@ -105,6 +107,12 @@ type PostmanCollection = {
   }
   item: PostmanItem[]
   variable?: PostmanVariable[]
+  auth?: PostmanAuth
+}
+
+type PostmanAuth = {
+  type?: string
+  bearer?: { key: string; value: unknown }[]
 }
 
 type PostmanVariable = {

@@ -36,9 +36,9 @@ export function useCollections() {
   const addCollection = useCallback(
     async (collection: PostmanCollection) => {
       await saveCollectionToIndexedDB(collection)
-      setCollections((previous) => [...previous, collection])
+      setCollections(await loadCollectionsFromIndexedDB())
     },
-    [saveCollectionToIndexedDB],
+    [saveCollectionToIndexedDB, loadCollectionsFromIndexedDB],
   )
 
   return { collections, isLoadingCollections, addCollection }
