@@ -104,9 +104,32 @@ type PostmanCollection = {
     description?: string
   }
   item: PostmanItem[]
+  variable?: PostmanVariable[]
+}
+
+type PostmanVariable = {
+  key?: string
+  value?: unknown
+  type?: string
+  disabled?: boolean
+  description?: PostmanDescription
 }
 
 type Environment = {
   id: string
   name: string
+  active: boolean
+  variables: EnvironmentVariable[]
+  kind?: "environment" | "collection"
+  collectionId?: string
+}
+
+type EnvironmentVariable = {
+  id: string
+  enabled: boolean
+  key: string
+  type: "text" | "secret"
+  value: string
+  description: string
+  visible: boolean
 }

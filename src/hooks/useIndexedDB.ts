@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 
 const DB_NAME = "postman-collections-db"
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_NAME = "collections"
 
 interface Options {
@@ -16,7 +16,7 @@ export function useIndexedDB<T>({
   storeName = STORE_NAME,
 }: Options = {}) {
   // 1. Open the IndexedDB database
-  const openCollectionsDatabase = useCallback((): Promise<IDBDatabase> => {
+  const openDatabase = useCallback((): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(databaseName, version)
 
@@ -28,9 +28,23 @@ export function useIndexedDB<T>({
             autoIncrement: true,
           })
         }
+
+        if (!db.objectStoreNames.contains("environments")) {
+          const environments = db.createObjectStore("environments", {
+            keyPath: "id",
+          })
+
+          environments.add({
+            id: "development",
+            name: "Development",
+            active: true,
+            variables: [],
+          })
+        }
       }
 
       request.onsuccess = () => {
+        request.result.onversionchange = () => request.result.close()
         resolve(request.result)
       }
 
@@ -43,7 +57,7 @@ export function useIndexedDB<T>({
   // 2. Save a collection into IndexedDB
   const saveCollectionToIndexedDB = useCallback(
     async (collection: T): Promise<void> => {
-      const db = await openCollectionsDatabase()
+      const db = await openDatabase()
 
       return new Promise((resolve, reject) => {
         const transaction = db.transaction(storeName, "readwrite")
@@ -61,12 +75,12 @@ export function useIndexedDB<T>({
         }
       })
     },
-    [openCollectionsDatabase, storeName],
+    [openDatabase, storeName],
   )
 
   // 3. Load all previously saved collections
   const loadCollectionsFromIndexedDB = useCallback(async (): Promise<T[]> => {
-    const db = await openCollectionsDatabase()
+    const db = await openDatabase()
 
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, "readonly")
@@ -88,7 +102,11 @@ export function useIndexedDB<T>({
         reject(transaction.error ?? new Error("Load failed"))
       }
     })
-  }, [openCollectionsDatabase, storeName])
+  }, [openDatabase, storeName])
 
-  return { saveCollectionToIndexedDB, loadCollectionsFromIndexedDB }
+  return {
+    openDatabase,
+    saveCollectionToIndexedDB,
+    loadCollectionsFromIndexedDB,
+  }
 }

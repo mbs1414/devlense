@@ -13,10 +13,13 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useEnvironments } from "@/hooks/useEnvironments"
 import { createFileRoute } from "@tanstack/react-router"
 import {
   Eye,
@@ -30,22 +33,45 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 
-type Variable = {
-  id: string
-  enabled: boolean
-  key: string
-  type: "text" | "secret"
-  value: string
-  description: string
-  visible: boolean
-}
-
 export const Route = createFileRoute("/environments")({
   component: function EnvironmentsPage() {
     const [createDialogOpen, setCreateDialogOpen] = useState(false)
     const [manageDialogOpen, setManageDialogOpen] = useState(false)
-    const [variables, setVariables] = useState<Variable[]>([])
     const [search, setSearch] = useState("")
+    const { environments, setEnvironments, isLoadingEnvironments, hasLoaded } =
+      useEnvironments()
+    const activeEnvironment = environments.find(
+      (environment) => environment.active,
+    )
+    const activeEnvironmentId = activeEnvironment?.id ?? ""
+    const variables = activeEnvironment?.variables ?? []
+    const userEnvironments = environments.filter(
+      (environment) => environment.kind !== "collection",
+    )
+    const collectionEnvironments = environments.filter(
+      (environment) => environment.kind === "collection",
+    )
+
+    const setActiveEnvironmentId = (id: string) => {
+      setEnvironments((previous) =>
+        previous.map((environment) => ({
+          ...environment,
+          active: environment.id === id,
+        })),
+      )
+    }
+
+    const setVariables = (
+      update: (previous: EnvironmentVariable[]) => EnvironmentVariable[],
+    ) => {
+      setEnvironments((previous) =>
+        previous.map((environment) =>
+          environment.id === activeEnvironmentId
+            ? { ...environment, variables: update(environment.variables) }
+            : environment,
+        ),
+      )
+    }
 
     const addVariable = () => {
       setSearch("")
@@ -63,17 +89,10 @@ export const Route = createFileRoute("/environments")({
       ])
     }
 
-    const [environments, setEnvironments] = useState<Environment[]>([
-      { id: "development", name: "Development" },
-    ])
-
-    const [activeEnvironmentId, setActiveEnvironmentId] =
-      useState("development")
-
-    const updateVariable = <K extends keyof Omit<Variable, "id">>(
+    const updateVariable = <K extends keyof Omit<EnvironmentVariable, "id">>(
       id: string,
       field: K,
-      value: Variable[K],
+      value: EnvironmentVariable[K],
     ) => {
       setVariables((previous) =>
         previous.map((variable) =>
@@ -96,11 +115,15 @@ export const Route = createFileRoute("/environments")({
       const newEnvironment: Environment = {
         id: crypto.randomUUID(),
         name,
+        kind: "environment",
+        active: true,
+        variables: [],
       }
 
-      setEnvironments((previous) => [...previous, newEnvironment])
-
-      setActiveEnvironmentId(newEnvironment.id)
+      setEnvironments((previous) => [
+        ...previous.map((environment) => ({ ...environment, active: false })),
+        newEnvironment,
+      ])
     }
 
     const handleRenameEnvironment = (id: string, name: string) => {
@@ -116,11 +139,16 @@ export const Route = createFileRoute("/environments")({
         (environment) => environment.id !== id,
       )
 
-      setEnvironments(remaining)
-
       // Switch selection if the active environment was deleted.
       if (activeEnvironmentId === id) {
-        setActiveEnvironmentId(remaining[0]?.id ?? "")
+        setEnvironments(
+          remaining.map((environment, index) => ({
+            ...environment,
+            active: index === 0,
+          })),
+        )
+      } else {
+        setEnvironments(remaining)
       }
     }
 
@@ -136,7 +164,10 @@ export const Route = createFileRoute("/environments")({
             </p>
           </div>
 
-          <Button onClick={() => setCreateDialogOpen(true)}>
+          <Button
+            onClick={() => setCreateDialogOpen(true)}
+            disabled={!hasLoaded}
+          >
             <Plus className="size-4" />
             New environment
           </Button>
@@ -150,7 +181,7 @@ export const Route = createFileRoute("/environments")({
 
         <div className="flex flex-wrap items-center gap-3 my-4">
           <Select
-            value={activeEnvironmentId || undefined}
+            value={activeEnvironmentId}
             onValueChange={setActiveEnvironmentId}
             disabled={environments.length === 0}
           >
@@ -165,18 +196,28 @@ export const Route = createFileRoute("/environments")({
             </SelectTrigger>
 
             <SelectContent position="popper">
-              {environments.map((environment) => (
-                <SelectItem key={environment.id} value={environment.id}>
-                  {environment.name}
-                </SelectItem>
-              ))}
+              {userEnvironments.length > 0 && (
+                <SelectGroup>
+                  <SelectLabel>My environments</SelectLabel>
+                  {userEnvironments.map((environment) => (
+                    <SelectItem key={environment.id} value={environment.id}>
+                      {environment.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              )}
+              {collectionEnvironments.length > 0 && (
+                <SelectGroup>
+                  <SelectLabel>Collection variables</SelectLabel>
+                  {collectionEnvironments.map((environment) => (
+                    <SelectItem key={environment.id} value={environment.id}>
+                      {environment.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              )}
             </SelectContent>
           </Select>
-
-          {/* <span className="inline-flex items-center gap-2 rounded-full bg-status-success-fg/10 px-2.5 py-1 text-caption font-medium text-status-success-fg">
-              <span className="size-2 rounded-full bg-status-success-fg" />
-              Active
-            </span> */}
 
           <Button
             variant="softOutline"
@@ -184,6 +225,7 @@ export const Route = createFileRoute("/environments")({
             aria-label="Manage environments"
             title="Manage environments"
             onClick={() => setManageDialogOpen(true)}
+            disabled={!hasLoaded}
           >
             <Settings2 className="size-4" />
           </Button>
@@ -191,7 +233,7 @@ export const Route = createFileRoute("/environments")({
           <ManageEnvironmentsDialog
             open={manageDialogOpen}
             onOpenChange={setManageDialogOpen}
-            environments={environments}
+            environments={userEnvironments}
             activeEnvironmentId={activeEnvironmentId}
             onRename={handleRenameEnvironment}
             onDelete={handleDeleteEnvironment}
@@ -202,11 +244,10 @@ export const Route = createFileRoute("/environments")({
           <CardHeader className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle p-4 shrink-0">
             <div className="flex items-center gap-3">
               <h2 className="text-section-title text-color-primary">
-                Variables
+                {activeEnvironment?.kind === "collection"
+                  ? "Collection variables"
+                  : "Variables"}
               </h2>
-              {/* <span className="rounded-full bg-surface-subtle px-2 py-1 text-caption text-color-muted">
-                  {variables.length} variables
-                </span> */}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -221,7 +262,12 @@ export const Route = createFileRoute("/environments")({
                   <Search />
                 </InputGroupAddon>
               </InputGroup>
-              <Button variant="secondary" size="lg" onClick={addVariable}>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={addVariable}
+                disabled={!activeEnvironment}
+              >
                 <Plus className="size-4" />
                 Add variable
               </Button>
@@ -230,18 +276,30 @@ export const Route = createFileRoute("/environments")({
 
           <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
             <div className="flex h-full min-h-0 flex-col">
-              {filteredVariables.length === 0 ? (
+              {isLoadingEnvironments ? (
+                <p className="text-color-secondary">Loading environments...</p>
+              ) : !hasLoaded ? (
+                <p className="text-color-secondary">
+                  Unable to load environments. Refresh to try again.
+                </p>
+              ) : filteredVariables.length === 0 ? (
                 <PlaceholderState
                   variant="inline"
                   showBorder={false}
                   icon={search.trim() ? SearchX : FilePlus2}
                   title={
-                    search.trim() ? "No matching variables" : "No variables yet"
+                    !activeEnvironment
+                      ? "No environment selected"
+                      : search.trim()
+                        ? "No matching variables"
+                        : "No variables yet"
                   }
                   description={
-                    search.trim()
-                      ? "Try a different search term."
-                      : "Click Add variable to create your first variable."
+                    !activeEnvironment
+                      ? "Create an environment to add variables."
+                      : search.trim()
+                        ? "Try a different search term."
+                        : "Click Add variable to create your first variable."
                   }
                 />
               ) : (
@@ -368,18 +426,9 @@ export const Route = createFileRoute("/environments")({
           </CardContent>
 
           <CardFooter className="justify-end gap-2 border-border-subtle shrink-0">
-            {/* <span className="mr-auto rounded-full bg-surface-subtle px-2 py-1 text-caption text-color-muted">
-                {variables.filter((variable) => variable.enabled).length} enabled
-              </span>
-              <span className="rounded-full bg-status-warning-fg/10 px-2 py-1 text-caption text-status-warning-fg">
-                Unsaved changes
-              </span> */}
-            <Button variant="secondary" size="lg" disabled>
-              Discard
-            </Button>
-            <Button size="lg" disabled>
-              Save changes
-            </Button>
+            <p className="text-caption text-color-muted">
+              {hasLoaded ? "Changes are saved automatically." : ""}
+            </p>
           </CardFooter>
         </Card>
       </div>
