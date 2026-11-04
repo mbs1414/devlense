@@ -164,14 +164,6 @@ export const Route = createFileRoute("/environments")({
             </p>
           </div>
 
-          <Button
-            onClick={() => setCreateDialogOpen(true)}
-            disabled={!hasLoaded}
-          >
-            <Plus className="size-4" />
-            New environment
-          </Button>
-
           <CreateEnvironmentDialog
             open={createDialogOpen}
             onOpenChange={setCreateDialogOpen}
@@ -228,6 +220,15 @@ export const Route = createFileRoute("/environments")({
             disabled={!hasLoaded}
           >
             <Settings2 className="size-4" />
+          </Button>
+
+          <Button
+            className="ml-auto"
+            onClick={() => setCreateDialogOpen(true)}
+            disabled={!hasLoaded}
+          >
+            <Plus className="size-4" />
+            New environment
           </Button>
 
           <ManageEnvironmentsDialog
