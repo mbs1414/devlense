@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 
 const DB_NAME = "postman-collections-db"
-const DB_VERSION = 2
+const DB_VERSION = 3
 const STORE_NAME = "collections"
 
 interface Options {
@@ -40,6 +40,11 @@ export function useIndexedDB<T>({
             active: true,
             variables: [],
           })
+        }
+
+        if (!db.objectStoreNames.contains("history")) {
+          const history = db.createObjectStore("history", { keyPath: "id" })
+          history.createIndex("createdAt", "createdAt")
         }
       }
 

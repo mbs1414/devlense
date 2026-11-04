@@ -22,6 +22,11 @@ export const Route = createFileRoute("/request")({
     const { collections, isLoadingCollections } = useCollections()
     const { environments, hasLoaded } = useEnvironments()
     const [selectedCollectionId, setSelectedCollectionId] = useState("")
+    const [requestName, setRequestName] = useState("")
+    const collectionName =
+      collections.find(
+        (collection) => collection.databaseId === selectedCollectionId,
+      )?.info.name ?? ""
     const variables = getRequestVariables(environments, selectedCollectionId)
     const [method, setMethod] = useState("GET")
     const [request, setRequest] = useState("")
@@ -51,15 +56,18 @@ export const Route = createFileRoute("/request")({
       auth,
       variables,
       variablesReady: hasLoaded,
+      requestName,
+      collectionName,
     })
 
     const handleSelectRequest = (
       selectedRequest: PostmanRequest,
-      _item: PostmanItem,
+      item: PostmanItem,
       _path: string,
       collection: PostmanCollection,
     ) => {
       setSelectedCollectionId(collection.databaseId ?? "")
+      setRequestName(item.name ?? "")
 
       const toFields = (entries: PostmanHeader[]): RequestField[] =>
         entries.map((entry) => ({

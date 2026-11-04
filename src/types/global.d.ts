@@ -14,6 +14,19 @@ interface RequestField {
   enabled: boolean
 }
 
+type RequestHistory = {
+  id: string
+  createdAt: number
+  name: string
+  collectionName: string
+  method: string
+  url: string
+  statusCode: number | null
+  statusLabel: string
+  duration: number
+  size: string | null
+}
+
 type PostmanHeader = {
   key: string
   value: string

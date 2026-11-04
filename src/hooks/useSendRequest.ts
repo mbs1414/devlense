@@ -3,6 +3,7 @@ import { getReasonPhrase } from "http-status-codes"
 import type { RequestAuth } from "@/hooks/useRequestAuth"
 import { resolveVariables } from "@/lib/resolveVariables"
 import { toast } from "sonner"
+import { useHistory } from "@/hooks/useHistory"
 
 interface Options {
   method: string
@@ -15,6 +16,8 @@ interface Options {
   auth: RequestAuth
   variables: EnvironmentVariable[]
   variablesReady: boolean
+  requestName: string
+  collectionName: string
 }
 
 const getStatusLabel = (code: number): string => {
@@ -36,11 +39,14 @@ export function useSendRequest({
   auth,
   variables,
   variablesReady,
+  requestName,
+  collectionName,
 }: Options) {
   const [responseInfo, setResponseInfo] = useState<ResponseInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [submittedUrl, setSubmittedUrl] = useState("")
   const [requestSummary, setRequestSummary] = useState("")
+  const { saveHistoryToIndexedDB } = useHistory()
 
   const sendRequest = useCallback(async () => {
     if (!variablesReady) {
@@ -51,6 +57,7 @@ export function useSendRequest({
     setResponseInfo(null)
 
     const startTime = performance.now()
+    let historyEntry: RequestHistory | null = null
     try {
       const resolve = (value: string) => resolveVariables(value, variables)
       const url = new URL(resolve(request))
@@ -140,6 +147,18 @@ export function useSendRequest({
       setRequestSummary(
         `${paramCount} query parameters · ${headerCount} headers · ${bodyLabel} · ${authLabel}`,
       )
+      historyEntry = {
+        id: crypto.randomUUID(),
+        createdAt: Date.now(),
+        name: requestName,
+        collectionName,
+        method,
+        url: request,
+        statusCode: null,
+        statusLabel: "Request failed",
+        duration: 0,
+        size: null,
+      }
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
@@ -147,18 +166,32 @@ export function useSendRequest({
       })
       const body = await response.text()
 
-      setResponseInfo({
+      const responseDetails = {
         duration: Math.round(performance.now() - startTime),
         size: (new Blob([body]).size / 1024).toFixed(2),
         statusLabel: `${response.status} ${getStatusLabel(response.status)}`,
         statusCode: response.status,
         body,
-      })
+      }
+
+      setResponseInfo(responseDetails)
+      historyEntry.statusCode = responseDetails.statusCode
+      historyEntry.statusLabel = responseDetails.statusLabel
+      historyEntry.size = responseDetails.size
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Unable to send request",
       )
     } finally {
+      if (historyEntry) {
+        historyEntry.duration = Math.round(performance.now() - startTime)
+
+        try {
+          await saveHistoryToIndexedDB(historyEntry)
+        } catch {
+          toast.error("Unable to save request history")
+        }
+      }
       setLoading(false)
     }
   }, [
@@ -172,6 +205,9 @@ export function useSendRequest({
     auth,
     variables,
     variablesReady,
+    requestName,
+    collectionName,
+    saveHistoryToIndexedDB,
   ])
 
   return {
