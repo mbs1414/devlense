@@ -4,8 +4,11 @@ import { useCallback, useEffect, useState } from "react"
 export function useCollections() {
   const [collections, setCollections] = useState<PostmanCollection[]>([])
   const [isLoadingCollections, setIsLoadingCollections] = useState(true)
-  const { saveCollectionToIndexedDB, loadCollectionsFromIndexedDB } =
-    useIndexedDB<PostmanCollection>()
+  const {
+    openDatabase,
+    saveCollectionToIndexedDB,
+    loadCollectionsFromIndexedDB,
+  } = useIndexedDB<PostmanCollection>()
 
   useEffect(() => {
     let cancelled = false
@@ -41,5 +44,36 @@ export function useCollections() {
     [saveCollectionToIndexedDB, loadCollectionsFromIndexedDB],
   )
 
-  return { collections, isLoadingCollections, addCollection }
+  const deleteCollection = useCallback(
+    async (id: string) => {
+      const db = await openDatabase()
+
+      await new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(
+          ["collections", "environments"],
+          "readwrite",
+        )
+
+        transaction.objectStore("collections").delete(Number(id))
+        transaction.objectStore("environments").delete(`collection:${id}`)
+
+        transaction.oncomplete = () => {
+          db.close()
+          resolve()
+        }
+
+        transaction.onabort = () => {
+          db.close()
+          reject(transaction.error ?? new Error("Delete failed"))
+        }
+      })
+
+      setCollections((previous) =>
+        previous.filter((collection) => collection.databaseId !== id),
+      )
+    },
+    [openDatabase],
+  )
+
+  return { collections, isLoadingCollections, addCollection, deleteCollection }
 }

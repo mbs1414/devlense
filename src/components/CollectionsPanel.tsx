@@ -14,6 +14,8 @@ import { useMemo } from "react"
 interface Props {
   collections: PostmanCollection[]
   isLoadingCollections: boolean
+  onDeleteCollection?: (collection: PostmanCollection) => void
+  deletingCollectionId?: string
   onSelectRequest?: (
     request: PostmanRequest,
     item: PostmanItem,
@@ -26,6 +28,8 @@ export default function CollectionsPanel({
   collections,
   isLoadingCollections,
   onSelectRequest,
+  onDeleteCollection,
+  deletingCollectionId,
 }: Props) {
   const {
     searchQuery,
@@ -90,6 +94,8 @@ export default function CollectionsPanel({
               filteredCollections={filteredCollections}
               isSearching={isSearching}
               onSelectRequest={onSelectRequest}
+              onDeleteCollection={onDeleteCollection}
+              deletingCollectionId={deletingCollectionId}
             />
           )}
         </div>

@@ -8,11 +8,16 @@ import { useImportPostmanCollection } from "@/hooks/useImportPostmanCollection"
 import { createFileRoute } from "@tanstack/react-router"
 import { Plus } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/collections")({
   component: function CollectionsComponent() {
-    const { collections, isLoadingCollections, addCollection } =
-      useCollections()
+    const {
+      collections,
+      isLoadingCollections,
+      addCollection,
+      deleteCollection,
+    } = useCollections()
     const {
       collectionFileInputRef,
       openCollectionFilePicker,
@@ -22,14 +27,39 @@ export const Route = createFileRoute("/collections")({
     const [selectedRequest, setSelectedRequest] = useState<{
       item: PostmanItem
       path: string
+      collectionId: string
     } | null>(null)
+    const [deletingCollectionId, setDeletingCollectionId] = useState("")
 
     const handleSelectRequest = (
       _request: PostmanRequest,
       item: PostmanItem,
       path: string,
+      collection: PostmanCollection,
     ) => {
-      setSelectedRequest({ item, path })
+      setSelectedRequest({
+        item,
+        path,
+        collectionId: collection.databaseId ?? "",
+      })
+    }
+
+    const handleDeleteCollection = async (collection: PostmanCollection) => {
+      if (!collection.databaseId || deletingCollectionId) return
+
+      setDeletingCollectionId(collection.databaseId)
+
+      try {
+        await deleteCollection(collection.databaseId)
+        setSelectedRequest((previous) =>
+          previous?.collectionId === collection.databaseId ? null : previous,
+        )
+        toast.success("Collection deleted")
+      } catch {
+        toast.error("Unable to delete collection")
+      } finally {
+        setDeletingCollectionId("")
+      }
     }
 
     return (
@@ -66,6 +96,8 @@ export const Route = createFileRoute("/collections")({
               collections={collections}
               isLoadingCollections={isLoadingCollections}
               onSelectRequest={handleSelectRequest}
+              onDeleteCollection={handleDeleteCollection}
+              deletingCollectionId={deletingCollectionId}
             />
             <Separator orientation="vertical" className="bg-border-subtle" />
             <CollectionRequestDetails
