@@ -9,6 +9,7 @@ interface Options {
   request: string
   requestBody: string
   bodyType: string
+  encodedBodyFields: RequestField[]
   queryParams: RequestField[]
   headers: RequestField[]
   authType: string
@@ -32,6 +33,7 @@ export function useSendRequest({
   request,
   requestBody,
   bodyType,
+  encodedBodyFields,
   queryParams,
   headers,
   authType,
@@ -120,13 +122,30 @@ export function useSendRequest({
 
       const canSendBody =
         method !== "GET" && method !== "HEAD" && bodyType !== "none"
-      const resolvedBody = canSendBody ? resolve(requestBody) : ""
+      let resolvedBody = ""
+
+      if (canSendBody) {
+        if (bodyType === "encoded") {
+          const body = new URLSearchParams()
+
+          encodedBodyFields
+            .filter((field) => field.enabled && field.key.trim())
+            .forEach((field) =>
+              body.append(resolve(field.key), resolve(field.value)),
+            )
+
+          resolvedBody = body.toString()
+        } else {
+          resolvedBody = resolve(requestBody)
+        }
+      }
 
       if (canSendBody && !requestHeaders.has("Content-Type")) {
-        requestHeaders.set(
-          "Content-Type",
-          bodyType === "json" ? "application/json" : "text/plain",
-        )
+        let contentType = "text/plain"
+        if (bodyType === "json") contentType = "application/json"
+        if (bodyType === "encoded")
+          contentType = "application/x-www-form-urlencoded"
+        requestHeaders.set("Content-Type", contentType)
       }
 
       setSubmittedUrl(url.toString())
@@ -204,6 +223,7 @@ export function useSendRequest({
     request,
     requestBody,
     bodyType,
+    encodedBodyFields,
     queryParams,
     headers,
     authType,

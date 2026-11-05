@@ -38,6 +38,7 @@ export const Route = createFileRoute("/request")({
     const [bodyType, setBodyType] = useState("json")
     const queryParamFields = useRequestFields()
     const headerFields = useRequestFields()
+    const encodedBodyFields = useRequestFields()
     const { fields: queryParams } = queryParamFields
     const { fields: headers } = headerFields
     const { authType, setAuthType, auth, handleAuthChange, setAuth } =
@@ -56,6 +57,7 @@ export const Route = createFileRoute("/request")({
       request,
       requestBody,
       bodyType,
+      encodedBodyFields: encodedBodyFields.fields,
       queryParams,
       headers,
       authType,
@@ -136,14 +138,17 @@ export const Route = createFileRoute("/request")({
 
       headerFields.setFields(toFields(importedHeaders))
       queryParamFields.setFields(toFields(importedQuery))
+      encodedBodyFields.setFields(toFields(body?.urlencoded ?? []))
 
       setRequestBody(body?.raw ?? "")
       setBodyType(
-        body?.mode === "raw"
-          ? contentType?.toLowerCase().includes("json")
-            ? "json"
-            : "text"
-          : "none",
+        body?.mode === "urlencoded"
+          ? "encoded"
+          : body?.mode === "raw"
+            ? contentType?.toLowerCase().includes("json")
+              ? "json"
+              : "text"
+            : "none",
       )
 
       setAuthType(importedAuth?.type === "bearer" ? "bearer" : "no auth")
@@ -231,6 +236,7 @@ export const Route = createFileRoute("/request")({
                   setBodyType={setBodyType}
                   requestBody={requestBody}
                   setRequestBody={setRequestBody}
+                  encodedBodyFields={encodedBodyFields}
                 />
               </TabsContent>
 

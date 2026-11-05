@@ -21,6 +21,7 @@ export const bodyTypes = [
   { value: "none", label: "None" },
   { value: "json", label: "JSON" },
   { value: "text", label: "Text" },
+  { value: "encoded", label: "Encoded" },
 ]
 
 export const responseTypes = [
