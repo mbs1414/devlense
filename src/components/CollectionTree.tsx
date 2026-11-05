@@ -11,6 +11,7 @@ import { useCallback, useMemo, type ReactNode } from "react"
 interface Props {
   filteredCollections: PostmanCollection[]
   isSearching: boolean
+  selectedRequest?: PostmanItem | null
   onDeleteCollection?: (collection: PostmanCollection) => void
   deletingCollectionId?: string
   onSelectRequest?: (
@@ -24,6 +25,7 @@ interface Props {
 export default function CollectionTree({
   filteredCollections,
   isSearching,
+  selectedRequest,
   onSelectRequest,
   onDeleteCollection,
   deletingCollectionId,
@@ -66,7 +68,9 @@ export default function CollectionTree({
               <Button
                 variant="collectionApi"
                 key={index}
-                className="w-full justify-start gap-2 text-foreground"
+                data-selected={selectedRequest === requestItem}
+                aria-current={selectedRequest === requestItem ? true : undefined}
+                className="w-full justify-start gap-2 text-foreground data-[selected=true]:bg-active data-[selected=true]:hover:bg-active"
                 onClick={() => {
                   if (request != null) {
                     onSelectRequest?.(request, requestItem, path, collection)
@@ -83,7 +87,7 @@ export default function CollectionTree({
         </div>
       )
     },
-    [isSearching, onSelectRequest],
+    [isSearching, onSelectRequest, selectedRequest],
   )
 
   const processCollection = useCallback(
