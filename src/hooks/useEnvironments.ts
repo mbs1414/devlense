@@ -3,6 +3,7 @@ import { toast } from "sonner"
 
 import { useIndexedDB } from "@/hooks/useIndexedDB"
 import { getCollectionEnvironment } from "@/lib/getCollectionEnvironment"
+import { disableDuplicateVariables } from "@/lib/disableDuplicateVariables"
 
 export function useEnvironments({
   showToasts = true,
@@ -53,7 +54,12 @@ export function useEnvironments({
                 )
               })
 
-              resolve(environments)
+              resolve(
+                environments.map((environment) => ({
+                  ...environment,
+                  variables: disableDuplicateVariables(environment.variables),
+                })),
+              )
             }
 
             transaction.onabort = () => {

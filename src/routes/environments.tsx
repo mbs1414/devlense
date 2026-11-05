@@ -94,11 +94,25 @@ export const Route = createFileRoute("/environments")({
       field: K,
       value: EnvironmentVariable[K],
     ) => {
-      setVariables((previous) =>
-        previous.map((variable) =>
-          variable.id === id ? { ...variable, [field]: value } : variable,
-        ),
-      )
+      setVariables((previous) => {
+        const selectedVariable = previous.find((variable) => variable.id === id)
+        if (!selectedVariable) return previous
+
+        const updatedVariable = { ...selectedVariable, [field]: value }
+        const key = updatedVariable.key.trim()
+        const shouldDisableDuplicates =
+          updatedVariable.enabled &&
+          key &&
+          (field === "key" || field === "enabled")
+
+        return previous.map((variable) => {
+          if (variable.id === id) return updatedVariable
+          if (shouldDisableDuplicates && variable.key.trim() === key) {
+            return { ...variable, enabled: false }
+          }
+          return variable
+        })
+      })
     }
 
     const removeVariable = (id: string) => {
