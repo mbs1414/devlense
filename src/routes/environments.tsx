@@ -79,7 +79,7 @@ export const Route = createFileRoute("/environments")({
         ...previous,
         {
           id: crypto.randomUUID(),
-          enabled: true,
+          enabled: false,
           key: "",
           type: "text",
           value: "",
@@ -107,7 +107,9 @@ export const Route = createFileRoute("/environments")({
 
         return previous.map((variable) => {
           if (variable.id === id) return updatedVariable
-          if (shouldDisableDuplicates && variable.key.trim() === key) {
+          const sameKey = variable.key.trim() === key
+          const bothTokens = /token/i.test(key) && /token/i.test(variable.key)
+          if (shouldDisableDuplicates && (sameKey || bothTokens)) {
             return { ...variable, enabled: false }
           }
           return variable

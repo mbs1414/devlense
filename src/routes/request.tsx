@@ -14,6 +14,7 @@ import { useRequestFields } from "@/hooks/useRequestFields"
 import { useRequestAuth } from "@/hooks/useRequestAuth"
 import { useSendRequest } from "@/hooks/useSendRequest"
 import { getRequestVariables } from "@/lib/getRequestVariables"
+import { getEnvironmentBearerToken } from "@/lib/getEnvironmentBearerToken"
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
@@ -32,6 +33,10 @@ export const Route = createFileRoute("/request")({
         (collection) => collection.databaseId === selectedCollectionId,
       )?.info.name ?? ""
     const variables = getRequestVariables(environments, selectedCollectionId)
+    const activeEnvironment = environments.find(
+      (environment) => environment.active,
+    )
+    const environmentBearerToken = getEnvironmentBearerToken(activeEnvironment)
     const [method, setMethod] = useState("GET")
     const [request, setRequest] = useState("")
     const [requestBody, setRequestBody] = useState("")
@@ -66,6 +71,7 @@ export const Route = createFileRoute("/request")({
       variablesReady: hasLoaded,
       requestName,
       collectionName,
+      environmentBearerToken,
     })
 
     const handleSelectRequest = (
@@ -247,6 +253,10 @@ export const Route = createFileRoute("/request")({
                   setAuthType={setAuthType}
                   auth={auth}
                   handleAuthChange={handleAuthChange}
+                  environmentToken={getEnvironmentBearerToken(
+                    activeEnvironment,
+                    true,
+                  )}
                 />
               </TabsContent>
             </Tabs>

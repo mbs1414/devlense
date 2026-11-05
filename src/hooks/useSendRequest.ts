@@ -18,6 +18,7 @@ interface Options {
   variablesReady: boolean
   requestName: string
   collectionName: string
+  environmentBearerToken?: string
 }
 
 const getStatusLabel = (code: number): string => {
@@ -42,6 +43,7 @@ export function useSendRequest({
   variablesReady,
   requestName,
   collectionName,
+  environmentBearerToken = "",
 }: Options) {
   const [responseInfo, setResponseInfo] = useState<ResponseInfo | null>(null)
   const [loading, setLoading] = useState(false)
@@ -75,17 +77,17 @@ export function useSendRequest({
       headers
         .filter((header) => header.enabled && header.key.trim())
         .forEach((header) => {
-          requestHeaders.append(
-            resolve(header.key).trim(),
-            resolve(header.value),
-          )
+          const key = resolve(header.key).trim()
+          if (authType === "bearer" && key.toLowerCase() === "authorization")
+            return
+          requestHeaders.append(key, resolve(header.value))
         })
 
       switch (authType) {
         case "bearer":
           requestHeaders.set(
             "Authorization",
-            `Bearer ${resolve(auth.token).trim()}`,
+            `Bearer ${resolve(environmentBearerToken.trim() || auth.token).trim()}`,
           )
           break
 
@@ -233,6 +235,7 @@ export function useSendRequest({
     requestName,
     collectionName,
     saveHistoryToIndexedDB,
+    environmentBearerToken,
   ])
 
   return {

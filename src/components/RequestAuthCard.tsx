@@ -12,13 +12,14 @@ import { ShieldOff } from "lucide-react"
 type Props = Pick<
   ReturnType<typeof useRequestAuth>,
   "authType" | "setAuthType" | "auth" | "handleAuthChange"
->
+> & { environmentToken?: string }
 
 export default function RequestAuthCard({
   authType,
   setAuthType,
   auth,
   handleAuthChange,
+  environmentToken,
 }: Props) {
   return (
     <Card className="bg-surface mt-4">
@@ -72,7 +73,8 @@ export default function RequestAuthCard({
               className="font-mono text-color-accent h-11"
               placeholder="{{token}}"
               id="token"
-              value={auth.token}
+              value={environmentToken || auth.token}
+              readOnly={Boolean(environmentToken)}
               onChange={(e) => handleAuthChange("token", e.target.value)}
             />
           </Field>
