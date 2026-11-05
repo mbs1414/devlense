@@ -67,9 +67,12 @@ export default function CollectionTree({
             ) : (
               <Button
                 variant="collectionApi"
+                size="sm"
                 key={index}
                 data-selected={selectedRequest === requestItem}
-                aria-current={selectedRequest === requestItem ? true : undefined}
+                aria-current={
+                  selectedRequest === requestItem ? true : undefined
+                }
                 className="w-full justify-start gap-2 text-foreground data-[selected=true]:bg-active data-[selected=true]:hover:bg-active"
                 onClick={() => {
                   if (request != null) {
@@ -79,7 +82,12 @@ export default function CollectionTree({
               >
                 {typeof request === "object" &&
                   request !== null &&
-                  request.method && <MethodBadge method={request.method} />}
+                  request.method && (
+                    <MethodBadge
+                      method={request.method}
+                      className="h-5 px-1.5 py-0 text-[10px] leading-none"
+                    />
+                  )}
                 <span className="truncate text-caption">{name}</span>
               </Button>
             )

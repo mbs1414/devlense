@@ -185,6 +185,7 @@ export const Route = createFileRoute("/request")({
           sendRequest={sendRequest}
           loading={loading}
           disabled={!hasLoaded}
+          variables={variables}
         />
         <div className="grid grid-cols-[30rem_minmax(0,1fr)] gap-6 flex-1 min-w-0">
           <Card className="h-[calc(100svh-152px)] min-h-96 bg-surface py-0">
@@ -272,7 +273,7 @@ export const Route = createFileRoute("/request")({
             {(environmentError || requestError) && (
               <p
                 role="alert"
-                className="text-caption text-status-error-fg break-words"
+                className="text-caption text-status-error-fg wrap-break-word"
               >
                 {environmentError || requestError}
               </p>

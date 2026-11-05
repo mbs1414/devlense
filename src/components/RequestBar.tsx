@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import RequestUrlInput from "@/components/RequestUrlInput"
 import {
   Select,
   SelectContent,
@@ -19,6 +19,7 @@ interface Props {
   sendRequest: () => Promise<void>
   loading: boolean
   disabled?: boolean
+  variables: EnvironmentVariable[]
 }
 
 export default function RequestBar({
@@ -29,6 +30,7 @@ export default function RequestBar({
   sendRequest,
   loading,
   disabled,
+  variables,
 }: Props) {
   const selectedMethod = methods.find((item) => item.value === method)
   return (
@@ -56,11 +58,10 @@ export default function RequestBar({
         </SelectContent>
       </Select>
 
-      <Input
-        className="h-11 font-mono bg-input"
-        placeholder="{{baseUrl}}/users"
+      <RequestUrlInput
         value={request}
-        onChange={(event) => setRequest(event.target.value)}
+        onChange={setRequest}
+        variables={variables}
       />
 
       <Button size="lg" onClick={sendRequest} disabled={loading || disabled}>
