@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/collapsible"
 import { ChevronRightIcon, FolderIcon, Trash2 } from "lucide-react"
 import { useCallback, useMemo, type ReactNode } from "react"
+import { useCollectionExpansion } from "@/hooks/useCollectionExpansion"
 
 interface Props {
   filteredCollections: PostmanCollection[]
@@ -30,20 +31,31 @@ export default function CollectionTree({
   onDeleteCollection,
   deletingCollectionId,
 }: Props) {
+  const { expandedFolders, setFolderOpen } = useCollectionExpansion()
+
   const renderItems = useCallback(
     function renderItems(
       items: PostmanItem[],
       path: string,
       collection: PostmanCollection,
+      folderPath: string[],
     ): ReactNode {
       return (
         <div className="flex flex-col gap-1">
           {items.map((requestItem, index) => {
             const { name, item, request } = requestItem
+            const nextFolderPath = [
+              ...folderPath,
+              requestItem.id ?? name ?? "Untitled folder",
+            ]
+            const folderKey = JSON.stringify(nextFolderPath)
             return item ? (
               <Collapsible
-                key={`${index}-${isSearching}`}
-                defaultOpen={isSearching}
+                key={folderKey}
+                open={isSearching || (expandedFolders[folderKey] ?? false)}
+                onOpenChange={(open) => {
+                  if (!isSearching) setFolderOpen(folderKey, open)
+                }}
               >
                 <CollapsibleTrigger asChild>
                   <Button
@@ -61,6 +73,7 @@ export default function CollectionTree({
                     item,
                     `${path} / ${name ?? "Untitled folder"}`,
                     collection,
+                    nextFolderPath,
                   )}
                 </CollapsibleContent>
               </Collapsible>
@@ -95,19 +108,30 @@ export default function CollectionTree({
         </div>
       )
     },
-    [isSearching, onSelectRequest, selectedRequest],
+    [
+      isSearching,
+      onSelectRequest,
+      selectedRequest,
+      expandedFolders,
+      setFolderOpen,
+    ],
   )
 
   const processCollection = useCallback(
     (importedCollection: PostmanCollection[]) => {
-      return importedCollection.map((collection, index) => {
+      return importedCollection.map((collection) => {
+        const collectionId =
+          collection.databaseId ??
+          collection.info._postman_id ??
+          collection.info.name
+        const collectionKey = JSON.stringify([collectionId])
         return (
           <Collapsible
-            key={
-              collection.databaseId ??
-              `${collection.info._postman_id ?? collection.info.name}-${index}`
-            }
-            defaultOpen
+            key={collectionKey}
+            open={isSearching || (expandedFolders[collectionKey] ?? true)}
+            onOpenChange={(open) => {
+              if (!isSearching) setFolderOpen(collectionKey, open)
+            }}
           >
             <div className="flex items-center gap-1">
               <CollapsibleTrigger asChild>
@@ -139,13 +163,22 @@ export default function CollectionTree({
             </div>
 
             <CollapsibleContent className="mt-1 ml-5">
-              {renderItems(collection.item, collection.info.name, collection)}
+              {renderItems(collection.item, collection.info.name, collection, [
+                collectionId,
+              ])}
             </CollapsibleContent>
           </Collapsible>
         )
       })
     },
-    [renderItems, onDeleteCollection, deletingCollectionId],
+    [
+      renderItems,
+      onDeleteCollection,
+      deletingCollectionId,
+      isSearching,
+      expandedFolders,
+      setFolderOpen,
+    ],
   )
 
   const renderedCollections = useMemo(() => {
