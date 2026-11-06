@@ -1,5 +1,6 @@
 import CollectionRequestDetails from "@/components/CollectionRequestDetails"
 import CollectionsPanel from "@/components/CollectionsPanel"
+import CollectionsSplitPanels from "@/components/CollectionsSplitPanels"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useCollections } from "@/hooks/useCollections"
@@ -189,19 +190,26 @@ export const Route = createFileRoute("/collections")({
           </div>
         )}
 
-        <Card className="min-w-0 bg-surface py-0 xl:min-h-0 xl:flex-1">
-          <CardContent className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-3 xl:grid-rows-1 p-0">
-            <div className="grid h-112 min-h-0 xl:h-auto">
-              <CollectionsPanel
-                collections={collections}
-                isLoadingCollections={isLoadingCollections}
-                onSelectRequest={handleSelectRequest}
-                onDeleteCollection={handleDeleteCollection}
-                deletingCollectionId={deletingCollectionId}
-              />
-            </div>
-            <div
-              className="min-w-0 min-h-0 border-t xl:border-t-0 xl:border-l border-border-subtle xl:col-span-2 xl:overflow-y-auto"
+        <CollectionsSplitPanels
+          layoutId="devlens-collections-panels"
+          fillHeight
+          collections={
+            <Card className="h-112 min-w-0 bg-surface py-0 xl:h-full xl:min-h-0">
+              <CardContent className="grid min-h-0 flex-1 p-0">
+                <CollectionsPanel
+                  collections={collections}
+                  isLoadingCollections={isLoadingCollections}
+                  onSelectRequest={handleSelectRequest}
+                  onDeleteCollection={handleDeleteCollection}
+                  deletingCollectionId={deletingCollectionId}
+                />
+              </CardContent>
+            </Card>
+          }
+        >
+          <Card className="min-w-0 bg-surface py-0 xl:h-full xl:min-h-0">
+            <CardContent
+              className="min-w-0 min-h-0 flex-1 p-0 xl:overflow-y-auto"
               role="region"
               aria-label="Request details"
               tabIndex={0}
@@ -211,9 +219,9 @@ export const Route = createFileRoute("/collections")({
                 path={selectedRequest?.path ?? ""}
                 onOpenRequest={handleOpenRequest}
               />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </CollectionsSplitPanels>
         {/* <PlaceholderState
           variant="panel"
           icon={FolderOpen}
