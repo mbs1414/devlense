@@ -34,9 +34,9 @@ export default function RequestBar({
 }: Props) {
   const selectedMethod = methods.find((item) => item.value === method)
   return (
-    <div className="flex gap-2 my-4 items-center">
+    <div className="flex min-w-0 gap-2 my-4 items-center">
       <Select value={method} onValueChange={setMethod}>
-        <SelectTrigger>
+        <SelectTrigger className="w-28 shrink-0">
           <SelectValue>
             <span className={`${selectedMethod?.className} font-mono w-14`}>
               {method}
@@ -58,13 +58,20 @@ export default function RequestBar({
         </SelectContent>
       </Select>
 
-      <RequestUrlInput
-        value={request}
-        onChange={setRequest}
-        variables={variables}
-      />
+      <div className="flex min-w-0 flex-1">
+        <RequestUrlInput
+          value={request}
+          onChange={setRequest}
+          variables={variables}
+        />
+      </div>
 
-      <Button size="lg" onClick={sendRequest} disabled={loading || disabled}>
+      <Button
+        className="shrink-0"
+        size="lg"
+        onClick={sendRequest}
+        disabled={loading || disabled}
+      >
         {loading && <Loader2Icon className="size-4 animate-spin" />}
         {loading ? "Sending..." : "Send"}
       </Button>

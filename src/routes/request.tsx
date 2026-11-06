@@ -201,8 +201,8 @@ export const Route = createFileRoute("/request")({
           disabled={!hasLoaded}
           variables={variables}
         />
-        <div className="grid grid-cols-[30rem_minmax(0,1fr)] gap-6 flex-1 min-w-0">
-          <Card className="h-[calc(100svh-152px)] min-h-96 bg-surface py-0">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 xl:gap-6 flex-1 min-w-0">
+          <Card className="h-112 xl:h-160 min-w-0 bg-surface py-0">
             <CardContent className="grid min-h-0 flex-1 p-0">
               <CollectionsPanel
                 collections={collections}
@@ -211,7 +211,7 @@ export const Route = createFileRoute("/request")({
               />
             </CardContent>
           </Card>
-          <div className="flex flex-col gap-4 flex-1 min-h-0 min-w-0">
+          <div className="flex flex-col gap-4 flex-1 min-h-0 min-w-0 xl:col-span-2">
             {/* Request configuration tabs */}
             <Tabs defaultValue="params" className="min-w-0">
               <TabsList variant="line">
