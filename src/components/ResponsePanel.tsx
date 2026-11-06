@@ -36,16 +36,26 @@ export default function ResponsePanel({
           </TabsList>
 
           <TabsContent value="body" className="mt-4">
-            <JsonEditor
-              data={responseInfo?.body}
-              onChange={(body) =>
-                setResponseInfo((previous) =>
-                  previous ? { ...previous, body } : previous,
-                )
-              }
-              loading={loading}
-              readOnly
-            />
+            {responseInfo.imageUrl ? (
+              <div className="flex min-h-64 items-center justify-center overflow-auto rounded-lg border border-border bg-surface-subtle p-4">
+                <img
+                  src={responseInfo.imageUrl}
+                  alt="Response preview"
+                  className="max-h-96 max-w-full object-contain"
+                />
+              </div>
+            ) : (
+              <JsonEditor
+                data={responseInfo.body}
+                onChange={(body) =>
+                  setResponseInfo((previous) =>
+                    previous ? { ...previous, body } : previous,
+                  )
+                }
+                loading={loading}
+                readOnly
+              />
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>

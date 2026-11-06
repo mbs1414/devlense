@@ -4,6 +4,7 @@ interface ResponseInfo {
   statusLabel: string // "200 OK"
   statusCode: number // 200
   body: string
+  imageUrl: string | null
 }
 
 interface RequestField {

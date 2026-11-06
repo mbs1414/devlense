@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { getReasonPhrase } from "http-status-codes"
 import type { RequestAuth } from "@/hooks/useRequestAuth"
 import { resolveVariables } from "@/lib/resolveVariables"
@@ -55,6 +55,13 @@ export function useSendRequest({
   const [error, setError] = useState("")
   const { saveHistoryToIndexedDB } = useHistory()
   const { settings } = useSettings()
+
+  const imageUrl = responseInfo?.imageUrl
+  useEffect(() => {
+    return () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl)
+    }
+  }, [imageUrl])
 
   const sendRequest = useCallback(async () => {
     setError("")
@@ -226,14 +233,17 @@ export function useSendRequest({
         headers: requestHeaders,
         ...(canSendBody ? { body: resolvedBody } : {}),
       })
-      const body = await response.text()
+      const blob = await response.blob()
+      const isImage = blob.type.startsWith("image/")
+      const body = isImage ? "" : await blob.text()
 
       const responseDetails = {
         duration: Math.round(performance.now() - startTime),
-        size: (new Blob([body]).size / 1024).toFixed(2),
+        size: (blob.size / 1024).toFixed(2),
         statusLabel: `${response.status} ${getStatusLabel(response.status)}`,
         statusCode: response.status,
         body,
+        imageUrl: isImage ? URL.createObjectURL(blob) : null,
       }
 
       setResponseInfo(responseDetails)
