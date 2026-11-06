@@ -49,8 +49,8 @@ export const Route = createFileRoute("/history")({
     )
 
     return (
-      <div className="h-full flex flex-col">
-        <h1 className="text-color-primary font-semibold text-page-title mb-4">
+      <div className="h-full min-w-0 flex flex-col lg:h-[calc(100dvh-3rem)]">
+        <h1 className="shrink-0 text-color-primary font-semibold text-page-title mb-4">
           History
         </h1>
 
@@ -69,8 +69,13 @@ export const Route = createFileRoute("/history")({
             description="Requests you send will appear here, grouped by date."
           />
         ) : (
-          <Card className="bg-surface flex-1">
-            <CardContent className="space-y-6">
+          <Card className="bg-surface min-w-0 flex-1 lg:min-h-0">
+            <CardContent
+              className="space-y-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
+              role="region"
+              aria-label="Request history"
+              tabIndex={0}
+            >
               {Object.entries(groupedHistory).map(([date, entries]) => (
                 <section key={date}>
                   <h2 className="text-label text-color-secondary mb-3">
@@ -80,46 +85,71 @@ export const Route = createFileRoute("/history")({
                     {entries.map((entry) => (
                       <div
                         key={entry.id}
-                        className="flex flex-wrap items-center gap-4 rounded-md border border-border-subtle bg-surface-subtle p-3"
+                        className="flex flex-col xl:flex-row xl:items-center gap-4 rounded-md border border-border-subtle bg-surface-subtle p-3"
                       >
-                        <MethodBadge method={entry.method} />
-                        <div className="min-w-0 flex-1">
-                          {entry.name && (
-                            <p className="text-body text-color-primary mb-1">
-                              {entry.name}
-                            </p>
-                          )}
+                        <div className="w-full min-w-0 flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <MethodBadge
+                              method={entry.method}
+                              className="shrink-0"
+                            />
+                            {entry.name && (
+                              <p className="min-w-0 break-all text-body text-color-primary">
+                                {entry.name}
+                              </p>
+                            )}
+                          </div>
                           <p className="break-all font-mono text-label text-color-secondary">
                             {entry.url}
                           </p>
                           {entry.collectionName && (
-                            <p className="text-caption text-color-muted mt-1">
+                            <p className="break-all text-caption text-color-muted mt-1">
                               {entry.collectionName}
                             </p>
                           )}
                         </div>
-                        <div className="flex flex-wrap items-center gap-4 text-caption text-color-muted">
-                          <span
-                            className={
-                              entry.statusCode === null ||
-                              entry.statusCode >= 400
-                                ? "text-status-error-fg"
-                                : "text-status-success-fg"
-                            }
-                          >
-                            {entry.statusLabel}
-                          </span>
-                          <span>{entry.duration} ms</span>
-                          {entry.size !== null && <span>{entry.size} KB</span>}
-                          <time
-                            dateTime={new Date(entry.createdAt).toISOString()}
-                          >
-                            {new Date(entry.createdAt).toLocaleTimeString(
-                              undefined,
-                              { hour: "2-digit", minute: "2-digit" },
-                            )}
-                          </time>
-                        </div>
+                        <dl className="grid grid-cols-2 gap-3 w-full min-w-0 text-caption xl:flex xl:w-auto xl:shrink-0 xl:gap-6">
+                          <div className="min-w-0">
+                            <dt className="text-color-muted">Status</dt>
+                            <dd
+                              className={
+                                entry.statusCode === null ||
+                                entry.statusCode >= 400
+                                  ? "break-words text-status-error-fg"
+                                  : "break-words text-status-success-fg"
+                              }
+                            >
+                              {entry.statusLabel}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-color-muted">Duration</dt>
+                            <dd className="text-color-secondary">
+                              {entry.duration} ms
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-color-muted">Size</dt>
+                            <dd className="text-color-secondary">
+                              {entry.size !== null ? `${entry.size} KB` : "—"}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-color-muted">Time</dt>
+                            <dd className="text-color-secondary">
+                              <time
+                                dateTime={new Date(
+                                  entry.createdAt,
+                                ).toISOString()}
+                              >
+                                {new Date(entry.createdAt).toLocaleTimeString(
+                                  undefined,
+                                  { hour: "2-digit", minute: "2-digit" },
+                                )}
+                              </time>
+                            </dd>
+                          </div>
+                        </dl>
                       </div>
                     ))}
                   </div>
