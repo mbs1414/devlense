@@ -31,7 +31,9 @@ export default function CollectionsPanel({
   onDeleteCollection,
   deletingCollectionId,
 }: Props) {
-  const [selectedRequest, setSelectedRequest] = useState<PostmanItem | null>(null)
+  const [selectedRequest, setSelectedRequest] = useState<PostmanItem | null>(
+    null,
+  )
   const {
     searchQuery,
     setSearchQuery,
@@ -56,11 +58,11 @@ export default function CollectionsPanel({
   }, [collections])
 
   return (
-    <section className="px-5 pt-5 flex flex-col gap-5 min-h-0">
-      <div className="flex justify-between">
+    <section className="px-5 pt-5 flex flex-col gap-5 min-h-0 min-w-0">
+      <div className="flex shrink-0 justify-between">
         <h1 className="text-color-primary">All collections</h1>
       </div>
-      <Field>
+      <Field className="shrink-0">
         <InputGroup className="border-border">
           <InputGroupInput
             placeholder="Search collections or requests"
@@ -72,38 +74,41 @@ export default function CollectionsPanel({
           </InputGroupAddon>
         </InputGroup>
       </Field>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          {isLoadingCollections ? (
-            <p className="text-color-secondary">Loading collections...</p>
-          ) : filteredCollections.length === 0 ? (
-            <PlaceholderState
-              title={
-                normalizedSearch ? "No matching results" : "No collections yet"
-              }
-              description={
-                normalizedSearch
-                  ? "Try adjusting your search."
-                  : "Import a Postman collection to get started."
-              }
-              variant="inline"
-              icon={normalizedSearch ? SearchX : FolderPlus}
-              showBorder={false}
-            />
-          ) : (
-            <CollectionTree
-              filteredCollections={filteredCollections}
-              isSearching={isSearching}
-              selectedRequest={selectedRequest}
-              onSelectRequest={(request, item, path, collection) => {
-                setSelectedRequest(item)
-                onSelectRequest?.(request, item, path, collection)
-              }}
-              onDeleteCollection={onDeleteCollection}
-              deletingCollectionId={deletingCollectionId}
-            />
-          )}
-        </div>
+      <div
+        className="min-h-0 flex-1 overflow-y-auto"
+        role="region"
+        aria-label="Collection requests"
+        tabIndex={0}
+      >
+        {isLoadingCollections ? (
+          <p className="text-color-secondary">Loading collections...</p>
+        ) : filteredCollections.length === 0 ? (
+          <PlaceholderState
+            title={
+              normalizedSearch ? "No matching results" : "No collections yet"
+            }
+            description={
+              normalizedSearch
+                ? "Try adjusting your search."
+                : "Import a Postman collection to get started."
+            }
+            variant="inline"
+            icon={normalizedSearch ? SearchX : FolderPlus}
+            showBorder={false}
+          />
+        ) : (
+          <CollectionTree
+            filteredCollections={filteredCollections}
+            isSearching={isSearching}
+            selectedRequest={selectedRequest}
+            onSelectRequest={(request, item, path, collection) => {
+              setSelectedRequest(item)
+              onSelectRequest?.(request, item, path, collection)
+            }}
+            onDeleteCollection={onDeleteCollection}
+            deletingCollectionId={deletingCollectionId}
+          />
+        )}
       </div>
       <CardFooter className="shrink-0 border-t-border-subtle text-caption text-color-muted">
         {collections.length}{" "}

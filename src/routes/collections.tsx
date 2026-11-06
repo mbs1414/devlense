@@ -99,17 +99,17 @@ export const Route = createFileRoute("/collections")({
 
     return (
       <div
-        className="relative h-full flex flex-col"
+        className="relative h-full min-w-0 flex flex-col xl:h-[calc(100dvh-3rem)]"
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
-        <h1 className="text-color-primary font-semibold text-page-title">
+        <h1 className="shrink-0 text-color-primary font-semibold text-page-title">
           Collections
         </h1>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-4">
+        <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-4">
           <p className="text-color-secondary text-body">
             Drag and drop Postman JSON files here, or import multiple
             collections.
@@ -133,14 +133,17 @@ export const Route = createFileRoute("/collections")({
         </div>
 
         {importMessage && (
-          <p role="status" className="text-caption text-color-secondary mb-4">
+          <p
+            role="status"
+            className="shrink-0 text-caption text-color-secondary mb-4"
+          >
             {importMessage}
           </p>
         )}
         {importErrors.length > 0 && (
           <ul
             role="alert"
-            className="text-caption text-status-error-fg mb-4 space-y-1"
+            className="shrink-0 text-caption text-status-error-fg mb-4 space-y-1"
           >
             {importErrors.map((error, index) => (
               <li key={index}>{error}</li>
@@ -160,9 +163,9 @@ export const Route = createFileRoute("/collections")({
           </div>
         )}
 
-        <Card className="xl:h-160 min-w-0 bg-surface py-0">
-          <CardContent className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-3 p-0">
-            <div className="grid h-112 min-h-0 xl:h-full">
+        <Card className="min-w-0 bg-surface py-0 xl:min-h-0 xl:flex-1">
+          <CardContent className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-3 xl:grid-rows-1 p-0">
+            <div className="grid h-112 min-h-0 xl:h-auto">
               <CollectionsPanel
                 collections={collections}
                 isLoadingCollections={isLoadingCollections}
@@ -171,7 +174,12 @@ export const Route = createFileRoute("/collections")({
                 deletingCollectionId={deletingCollectionId}
               />
             </div>
-            <div className="min-w-0 border-t xl:border-t-0 xl:border-l border-border-subtle xl:col-span-2 xl:overflow-y-auto">
+            <div
+              className="min-w-0 min-h-0 border-t xl:border-t-0 xl:border-l border-border-subtle xl:col-span-2 xl:overflow-y-auto"
+              role="region"
+              aria-label="Request details"
+              tabIndex={0}
+            >
               <CollectionRequestDetails
                 item={selectedRequest?.item ?? null}
                 path={selectedRequest?.path ?? ""}

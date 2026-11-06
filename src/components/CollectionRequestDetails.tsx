@@ -17,7 +17,7 @@ interface Props {
 export default function CollectionRequestDetails({ item, path }: Props) {
   if (!item || item.request == null) {
     return (
-      <section className="flex-1 min-h-0 overflow-y-auto p-5">
+      <section className="flex-1 min-h-0 p-5">
         <PlaceholderState
           title="Select a request"
           description="Choose an API from a collection to view its details."
@@ -48,7 +48,7 @@ export default function CollectionRequestDetails({ item, path }: Props) {
   }
 
   return (
-    <section className="flex-1 min-w-0 min-h-0 overflow-y-auto p-5">
+    <section className="flex-1 min-w-0 min-h-0 p-5">
       <div>
         <p className="text-color-secondary text-caption mb-4 break-all">
           {path}
