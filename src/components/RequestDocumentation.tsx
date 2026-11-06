@@ -13,7 +13,7 @@ export default function RequestDocumentation({ text }: { text: string }) {
       </summary>
       <div
         dir="auto"
-        className="mt-3 min-w-0 space-y-3 break-words text-body text-color-secondary"
+        className="mt-3 min-w-0 space-y-3 wrap-break-word text-body text-color-secondary"
       >
         <Markdown
           components={{
@@ -90,7 +90,7 @@ export default function RequestDocumentation({ text }: { text: string }) {
                             </td>
                             <td
                               dir="auto"
-                              className="px-3 py-2 align-top text-start break-words"
+                              className="px-3 py-2 align-top text-start wrap-break-word"
                             >
                               {row.description || "—"}
                             </td>
