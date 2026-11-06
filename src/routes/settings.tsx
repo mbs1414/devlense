@@ -42,7 +42,7 @@ export const Route = createFileRoute("/settings")({
       (option) => option.value === String(settings.requestTimeout),
     )
     return (
-      <div className="h-full flex flex-col">
+      <div className="h-full w-full min-w-0 flex flex-col">
         <h1 className="text-color-primary font-semibold text-page-title mb-4">
           Settings
         </h1>
@@ -59,12 +59,12 @@ export const Route = createFileRoute("/settings")({
             )}
             <section>
               <h1 className="font-semibold mb-4 text-base">Appearance</h1>
-              <div className="flex justify-between">
-                <div>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="min-w-0 flex-1">
                   <h2 className="text-body ">Theme</h2>
-                  <label className="text-color-secondary text-label">
+                  <p className="text-color-secondary text-label">
                     Use Dark, Light, or follow the system appearance.
-                  </label>
+                  </p>
                 </div>
                 <ToggleGroup
                   type="single"
@@ -75,13 +75,14 @@ export const Route = createFileRoute("/settings")({
                   }}
                   variant="default"
                   spacing={1}
+                  className="w-full md:w-48 shrink-0"
                 >
                   {themeTypes.map((bodyType) => (
                     <ToggleGroupItem
                       key={bodyType.value}
                       value={bodyType.value}
                       aria-label={bodyType.label}
-                      className="bg-action-secondary data-[state=on]:bg-action-primary"
+                      className="h-11 flex-1 bg-action-secondary data-[state=on]:bg-action-primary"
                     >
                       {bodyType.label}
                     </ToggleGroupItem>
@@ -94,12 +95,12 @@ export const Route = createFileRoute("/settings")({
 
             <section>
               <h1 className="font-semibold mb-4 text-base">Request defaults</h1>
-              <div className="flex justify-between">
-                <div>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="min-w-0 flex-1">
                   <h2 className="text-body ">Request timeout</h2>
-                  <label className="text-color-secondary text-label">
+                  <p className="text-color-secondary text-label">
                     Stop requests that exceed this duration.
-                  </label>
+                  </p>
                 </div>
                 <Select
                   value={String(settings.requestTimeout)}
@@ -107,7 +108,10 @@ export const Route = createFileRoute("/settings")({
                     updateSetting("requestTimeout", Number(value))
                   }
                 >
-                  <SelectTrigger aria-label="Request timeout">
+                  <SelectTrigger
+                    className="h-11 w-full md:w-48 shrink-0"
+                    aria-label="Request timeout"
+                  >
                     <SelectValue>
                       <span>{selectedTimeoutOption?.label}</span>
                     </SelectValue>
@@ -127,14 +131,15 @@ export const Route = createFileRoute("/settings")({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex justify-between my-4">
-                <div>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between my-4">
+                <div className="min-w-0 flex-1">
                   <h2 className="text-body ">Follow redirects</h2>
-                  <label className="text-color-secondary text-label">
+                  <p className="text-color-secondary text-label">
                     Automatically follow HTTP redirects.
-                  </label>
+                  </p>
                 </div>
                 <Button
+                  className="h-11 w-full md:w-48 shrink-0"
                   variant="secondary"
                   aria-label="Follow redirects"
                   aria-pressed={settings.followRedirects}
@@ -153,14 +158,15 @@ export const Route = createFileRoute("/settings")({
               <h1 className="font-semibold mb-4 text-base">
                 Editor preferences
               </h1>
-              <div className="flex justify-between my-4">
-                <div>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between my-4">
+                <div className="min-w-0 flex-1">
                   <h2 className="text-body ">Word wrap</h2>
-                  <label className="text-color-secondary text-label">
+                  <p className="text-color-secondary text-label">
                     Wrap long JSON and text values in editors.
-                  </label>
+                  </p>
                 </div>
                 <Button
+                  className="h-11 w-full md:w-48 shrink-0"
                   variant="secondary"
                   aria-label="Word wrap"
                   aria-pressed={settings.wordWrap}
