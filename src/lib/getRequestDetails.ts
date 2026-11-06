@@ -2,6 +2,13 @@ export function getRequestDetails(item: PostmanItem) {
   const request = typeof item.request === "string" ? null : item.request
   const url = typeof item.request === "string" ? item.request : request?.url
   const rawUrl = typeof url === "string" ? url : (url?.raw ?? "")
+  const descriptionText = (description?: PostmanDescription) =>
+    (typeof description === "string"
+      ? description
+      : (description?.content ?? "")
+    ).trim()
+  const documentation =
+    descriptionText(request?.description) || descriptionText(item.description)
   const queryParams: PostmanHeader[] =
     typeof url === "object" && url?.query
       ? url.query
@@ -44,6 +51,7 @@ export function getRequestDetails(item: PostmanItem) {
     name: item.name || "Untitled request",
     method: request?.method ?? "GET",
     rawUrl,
+    documentation,
     queryParams: queryParams.filter((field) => !field.disabled),
     headers: headers.filter((field) => !field.disabled),
     headerText: typeof request?.header === "string" ? request.header : "",

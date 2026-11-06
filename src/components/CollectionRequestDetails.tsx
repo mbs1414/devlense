@@ -2,6 +2,7 @@ import { Copy } from "lucide-react"
 import { toast } from "sonner"
 
 import { getRequestDetails } from "@/lib/getRequestDetails"
+import RequestDocumentation from "./RequestDocumentation"
 
 import MethodBadge from "./MethodBadge"
 import PlaceholderState from "./PlaceholderState"
@@ -36,6 +37,7 @@ export default function CollectionRequestDetails({
     name,
     method,
     rawUrl,
+    documentation,
     queryParams,
     headers,
     headerText,
@@ -87,6 +89,8 @@ export default function CollectionRequestDetails({
       </div>
 
       <Separator className="my-4 bg-border-subtle" />
+
+      {documentation && <RequestDocumentation text={documentation} />}
 
       <div className="mb-5">
         <h3 className="text-section-title text-color-primary mb-2">
