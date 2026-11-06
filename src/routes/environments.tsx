@@ -321,96 +321,124 @@ export const Route = createFileRoute("/environments")({
                 />
               ) : (
                 <>
-                  <div className="grid grid-cols-[20px_minmax(0,1fr)_120px_minmax(0,1.4fr)_minmax(0,1fr)_72px] gap-2 items-center px-2 pb-2 text-caption text-color-muted">
-                    <div />
-                    <div>Variable</div>
-                    <div>Type</div>
-                    <div>Value</div>
-                    <div>Description</div>
-                    <div />
+                  <div className="hidden md:flex gap-2 items-center px-2 pb-2 text-caption text-color-muted">
+                    <div className="w-5 shrink-0" />
+                    <div className="min-w-0 flex-1">Variable</div>
+                    <div className="w-30 shrink-0">Type</div>
+                    <div className="min-w-0 flex-1">Value</div>
+                    <div className="min-w-0 flex-1">Description</div>
+                    <div className="w-18 shrink-0" />
                   </div>
                   <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-2">
                     {filteredVariables.map((variable) => (
                       <div
                         key={variable.id}
-                        className="grid grid-cols-[20px_minmax(0,1fr)_120px_minmax(0,1.4fr)_minmax(0,1fr)_72px] gap-2 items-center p-2 bg-surface-subtle border border-border-subtle rounded-md"
+                        className="grid grid-cols-2 md:flex md:items-center gap-3 md:gap-2 p-3 md:p-2 bg-surface-subtle border border-border-subtle rounded-md"
                       >
-                        <Checkbox
-                          aria-label="Enable variable"
-                          checked={variable.enabled}
-                          onCheckedChange={(checked) =>
-                            updateVariable(
-                              variable.id,
-                              "enabled",
-                              checked === true,
-                            )
-                          }
-                        />
-                        <Input
-                          aria-label="Variable name"
-                          className="font-mono"
-                          placeholder="baseUrl"
-                          value={variable.key}
-                          onChange={(event) =>
-                            updateVariable(
-                              variable.id,
-                              "key",
-                              event.target.value,
-                            )
-                          }
-                        />
-                        <Select
-                          value={variable.type}
-                          onValueChange={(value: "text" | "secret") =>
-                            updateVariable(variable.id, "type", value)
-                          }
-                        >
-                          <SelectTrigger
-                            aria-label="Variable type"
-                            className="w-full h-8!"
+                        <label className="flex h-11 items-center gap-2 md:h-auto md:w-5 shrink-0">
+                          <Checkbox
+                            className="size-5 md:size-4"
+                            aria-label="Enable variable"
+                            checked={variable.enabled}
+                            onCheckedChange={(checked) =>
+                              updateVariable(
+                                variable.id,
+                                "enabled",
+                                checked === true,
+                              )
+                            }
+                          />
+                          <span className="text-caption text-color-muted md:sr-only">
+                            Enabled
+                          </span>
+                        </label>
+                        <label className="col-span-2 min-w-0 md:flex-1">
+                          <span className="mb-1 block text-caption text-color-muted md:hidden">
+                            Variable
+                          </span>
+                          <Input
+                            aria-label="Variable name"
+                            className="h-11 md:h-8 font-mono"
+                            placeholder="baseUrl"
+                            value={variable.key}
+                            onChange={(event) =>
+                              updateVariable(
+                                variable.id,
+                                "key",
+                                event.target.value,
+                              )
+                            }
+                          />
+                        </label>
+                        <div className="col-span-2 min-w-0 md:w-30 md:shrink-0">
+                          <span className="mb-1 block text-caption text-color-muted md:hidden">
+                            Type
+                          </span>
+                          <Select
+                            value={variable.type}
+                            onValueChange={(value: "text" | "secret") =>
+                              updateVariable(variable.id, "type", value)
+                            }
                           >
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent position="popper">
-                            <SelectItem value="text">Text</SelectItem>
-                            <SelectItem value="secret">Secret</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          aria-label="Variable value"
-                          className="font-mono"
-                          type={
-                            variable.type === "secret" && !variable.visible
-                              ? "password"
-                              : "text"
-                          }
-                          placeholder="Value"
-                          value={variable.value}
-                          onChange={(event) =>
-                            updateVariable(
-                              variable.id,
-                              "value",
-                              event.target.value,
-                            )
-                          }
-                        />
-                        <Input
-                          aria-label="Variable description"
-                          placeholder="Description"
-                          value={variable.description}
-                          onChange={(event) =>
-                            updateVariable(
-                              variable.id,
-                              "description",
-                              event.target.value,
-                            )
-                          }
-                        />
-                        <div className="flex items-center gap-1">
+                            <SelectTrigger
+                              aria-label="Variable type"
+                              className="w-full h-11 md:h-8"
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent position="popper">
+                              <SelectItem value="text">Text</SelectItem>
+                              <SelectItem value="secret">Secret</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <label className="col-span-2 min-w-0 md:flex-1">
+                          <span className="mb-1 block text-caption text-color-muted md:hidden">
+                            Value
+                          </span>
+                          <Input
+                            aria-label="Variable value"
+                            className="h-11 md:h-8 font-mono"
+                            type={
+                              variable.type === "secret" && !variable.visible
+                                ? "password"
+                                : "text"
+                            }
+                            placeholder="Value"
+                            value={variable.value}
+                            onChange={(event) =>
+                              updateVariable(
+                                variable.id,
+                                "value",
+                                event.target.value,
+                              )
+                            }
+                          />
+                        </label>
+                        <label className="col-span-2 min-w-0 md:flex-1">
+                          <span className="mb-1 block text-caption text-color-muted md:hidden">
+                            Description
+                          </span>
+                          <Input
+                            className="h-11 md:h-8"
+                            aria-label="Variable description"
+                            placeholder="Description"
+                            value={variable.description}
+                            onChange={(event) =>
+                              updateVariable(
+                                variable.id,
+                                "description",
+                                event.target.value,
+                              )
+                            }
+                          />
+                        </label>
+                        <div className="col-start-2 row-start-1 justify-self-end flex items-center gap-1 md:w-18 shrink-0">
                           {variable.type === "secret" && (
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="h-11 w-11 md:h-8 md:w-8"
                               aria-label={
                                 variable.visible ? "Hide value" : "Show value"
                               }
@@ -428,6 +456,7 @@ export const Route = createFileRoute("/environments")({
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="h-11 w-11 md:h-8 md:w-8"
                             aria-label="Delete variable"
                             onClick={() => removeVariable(variable.id)}
                           >
