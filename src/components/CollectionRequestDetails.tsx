@@ -50,10 +50,14 @@ export default function CollectionRequestDetails({ item, path }: Props) {
   return (
     <section className="flex-1 min-w-0 min-h-0 overflow-y-auto p-5">
       <div>
-        <p className="text-color-secondary text-caption mb-4">{path}</p>
-        <div className="flex justify-between items-center gap-4 mb-4">
-          <div>
-            <h2 className="text-color-primary text-page-title mb-2">{name}</h2>
+        <p className="text-color-secondary text-caption mb-4 break-all">
+          {path}
+        </p>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
+          <div className="min-w-0">
+            <h2 className="text-color-primary text-page-title mb-2 break-all">
+              {name}
+            </h2>
           </div>
           <Button size="lg">Open in Request</Button>
         </div>

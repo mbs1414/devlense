@@ -48,8 +48,14 @@ export function RequestFieldsTable({
       const isExpanded = !collapsed[path]
 
       const row = (
-        <TableRow key={path} className="border-0 hover:bg-transparent">
-          <TableCell className="h-12 overflow-hidden px-3 text-color-primary">
+        <TableRow
+          key={path}
+          className="block rounded-lg border border-border-subtle p-3 md:table-row md:rounded-none md:border-0 md:p-0 hover:bg-transparent"
+        >
+          <TableCell className="block whitespace-normal p-0 text-color-primary md:table-cell md:h-12 md:overflow-hidden md:px-3">
+            <span className="mb-1 block text-caption text-color-muted md:hidden">
+              Key
+            </span>
             <div
               className="flex min-w-0 items-center gap-1"
               style={{ paddingLeft: depth * 16 }}
@@ -60,7 +66,7 @@ export function RequestFieldsTable({
                   onClick={() => toggleRow(path)}
                   aria-expanded={isExpanded}
                   aria-label={`Toggle ${field.key}`}
-                  className="flex size-5 shrink-0 items-center justify-center"
+                  className="flex size-11 md:size-5 shrink-0 items-center justify-center"
                 >
                   {isExpanded ? (
                     <ChevronDown className="size-3.5" />
@@ -70,16 +76,26 @@ export function RequestFieldsTable({
                 </button>
               )}
 
-              <span className="truncate">{field.key}</span>
+              <span className="min-w-0 break-all md:truncate">{field.key}</span>
             </div>
           </TableCell>
 
-          <TableCell className="overflow-hidden px-3 font-mono text-(length:--text-code) text-color-secondary">
-            <span className="block truncate">{field.value}</span>
+          <TableCell className="block whitespace-normal px-0 pt-3 font-mono text-(length:--text-code) text-color-secondary md:table-cell md:overflow-hidden md:px-3 md:py-2">
+            <span className="mb-1 block font-sans text-caption text-color-muted md:hidden">
+              Value
+            </span>
+            <span className="block whitespace-pre-wrap break-all md:truncate md:whitespace-nowrap">
+              {field.value}
+            </span>
           </TableCell>
 
-          <TableCell className="overflow-hidden px-3 text-color-secondary">
-            <span className="block truncate">{field.description}</span>
+          <TableCell className="block whitespace-normal px-0 pt-3 text-color-secondary md:table-cell md:overflow-hidden md:px-3 md:py-2">
+            <span className="mb-1 block text-caption text-color-muted md:hidden">
+              Description
+            </span>
+            <span className="block whitespace-pre-wrap break-all md:truncate md:whitespace-nowrap">
+              {field.description || "—"}
+            </span>
           </TableCell>
         </TableRow>
       )
@@ -93,8 +109,8 @@ export function RequestFieldsTable({
   }
 
   return (
-    <Table className="table-fixed border-separate border-spacing-0 text-label">
-      <TableHeader>
+    <Table className="block md:table table-fixed border-separate border-spacing-0 text-label">
+      <TableHeader className="hidden md:table-header-group">
         <TableRow className="border-0 hover:bg-transparent">
           <TableHead className="h-8 w-[35%] truncate px-3 text-(length:--text-caption) text-color-muted">
             Key
@@ -110,15 +126,16 @@ export function RequestFieldsTable({
 
       <TableBody
         className="
-          [&_tr>*]:border-b
-          [&_tr>*]:border-border-subtle
-          [&_tr>*:first-child]:border-l
-          [&_tr>*:last-child]:border-r
-          [&_tr:first-child>*]:border-t
-          [&_tr:first-child>*:first-child]:rounded-tl-lg
-          [&_tr:first-child>*:last-child]:rounded-tr-lg
-          [&_tr:last-child>*:first-child]:rounded-bl-lg
-          [&_tr:last-child>*:last-child]:rounded-br-lg
+          block space-y-3 md:table-row-group md:space-y-0
+          md:[&_tr>*]:border-b
+          md:[&_tr>*]:border-border-subtle
+          md:[&_tr>*:first-child]:border-l
+          md:[&_tr>*:last-child]:border-r
+          md:[&_tr:first-child>*]:border-t
+          md:[&_tr:first-child>*:first-child]:rounded-tl-lg
+          md:[&_tr:first-child>*:last-child]:rounded-tr-lg
+          md:[&_tr:last-child>*:first-child]:rounded-bl-lg
+          md:[&_tr:last-child>*:last-child]:rounded-br-lg
         "
       >
         {renderRows(rows)}

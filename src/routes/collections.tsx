@@ -2,7 +2,6 @@ import CollectionRequestDetails from "@/components/CollectionRequestDetails"
 import CollectionsPanel from "@/components/CollectionsPanel"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { useCollections } from "@/hooks/useCollections"
 import { useImportPostmanCollection } from "@/hooks/useImportPostmanCollection"
 import { createFileRoute } from "@tanstack/react-router"
@@ -110,7 +109,7 @@ export const Route = createFileRoute("/collections")({
           Collections
         </h1>
 
-        <div className="flex items-center justify-between my-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-4">
           <p className="text-color-secondary text-body">
             Drag and drop Postman JSON files here, or import multiple
             collections.
@@ -161,20 +160,23 @@ export const Route = createFileRoute("/collections")({
           </div>
         )}
 
-        <Card className="h-[calc(100svh-152px)] min-h-96 bg-surface py-0">
-          <CardContent className="grid min-h-0 flex-1 grid-cols-[30rem_auto_1fr] p-0">
-            <CollectionsPanel
-              collections={collections}
-              isLoadingCollections={isLoadingCollections}
-              onSelectRequest={handleSelectRequest}
-              onDeleteCollection={handleDeleteCollection}
-              deletingCollectionId={deletingCollectionId}
-            />
-            <Separator orientation="vertical" className="bg-border-subtle" />
-            <CollectionRequestDetails
-              item={selectedRequest?.item ?? null}
-              path={selectedRequest?.path ?? ""}
-            />
+        <Card className="xl:h-160 min-w-0 bg-surface py-0">
+          <CardContent className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-3 p-0">
+            <div className="grid h-112 min-h-0 xl:h-full">
+              <CollectionsPanel
+                collections={collections}
+                isLoadingCollections={isLoadingCollections}
+                onSelectRequest={handleSelectRequest}
+                onDeleteCollection={handleDeleteCollection}
+                deletingCollectionId={deletingCollectionId}
+              />
+            </div>
+            <div className="min-w-0 border-t xl:border-t-0 xl:border-l border-border-subtle xl:col-span-2 xl:overflow-y-auto">
+              <CollectionRequestDetails
+                item={selectedRequest?.item ?? null}
+                path={selectedRequest?.path ?? ""}
+              />
+            </div>
           </CardContent>
         </Card>
         {/* <PlaceholderState
