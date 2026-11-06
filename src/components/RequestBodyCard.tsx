@@ -8,6 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Textarea } from "@/components/ui/textarea"
 import { bodyTypes } from "@/constants/request"
 import type { useRequestFields } from "@/hooks/useRequestFields"
+import { useSettings } from "@/hooks/useSettings"
 
 interface Props {
   bodyType: string
@@ -26,6 +27,7 @@ export default function RequestBodyCard({
   encodedBodyFields,
   formDataFields,
 }: Props) {
+  const { settings } = useSettings()
   return (
     <Card className="bg-surface mt-4 min-w-0">
       <CardHeader>
@@ -68,6 +70,12 @@ export default function RequestBodyCard({
         )}
         {bodyType === "text" && (
           <Textarea
+            wrap={settings.wordWrap ? "soft" : "off"}
+            style={{
+              fieldSizing: "fixed",
+              whiteSpace: settings.wordWrap ? "pre-wrap" : "pre",
+              overflowWrap: settings.wordWrap ? "anywhere" : "normal",
+            }}
             value={requestBody}
             onChange={(event) => setRequestBody(event.target.value)}
             placeholder="Enter your request body..."

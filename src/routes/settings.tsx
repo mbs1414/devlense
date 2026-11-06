@@ -12,11 +12,12 @@ import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { createFileRoute } from "@tanstack/react-router"
 import { useTheme } from "next-themes"
-import { useState } from "react"
+import { useSettings } from "@/hooks/useSettings"
 
 export const Route = createFileRoute("/settings")({
   component: function SettingsPage() {
     const { theme, setTheme } = useTheme()
+    const { settings, updateSetting, error } = useSettings()
     const themeTypes = [
       {
         value: "dark",
@@ -37,10 +38,8 @@ export const Route = createFileRoute("/settings")({
       { label: "60 seconds", value: "60" },
     ]
 
-    const [requestTimeout, setRequestTimeout] = useState("30")
-
     const selectedTimeoutOption = timeoutOptions.find(
-      (option) => option.value === requestTimeout,
+      (option) => option.value === String(settings.requestTimeout),
     )
     return (
       <div className="h-full flex flex-col">
@@ -50,6 +49,14 @@ export const Route = createFileRoute("/settings")({
 
         <Card className="flex-1 bg-surface">
           <CardContent>
+            {error && (
+              <p
+                role="alert"
+                className="text-caption text-status-error-fg mb-4"
+              >
+                {error}
+              </p>
+            )}
             <section>
               <h1 className="font-semibold mb-4 text-base">Appearance</h1>
               <div className="flex justify-between">
@@ -95,10 +102,12 @@ export const Route = createFileRoute("/settings")({
                   </label>
                 </div>
                 <Select
-                  value={requestTimeout}
-                  onValueChange={setRequestTimeout}
+                  value={String(settings.requestTimeout)}
+                  onValueChange={(value) =>
+                    updateSetting("requestTimeout", Number(value))
+                  }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger aria-label="Request timeout">
                     <SelectValue>
                       <span>{selectedTimeoutOption?.label}</span>
                     </SelectValue>
@@ -125,7 +134,16 @@ export const Route = createFileRoute("/settings")({
                     Automatically follow HTTP redirects.
                   </label>
                 </div>
-                <Button variant="secondary">Enabled</Button>
+                <Button
+                  variant="secondary"
+                  aria-label="Follow redirects"
+                  aria-pressed={settings.followRedirects}
+                  onClick={() =>
+                    updateSetting("followRedirects", !settings.followRedirects)
+                  }
+                >
+                  {settings.followRedirects ? "Enabled" : "Disabled"}
+                </Button>
               </div>
             </section>
 
@@ -142,7 +160,14 @@ export const Route = createFileRoute("/settings")({
                     Wrap long JSON and text values in editors.
                   </label>
                 </div>
-                <Button variant="secondary">On</Button>
+                <Button
+                  variant="secondary"
+                  aria-label="Word wrap"
+                  aria-pressed={settings.wordWrap}
+                  onClick={() => updateSetting("wordWrap", !settings.wordWrap)}
+                >
+                  {settings.wordWrap ? "On" : "Off"}
+                </Button>
               </div>
             </section>
           </CardContent>

@@ -3,6 +3,7 @@ import { getReasonPhrase } from "http-status-codes"
 import type { RequestAuth } from "@/hooks/useRequestAuth"
 import { resolveVariables } from "@/lib/resolveVariables"
 import { useHistory } from "@/hooks/useHistory"
+import { useSettings } from "@/hooks/useSettings"
 
 interface Options {
   method: string
@@ -53,6 +54,7 @@ export function useSendRequest({
   const [requestSummary, setRequestSummary] = useState("")
   const [error, setError] = useState("")
   const { saveHistoryToIndexedDB } = useHistory()
+  const { settings } = useSettings()
 
   const sendRequest = useCallback(async () => {
     setError("")
@@ -65,6 +67,8 @@ export function useSendRequest({
 
     const startTime = performance.now()
     let historyEntry: RequestHistory | null = null
+    const controller = new AbortController()
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
     try {
       const resolve = (value: string) => resolveVariables(value, variables)
       const url = new URL(resolve(request))
@@ -211,8 +215,14 @@ export function useSendRequest({
         duration: 0,
         size: null,
       }
+      timeoutId = setTimeout(
+        () => controller.abort(),
+        settings.requestTimeout * 1000,
+      )
       const response = await fetch(url, {
         method,
+        signal: controller.signal,
+        redirect: settings.followRedirects ? "follow" : "error",
         headers: requestHeaders,
         ...(canSendBody ? { body: resolvedBody } : {}),
       })
@@ -231,10 +241,16 @@ export function useSendRequest({
       historyEntry.statusLabel = responseDetails.statusLabel
       historyEntry.size = responseDetails.size
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Unable to send request",
-      )
+      if (controller.signal.aborted) {
+        setError(`Request timed out after ${settings.requestTimeout} seconds.`)
+        if (historyEntry) historyEntry.statusLabel = "Timed out"
+      } else {
+        setError(
+          error instanceof Error ? error.message : "Unable to send request",
+        )
+      }
     } finally {
+      clearTimeout(timeoutId)
       if (historyEntry) {
         historyEntry.duration = Math.round(performance.now() - startTime)
 
@@ -267,6 +283,8 @@ export function useSendRequest({
     collectionName,
     saveHistoryToIndexedDB,
     environmentBearerToken,
+    settings.requestTimeout,
+    settings.followRedirects,
   ])
 
   return {

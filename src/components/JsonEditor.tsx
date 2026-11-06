@@ -5,6 +5,7 @@ import CodeMirror, { EditorView } from "@uiw/react-codemirror"
 import { Copy, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { useSettings } from "@/hooks/useSettings"
 
 const editorTheme = createTheme({
   theme: "dark",
@@ -45,6 +46,7 @@ export default function JsonEditor({
   onChange,
 }: Props) {
   const value = data ?? ""
+  const { settings } = useSettings()
 
   function formatJson() {
     try {
@@ -105,7 +107,9 @@ export default function JsonEditor({
       ) : (
         <CodeMirror
           value={value}
-          extensions={[json(), EditorView.lineWrapping]}
+          extensions={
+            settings.wordWrap ? [json(), EditorView.lineWrapping] : [json()]
+          }
           theme={editorTheme}
           height="256px"
           width="100%"
