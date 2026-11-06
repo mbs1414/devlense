@@ -1,9 +1,13 @@
-import { useRef, type ChangeEvent } from "react"
+import { useRef, useState, type ChangeEvent } from "react"
 
 export function useImportPostmanCollection(
   onImport: (collection: PostmanCollection) => void | Promise<void>,
 ) {
   const collectionFileInputRef = useRef<HTMLInputElement>(null)
+  const importingRef = useRef(false)
+  const [isImporting, setIsImporting] = useState(false)
+  const [importMessage, setImportMessage] = useState("")
+  const [importErrors, setImportErrors] = useState<string[]>([])
 
   const openCollectionFilePicker = () => {
     collectionFileInputRef.current?.click()
@@ -28,39 +32,63 @@ export function useImportPostmanCollection(
     )
   }
 
+  const importCollectionFiles = async (files: File[]) => {
+    if (importingRef.current || files.length === 0) return
+
+    importingRef.current = true
+    setIsImporting(true)
+    setImportMessage("")
+    setImportErrors([])
+    const errors: string[] = []
+    let importedCount = 0
+
+    try {
+      for (const file of files) {
+        try {
+          const text = await file.text()
+          const collection: unknown = JSON.parse(text.replace(/^\uFEFF/, ""))
+
+          if (!isPostmanCollection(collection)) {
+            errors.push(`${file.name}: Not a valid Postman collection.`)
+            continue
+          }
+
+          await onImport(collection)
+          importedCount += 1
+        } catch {
+          errors.push(
+            `${file.name}: Unable to import this file. Check that it is a valid Postman JSON collection.`,
+          )
+        }
+      }
+
+      if (importedCount > 0) {
+        setImportMessage(
+          `Imported ${importedCount} ${importedCount === 1 ? "collection" : "collections"}.`,
+        )
+      }
+      setImportErrors(errors)
+    } finally {
+      importingRef.current = false
+      setIsImporting(false)
+    }
+  }
+
   const handleCollectionFileChange = async (
     event: ChangeEvent<HTMLInputElement>,
   ) => {
-    const file = event.target.files?.[0]
-
+    const files = Array.from(event.target.files ?? [])
     event.currentTarget.value = ""
-
-    if (!file) return
-
-    try {
-      // Step 1: Read the selected JSON file
-      const text = await file.text()
-
-      // Step 2: Convert JSON text into an object
-      const collection: unknown = JSON.parse(text)
-
-      // Step 3: Validate the Postman collection
-      if (!isPostmanCollection(collection)) {
-        console.error("Please select a valid Postman collection.")
-        return
-      }
-
-      await onImport(collection)
-
-      console.log("Collection saved successfully!")
-    } catch (error) {
-      console.error("Failed to import collection:", error)
-    }
+    await importCollectionFiles(files)
   }
 
   return {
     collectionFileInputRef,
     openCollectionFilePicker,
     handleCollectionFileChange,
+    importCollectionFiles,
+    isImporting,
+    importMessage,
+    importErrors,
   }
 }

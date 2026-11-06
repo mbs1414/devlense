@@ -10,6 +10,7 @@ interface Options {
   requestBody: string
   bodyType: string
   encodedBodyFields: RequestField[]
+  formDataFields: FormDataField[]
   queryParams: RequestField[]
   headers: RequestField[]
   authType: string
@@ -35,6 +36,7 @@ export function useSendRequest({
   requestBody,
   bodyType,
   encodedBodyFields,
+  formDataFields,
   queryParams,
   headers,
   authType,
@@ -67,6 +69,8 @@ export function useSendRequest({
       const resolve = (value: string) => resolveVariables(value, variables)
       const url = new URL(resolve(request))
       const requestHeaders = new Headers()
+      const canSendBody =
+        method !== "GET" && method !== "HEAD" && bodyType !== "none"
 
       queryParams
         .filter((param) => param.enabled && param.key.trim())
@@ -78,6 +82,12 @@ export function useSendRequest({
         .filter((header) => header.enabled && header.key.trim())
         .forEach((header) => {
           const key = resolve(header.key).trim()
+          if (
+            canSendBody &&
+            bodyType === "formdata" &&
+            key.toLowerCase() === "content-type"
+          )
+            return
           if (authType === "bearer" && key.toLowerCase() === "authorization")
             return
           requestHeaders.append(key, resolve(header.value))
@@ -122,12 +132,25 @@ export function useSendRequest({
           break
       }
 
-      const canSendBody =
-        method !== "GET" && method !== "HEAD" && bodyType !== "none"
-      let resolvedBody = ""
+      let resolvedBody: string | FormData = ""
 
       if (canSendBody) {
-        if (bodyType === "encoded") {
+        if (bodyType === "formdata") {
+          const body = new FormData()
+          formDataFields
+            .filter((field) => field.enabled && field.key.trim())
+            .forEach((field) => {
+              const key = resolve(field.key)
+              if (field.type === "file") {
+                if (field.files.length === 0)
+                  throw new Error(`Choose a file for "${key}" before sending.`)
+                field.files.forEach((file) => body.append(key, file))
+              } else {
+                body.append(key, resolve(field.value))
+              }
+            })
+          resolvedBody = body
+        } else if (bodyType === "encoded") {
           const body = new URLSearchParams()
 
           encodedBodyFields
@@ -142,7 +165,11 @@ export function useSendRequest({
         }
       }
 
-      if (canSendBody && !requestHeaders.has("Content-Type")) {
+      if (
+        canSendBody &&
+        bodyType !== "formdata" &&
+        !requestHeaders.has("Content-Type")
+      ) {
         let contentType = "text/plain"
         if (bodyType === "json") contentType = "application/json"
         if (bodyType === "encoded")
@@ -154,7 +181,10 @@ export function useSendRequest({
       const paramCount = url.searchParams.size
       const headerCount = Array.from(requestHeaders.keys()).length
       const bodyLabel =
-        canSendBody && resolvedBody.length > 0
+        canSendBody &&
+        (typeof resolvedBody === "string"
+          ? resolvedBody.length > 0
+          : Array.from(resolvedBody.keys()).length > 0)
           ? "Request body"
           : "No request body"
       const authorization = requestHeaders.get("Authorization") ?? ""
@@ -226,6 +256,7 @@ export function useSendRequest({
     requestBody,
     bodyType,
     encodedBodyFields,
+    formDataFields,
     queryParams,
     headers,
     authType,

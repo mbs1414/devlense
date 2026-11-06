@@ -14,6 +14,11 @@ interface RequestField {
   enabled: boolean
 }
 
+interface FormDataField extends RequestField {
+  type: "text" | "file"
+  files: File[]
+}
+
 type RequestHistory = {
   id: string
   createdAt: number
@@ -56,6 +61,7 @@ type PostmanBody = {
     type?: "text" | "file"
     src?: string | string[] | null
     disabled?: boolean
+    description?: string
   }[]
   file?: {
     src?: string | null

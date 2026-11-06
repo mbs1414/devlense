@@ -11,6 +11,7 @@ import { tabs } from "@/constants/request"
 import { useCollections } from "@/hooks/useCollections"
 import { useEnvironments } from "@/hooks/useEnvironments"
 import { useRequestFields } from "@/hooks/useRequestFields"
+import { useFormDataFields } from "@/hooks/useFormDataFields"
 import { useRequestAuth } from "@/hooks/useRequestAuth"
 import { useSendRequest } from "@/hooks/useSendRequest"
 import { getRequestVariables } from "@/lib/getRequestVariables"
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/request")({
     const queryParamFields = useRequestFields()
     const headerFields = useRequestFields()
     const encodedBodyFields = useRequestFields()
+    const formDataFields = useFormDataFields()
     const { fields: queryParams } = queryParamFields
     const { fields: headers } = headerFields
     const { authType, setAuthType, auth, handleAuthChange, setAuth } =
@@ -63,6 +65,7 @@ export const Route = createFileRoute("/request")({
       requestBody,
       bodyType,
       encodedBodyFields: encodedBodyFields.fields,
+      formDataFields: formDataFields.fields,
       queryParams,
       headers,
       authType,
@@ -145,17 +148,28 @@ export const Route = createFileRoute("/request")({
       headerFields.setFields(toFields(importedHeaders))
       queryParamFields.setFields(toFields(importedQuery))
       encodedBodyFields.setFields(toFields(body?.urlencoded ?? []))
+      formDataFields.setFields(
+        (body?.formdata ?? []).map((field) => ({
+          id: crypto.randomUUID(),
+          key: field.key,
+          value: field.value ?? "",
+          description: field.description ?? "",
+          enabled: !field.disabled,
+          type: field.type === "file" ? "file" : "text",
+          files: [],
+        })),
+      )
 
       setRequestBody(body?.raw ?? "")
-      setBodyType(
-        body?.mode === "urlencoded"
-          ? "encoded"
-          : body?.mode === "raw"
-            ? contentType?.toLowerCase().includes("json")
-              ? "json"
-              : "text"
-            : "none",
-      )
+      let importedBodyType = "none"
+      if (body?.mode === "formdata") importedBodyType = "formdata"
+      else if (body?.mode === "urlencoded") importedBodyType = "encoded"
+      else if (body?.mode === "raw") {
+        importedBodyType = contentType?.toLowerCase().includes("json")
+          ? "json"
+          : "text"
+      }
+      setBodyType(importedBodyType)
 
       setAuthType(importedAuth?.type === "bearer" ? "bearer" : "no auth")
       setAuth({
@@ -244,6 +258,7 @@ export const Route = createFileRoute("/request")({
                   requestBody={requestBody}
                   setRequestBody={setRequestBody}
                   encodedBodyFields={encodedBodyFields}
+                  formDataFields={formDataFields}
                 />
               </TabsContent>
 

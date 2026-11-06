@@ -1,5 +1,7 @@
 import JsonEditor from "@/components/JsonEditor"
 import RequestEncodedFields from "@/components/RequestEncodedFields"
+import RequestFormDataFields from "@/components/RequestFormDataFields"
+import type { useFormDataFields } from "@/hooks/useFormDataFields"
 import PlaceholderState from "@/components/PlaceholderState"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -13,6 +15,7 @@ interface Props {
   requestBody: string
   setRequestBody: (requestBody: string) => void
   encodedBodyFields: ReturnType<typeof useRequestFields>
+  formDataFields: ReturnType<typeof useFormDataFields>
 }
 
 export default function RequestBodyCard({
@@ -21,6 +24,7 @@ export default function RequestBodyCard({
   requestBody,
   setRequestBody,
   encodedBodyFields,
+  formDataFields,
 }: Props) {
   return (
     <Card className="bg-surface mt-4 min-w-0">
@@ -35,7 +39,7 @@ export default function RequestBodyCard({
           onValueChange={(value) => value && setBodyType(value)}
           variant="default"
           spacing={1}
-          className="mb-4"
+          className="mb-4 flex-wrap"
         >
           {bodyTypes.map((bodyType) => (
             <ToggleGroupItem
@@ -52,7 +56,7 @@ export default function RequestBodyCard({
           <PlaceholderState
             variant="inline"
             title="This request has no body"
-            description="Select JSON, Text, or Encoded to include a body with your request."
+            description="Select a body type to include a body with your request."
           />
         )}
         {bodyType === "json" && (
@@ -72,6 +76,9 @@ export default function RequestBodyCard({
         )}
         {bodyType === "encoded" && (
           <RequestEncodedFields {...encodedBodyFields} />
+        )}
+        {bodyType === "formdata" && (
+          <RequestFormDataFields {...formDataFields} />
         )}
       </CardContent>
     </Card>
