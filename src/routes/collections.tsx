@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useCollections } from "@/hooks/useCollections"
 import { useImportPostmanCollection } from "@/hooks/useImportPostmanCollection"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { findRequestPath } from "@/lib/collectionRequestPath"
 import { Plus, Upload } from "lucide-react"
 import { useRef, useState, type DragEvent } from "react"
 import { toast } from "sonner"
 
 export const Route = createFileRoute("/collections")({
   component: function CollectionsComponent() {
+    const navigate = useNavigate()
     const {
       collections,
       isLoadingCollections,
@@ -95,6 +97,30 @@ export const Route = createFileRoute("/collections")({
       } finally {
         setDeletingCollectionId("")
       }
+    }
+
+    const handleOpenRequest = () => {
+      const collection = collections.find(
+        (collection) => collection.databaseId === selectedRequest?.collectionId,
+      )
+      const requestPath =
+        collection && selectedRequest
+          ? findRequestPath(collection.item, selectedRequest.item)
+          : null
+
+      if (!collection?.databaseId || requestPath === null) {
+        toast.error(
+          "Unable to open this request. Select it again and try again.",
+        )
+        return
+      }
+
+      void navigate({
+        to: "/request",
+        state: {
+          requestToOpen: { collectionId: collection.databaseId, requestPath },
+        },
+      })
     }
 
     return (
@@ -183,6 +209,7 @@ export const Route = createFileRoute("/collections")({
               <CollectionRequestDetails
                 item={selectedRequest?.item ?? null}
                 path={selectedRequest?.path ?? ""}
+                onOpenRequest={handleOpenRequest}
               />
             </div>
           </CardContent>

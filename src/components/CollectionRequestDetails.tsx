@@ -12,9 +12,14 @@ import { Separator } from "./ui/separator"
 interface Props {
   item: PostmanItem | null
   path: string
+  onOpenRequest: () => void
 }
 
-export default function CollectionRequestDetails({ item, path }: Props) {
+export default function CollectionRequestDetails({
+  item,
+  path,
+  onOpenRequest,
+}: Props) {
   if (!item || item.request == null) {
     return (
       <section className="flex-1 min-h-0 p-5">
@@ -59,7 +64,9 @@ export default function CollectionRequestDetails({ item, path }: Props) {
               {name}
             </h2>
           </div>
-          <Button size="lg">Open in Request</Button>
+          <Button size="lg" onClick={onOpenRequest}>
+            Open in Request
+          </Button>
         </div>
 
         <div className="flex justify-between items-center bg-canvas p-2 gap-2 border border-border-subtle rounded-md">

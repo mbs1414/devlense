@@ -16,11 +16,17 @@ import { useRequestAuth } from "@/hooks/useRequestAuth"
 import { useSendRequest } from "@/hooks/useSendRequest"
 import { getRequestVariables } from "@/lib/getRequestVariables"
 import { getEnvironmentBearerToken } from "@/lib/getEnvironmentBearerToken"
-import { createFileRoute } from "@tanstack/react-router"
-import { useState } from "react"
+import { getRequestAtPath } from "@/lib/collectionRequestPath"
+import { createFileRoute, useLocation } from "@tanstack/react-router"
+import { useEffect, useEffectEvent, useState } from "react"
 
 export const Route = createFileRoute("/request")({
   component: function RequestPage() {
+    const requestToOpen = useLocation({
+      select: (location) => location.state.requestToOpen,
+    })
+    const { collectionId, requestPath } = requestToOpen ?? {}
+    const navigate = Route.useNavigate()
     const { collections, isLoadingCollections } = useCollections()
     const {
       environments,
@@ -184,6 +190,35 @@ export const Route = createFileRoute("/request")({
       setResponseInfo(null)
     }
 
+    const openSelectedRequest = useEffectEvent(
+      (collection: PostmanCollection, item: PostmanItem) => {
+        if (item.request != null)
+          handleSelectRequest(item.request, item, "", collection)
+        else
+          setRequestError(
+            "This item is not a request. Select a request from the collection.",
+          )
+      },
+    )
+    const reportMissingRequest = useEffectEvent(() => {
+      setRequestError(
+        "This request is no longer available. Select a request from the collection.",
+      )
+    })
+
+    useEffect(() => {
+      if (isLoadingCollections || !collectionId || requestPath === undefined)
+        return
+      const collection = collections.find(
+        (collection) => collection.databaseId === collectionId,
+      )
+      const item = collection
+        ? getRequestAtPath(collection.item, requestPath)
+        : undefined
+      if (collection && item) openSelectedRequest(collection, item)
+      else reportMissingRequest()
+    }, [collections, isLoadingCollections, collectionId, requestPath])
+
     return (
       <div className="h-full min-w-0 flex flex-col">
         <h1 className="text-color-primary font-semibold text-page-title">
@@ -207,7 +242,17 @@ export const Route = createFileRoute("/request")({
               <CollectionsPanel
                 collections={collections}
                 isLoadingCollections={isLoadingCollections}
-                onSelectRequest={handleSelectRequest}
+                onSelectRequest={(request, item, path, collection) => {
+                  handleSelectRequest(request, item, path, collection)
+                  if (requestToOpen)
+                    void navigate({
+                      state: (previous) => ({
+                        ...previous,
+                        requestToOpen: undefined,
+                      }),
+                      replace: true,
+                    })
+                }}
               />
             </CardContent>
           </Card>
