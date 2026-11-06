@@ -1,6 +1,7 @@
 import { Plus, Trash2 } from "lucide-react"
 
 import PlaceholderState from "@/components/PlaceholderState"
+import FormDataFileInput from "@/components/FormDataFileInput"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -41,84 +42,94 @@ export default function RequestFormDataFields({
         />
       ) : (
         <>
-          <div className="grid grid-cols-[20px_minmax(0,1fr)_80px_minmax(0,1.5fr)_32px] gap-2 items-center p-2 text-caption text-color-muted">
-            <div />
-            <div>Key</div>
-            <div>Type</div>
-            <div>Value</div>
-            <div />
+          <div className="hidden md:flex gap-2 items-center p-2 text-caption text-color-muted">
+            <div className="w-5 shrink-0" />
+            <div className="min-w-0 flex-1">Key</div>
+            <div className="w-20 shrink-0">Type</div>
+            <div className="min-w-0 flex-1">Value</div>
+            <div className="w-8 shrink-0" />
           </div>
           {fields.map((field) => (
             <div
               key={field.id}
-              className="grid grid-cols-[20px_minmax(0,1fr)_80px_minmax(0,1.5fr)_32px] gap-2 items-center p-2 bg-surface-subtle border border-border-subtle rounded-md"
+              className="grid grid-cols-2 md:flex md:items-center gap-3 md:gap-2 p-3 md:p-2 bg-surface-subtle border border-border-subtle rounded-md"
             >
-              <Checkbox
-                aria-label="Enable form data field"
-                checked={field.enabled}
-                onCheckedChange={(checked) =>
-                  updateField(field.id, "enabled", checked === true)
-                }
-              />
-              <Input
-                aria-label="Form data key"
-                placeholder="Key"
-                value={field.key}
-                onChange={(event) =>
-                  updateField(field.id, "key", event.target.value)
-                }
-              />
-              <Select
-                value={field.type}
-                onValueChange={(value: "text" | "file") =>
-                  updateField(field.id, "type", value)
-                }
-              >
-                <SelectTrigger
-                  aria-label="Form data type"
-                  className="w-full h-8!"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="text">Text</SelectItem>
-                  <SelectItem value="file">File</SelectItem>
-                </SelectContent>
-              </Select>
-              {field.type === "text" ? (
-                <Input
-                  aria-label="Form data value"
-                  placeholder="Value"
-                  value={field.value}
-                  onChange={(event) =>
-                    updateField(field.id, "value", event.target.value)
+              <label className="flex h-11 items-center gap-2 md:h-auto md:w-5 shrink-0">
+                <Checkbox
+                  className="size-5 md:size-4"
+                  aria-label="Enable form data field"
+                  checked={field.enabled}
+                  onCheckedChange={(checked) =>
+                    updateField(field.id, "enabled", checked === true)
                   }
                 />
-              ) : (
-                <div className="min-w-0">
+                <span className="text-caption text-color-muted md:sr-only">
+                  Enabled
+                </span>
+              </label>
+              <label className="col-span-2 min-w-0 md:flex-1">
+                <span className="mb-1 block text-caption text-color-muted md:hidden">
+                  Key
+                </span>
+                <Input
+                  className="h-11 md:h-8"
+                  aria-label="Form data key"
+                  placeholder={
+                    field.type === "file" ? "avatar or attachment" : "Key"
+                  }
+                  value={field.key}
+                  onChange={(event) =>
+                    updateField(field.id, "key", event.target.value)
+                  }
+                />
+              </label>
+              <div className="col-span-2 min-w-0 md:w-20 md:shrink-0">
+                <span className="mb-1 block text-caption text-color-muted md:hidden">
+                  Type
+                </span>
+                <Select
+                  value={field.type}
+                  onValueChange={(value: "text" | "file") =>
+                    updateField(field.id, "type", value)
+                  }
+                >
+                  <SelectTrigger
+                    aria-label="Form data type"
+                    className="w-full h-11 md:h-8"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="file">File</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-2 min-w-0 md:flex-1">
+                <span className="mb-1 block text-caption text-color-muted md:hidden">
+                  {field.type === "file" ? "Files" : "Value"}
+                </span>
+                {field.type === "text" ? (
                   <Input
-                    type="file"
-                    multiple
-                    aria-label="Form data files"
+                    className="h-11 md:h-8"
+                    aria-label="Form data value"
+                    placeholder="Value"
+                    value={field.value}
                     onChange={(event) =>
-                      updateField(
-                        field.id,
-                        "files",
-                        Array.from(event.target.files ?? []),
-                      )
+                      updateField(field.id, "value", event.target.value)
                     }
                   />
-                  <p className="text-caption text-color-muted break-all mt-1">
-                    {field.files.length
-                      ? field.files.map((file) => file.name).join(", ")
-                      : "Choose local files before sending."}
-                  </p>
-                </div>
-              )}
+                ) : (
+                  <FormDataFileInput
+                    files={field.files}
+                    onChange={(files) => updateField(field.id, "files", files)}
+                  />
+                )}
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="col-start-2 row-start-1 justify-self-end h-11 w-11 md:h-8 md:w-8 shrink-0"
                 aria-label="Delete form data field"
                 onClick={() => removeField(field.id)}
               >
