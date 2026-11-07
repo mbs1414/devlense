@@ -1,12 +1,7 @@
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Menu } from "lucide-react"
-
 const AppHeader = () => {
   return (
-    <header className="sticky text-color-primary top-0 z-20 flex shrink-0 py-3 px-2 items-center border-b border-border-subtle bg-surface md:hidden space-x-2">
-      <SidebarTrigger>
-        <Menu className="size-5" />
-      </SidebarTrigger>
+    <header className="sticky text-color-primary top-0 z-20 flex h-14 shrink-0 px-4 items-center gap-2.5 border-b border-border-subtle bg-surface md:hidden">
+      <div className="size-6 rounded-full bg-action-primary" aria-hidden="true" />
       <span className="font-semibold">DevLens</span>
     </header>
   )
