@@ -26,7 +26,6 @@ export const Route = createFileRoute("/collections")({
       handleCollectionFileChange,
       importCollectionFiles,
       isImporting,
-      importMessage,
       importErrors,
     } = useImportPostmanCollection(addCollection)
 
@@ -159,14 +158,6 @@ export const Route = createFileRoute("/collections")({
           </Button>
         </div>
 
-        {importMessage && (
-          <p
-            role="status"
-            className="shrink-0 text-caption text-color-secondary mb-4"
-          >
-            {importMessage}
-          </p>
-        )}
         {importErrors.length > 0 && (
           <ul
             role="alert"
@@ -194,7 +185,7 @@ export const Route = createFileRoute("/collections")({
           layoutId="devlens-collections-panels"
           fillHeight
           collections={
-            <Card className="h-112 min-w-0 bg-surface py-0 xl:h-full xl:min-h-0">
+            <Card className="min-w-0 bg-surface py-0 xl:h-full xl:min-h-0 ring-0 border border-border-subtle">
               <CardContent className="grid min-h-0 flex-1 p-0">
                 <CollectionsPanel
                   collections={collections}
@@ -207,9 +198,9 @@ export const Route = createFileRoute("/collections")({
             </Card>
           }
         >
-          <Card className="min-w-0 bg-surface py-0 xl:h-full xl:min-h-0">
+          <Card className="min-w-0 bg-surface py-0 xl:h-full xl:min-h-0 ring-0 border border-border-subtle">
             <CardContent
-              className="min-w-0 min-h-0 flex-1 p-0 xl:overflow-y-auto"
+              className="flex flex-col min-w-0 min-h-0 flex-1 p-0 xl:overflow-y-auto"
               role="region"
               aria-label="Request details"
               tabIndex={0}

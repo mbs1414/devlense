@@ -23,8 +23,8 @@ const PlaceholderState = ({
       <Card className="bg-surface flex-1">
         <CardContent className="h-full flex flex-col gap-4 rounded-lg justify-center items-center mx-4 border border-border-subtle min-h-44">
           <Info className="size-12 text-color-muted" aria-hidden="true" />
-          <p className="text-body font-semibold text-color-primary">{title}</p>
-          <p className="text-caption text-color-secondary">{description}</p>
+          <p className="text-body font-semibold text-color-primary text-center">{title}</p>
+          <p className="text-caption text-color-secondary text-center">{description}</p>
         </CardContent>
       </Card>
     )
@@ -38,8 +38,8 @@ const PlaceholderState = ({
       )}
     >
       <Icon className="size-12 text-color-muted" aria-hidden="true" />
-      <p className="text-body font-semibold text-color-primary">{title}</p>
-      <p className="text-caption text-color-secondary">{description}</p>
+      <p className="text-body font-semibold text-color-primary text-center">{title}</p>
+      <p className="text-caption text-color-secondary text-center">{description}</p>
     </div>
   )
 }

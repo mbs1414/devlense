@@ -27,7 +27,7 @@ export default function CollectionRequestDetails({
         <PlaceholderState
           title="Select a request"
           description="Choose an API from a collection to view its details."
-          showBorder={false}
+          showBorder={true}
         />
       </section>
     )

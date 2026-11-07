@@ -108,7 +108,7 @@ export const Route = createFileRoute("/history")({
                             </p>
                           )}
                         </div>
-                        <dl className="grid grid-cols-2 gap-3 w-full min-w-0 text-caption xl:flex xl:w-auto xl:shrink-0 xl:gap-6">
+                        <dl className="grid grid-cols-2 gap-3 w-full min-w-0 text-caption tabular-nums sm:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] xl:w-112 xl:shrink-0 xl:gap-6">
                           <div className="min-w-0">
                             <dt className="text-color-muted">Status</dt>
                             <dd

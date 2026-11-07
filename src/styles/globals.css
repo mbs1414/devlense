@@ -94,7 +94,7 @@
   --status-info-fg: var(--color-devlens-blue-500);
   --status-info-bg: var(--color-devlens-neutral-100);
 
-  --method-get-fg: var(--color-devlens-teal-500);
+  --method-get-fg: var(--status-success-fg);
   --method-get-bg: var(--color-devlens-neutral-100);
   --method-post-fg: var(--color-devlens-amber-500);
   --method-post-bg: var(--color-devlens-neutral-100);
@@ -186,7 +186,7 @@
   --status-info-fg: var(--color-devlens-blue-500);
   --status-info-bg: var(--color-devlens-neutral-850);
 
-  --method-get-fg: var(--color-devlens-teal-500);
+  --method-get-fg: var(--status-success-fg);
   --method-get-bg: var(--color-devlens-neutral-850);
   --method-post-fg: var(--color-devlens-amber-500);
   --method-post-bg: var(--color-devlens-neutral-850);
