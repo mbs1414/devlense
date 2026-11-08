@@ -25,8 +25,14 @@ const AppSidebar = () => {
   return (
     <Sidebar className="bg-sidebar border-border-subtle">
       <SidebarHeader className="flex-row items-center px-4 py-5 gap-2.5 md:justify-center md:px-0">
-        <CodeXml className="size-5 shrink-0 text-action-primary" aria-hidden="true" />
-        <div className="font-semibold text-color-primary md:sr-only">DevLens</div>
+        <Link
+          to="/"
+          aria-label="DevLens home"
+          className="flex items-center gap-2.5 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+        >
+          <CodeXml className="size-5 shrink-0 text-action-primary" aria-hidden="true" />
+          <span className="font-semibold text-color-primary md:sr-only">DevLens</span>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent className="px-4 md:px-3">

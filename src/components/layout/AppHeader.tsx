@@ -1,4 +1,4 @@
-import { useLocation } from "@tanstack/react-router"
+import { Link, useLocation } from "@tanstack/react-router"
 import { CodeXml } from "lucide-react"
 
 import { routes } from "@/constants/sidebar-items"
@@ -11,8 +11,14 @@ const AppHeader = () => {
   return (
     <header className="sticky text-color-primary top-0 z-20 flex h-15 shrink-0 px-4 items-center justify-between gap-4 border-b border-border-subtle bg-surface md:hidden">
       <div className="flex shrink-0 items-center gap-2.5">
-        <CodeXml className="size-5 text-action-primary" aria-hidden="true" />
-        <span className="font-semibold">DevLens</span>
+        <Link
+          to="/"
+          aria-label="DevLens home"
+          className="flex items-center gap-2.5 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
+        >
+          <CodeXml className="size-5 text-action-primary" aria-hidden="true" />
+          <span className="font-semibold">DevLens</span>
+        </Link>
       </div>
       {currentRoute && Icon && (
         <div className="flex min-w-0 items-center gap-2 rounded-lg bg-action-primary/10 px-2.5 py-1.5 text-color-accent">
