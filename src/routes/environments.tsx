@@ -169,7 +169,9 @@ export const Route = createFileRoute("/environments")({
     }
 
     return (
-      <div className="h-full min-w-0 flex flex-col lg:h-[calc(100dvh-3rem)]">
+      <div
+        className="relative h-full min-w-0 flex flex-col lg:h-[calc(100dvh-3rem)] lg:min-h-96 lg:overflow-hidden"
+      >
         <div className="flex shrink-0 flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="hidden md:block text-color-primary font-semibold text-page-title">
@@ -331,7 +333,7 @@ export const Route = createFileRoute("/environments")({
                     <div className="w-18 shrink-0" />
                   </div>
                   <div
-                    className="space-y-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-2"
+                    className="relative space-y-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-2"
                     role="region"
                     aria-label="Environment variables"
                     tabIndex={0}
