@@ -4,6 +4,46 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
 
+@keyframes welcome-particle-float {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate3d(24px, -32px, 0) scale(1.6);
+  }
+}
+
+.welcome-particle {
+  animation: welcome-particle-float 4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes welcome-orbit {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.welcome-orbit {
+  animation: welcome-orbit 48s linear infinite;
+}
+
+.welcome-orbit-reverse {
+  animation: welcome-orbit 64s linear infinite reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-particle,
+  .welcome-orbit,
+  .welcome-orbit-reverse {
+    animation: none;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme static {
