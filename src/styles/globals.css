@@ -344,6 +344,14 @@
     background: transparent;
   }
 
+  ::-webkit-scrollbar-track:vertical {
+    margin-block: 8px;
+  }
+
+  ::-webkit-scrollbar-track:horizontal {
+    margin-inline: 8px;
+  }
+
   ::-webkit-scrollbar-thumb {
     background: var(--border-strong);
     border-radius: 999px;
