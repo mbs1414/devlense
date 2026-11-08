@@ -1,3 +1,6 @@
+import { Link, useLocation } from "@tanstack/react-router"
+import { CodeXml } from "lucide-react"
+
 import { routes } from "@/constants/sidebar-items"
 import {
   Sidebar,
@@ -7,7 +10,6 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "../ui/sidebar"
-import { Link, useLocation } from "@tanstack/react-router"
 // import { useTheme } from "next-themes"
 
 const AppSidebar = () => {
@@ -23,7 +25,7 @@ const AppSidebar = () => {
   return (
     <Sidebar className="bg-sidebar border-border-subtle">
       <SidebarHeader className="flex-row items-center px-4 py-5 gap-2.5 md:justify-center md:px-0">
-        <div className="size-6 shrink-0 rounded-full bg-action-primary" title="DevLens" />
+        <CodeXml className="size-5 shrink-0 text-action-primary" aria-hidden="true" />
         <div className="font-semibold text-color-primary md:sr-only">DevLens</div>
       </SidebarHeader>
 
