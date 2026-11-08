@@ -49,7 +49,7 @@ export const Route = createFileRoute("/history")({
     )
 
     return (
-      <div className="h-full min-w-0 flex flex-col lg:h-[calc(100dvh-3rem)]">
+      <div className="h-full min-w-0 flex flex-col lg:h-[calc(100dvh-3rem)] lg:min-h-128">
         <h1 className="hidden md:block shrink-0 text-color-primary font-semibold text-page-title mb-4">
           History
         </h1>
