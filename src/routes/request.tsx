@@ -239,7 +239,7 @@ export const Route = createFileRoute("/request")({
         />
         <CollectionsSplitPanels
           collections={
-            <Card className="h-112 xl:h-160 min-w-0 bg-surface py-0 ring-0 border border-border-subtle">
+            <Card className="h-112 xl:sticky xl:top-6 xl:h-[min(40rem,max(20rem,calc(100dvh-9.5rem)))] min-w-0 bg-surface py-0 ring-0 border border-border-subtle">
               <CardContent className="grid min-h-0 flex-1 p-0">
                 <CollectionsPanel
                   collections={collections}

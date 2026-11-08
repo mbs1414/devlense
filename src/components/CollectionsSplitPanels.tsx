@@ -42,7 +42,7 @@ export default function CollectionsSplitPanels({
       orientation="horizontal"
       defaultLayout={defaultLayout}
       onLayoutChanged={onLayoutChanged}
-      className={fillHeight ? "min-h-0 flex-1" : "min-h-160"}
+      className={fillHeight ? "min-h-0 flex-1" : undefined}
       style={fillHeight ? undefined : { overflow: "visible" }}
     >
       <ResizablePanel
@@ -50,11 +50,13 @@ export default function CollectionsSplitPanels({
         defaultSize="33%"
         minSize={240}
         maxSize="45%"
+        style={fillHeight ? undefined : { overflow: "visible" }}
       >
         {collections}
       </ResizablePanel>
       <ResizableHandle
         withHandle
+        stickyHandle={!fillHeight}
         className="w-4 bg-transparent"
         aria-label="Resize collections panel"
       />

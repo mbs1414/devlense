@@ -23,10 +23,12 @@ function ResizablePanel({ ...props }: ResizablePrimitive.PanelProps) {
 
 function ResizableHandle({
   withHandle,
+  stickyHandle,
   className,
   ...props
 }: ResizablePrimitive.SeparatorProps & {
   withHandle?: boolean
+  stickyHandle?: boolean
 }) {
   return (
     <ResizablePrimitive.Separator
@@ -37,9 +39,13 @@ function ResizableHandle({
       )}
       {...props}
     >
-      {withHandle && (
+      {withHandle && stickyHandle ? (
+        <div className="sticky top-6 z-10 flex h-[min(40rem,max(20rem,calc(100dvh-9.5rem)))] w-1 shrink-0 self-start items-center justify-center">
+          <div className="h-6 w-1 rounded-lg bg-border" />
+        </div>
+      ) : withHandle ? (
         <div className="z-10 flex h-6 w-1 shrink-0 rounded-lg bg-border" />
-      )}
+      ) : null}
     </ResizablePrimitive.Separator>
   )
 }
