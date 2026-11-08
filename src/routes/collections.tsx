@@ -125,7 +125,7 @@ export const Route = createFileRoute("/collections")({
 
     return (
       <div
-        className="relative h-full min-w-0 flex flex-col xl:h-[calc(100dvh-3rem)]"
+        className="relative h-full min-w-0 flex flex-col xl:h-[calc(100dvh-3rem)] xl:min-h-128"
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
