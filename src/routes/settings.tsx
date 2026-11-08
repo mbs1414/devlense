@@ -43,7 +43,7 @@ export const Route = createFileRoute("/settings")({
     )
     return (
       <div className="h-full w-full min-w-0 flex flex-col">
-        <h1 className="text-color-primary font-semibold text-page-title mb-4">
+        <h1 className="hidden md:block text-color-primary font-semibold text-page-title mb-4">
           Settings
         </h1>
 

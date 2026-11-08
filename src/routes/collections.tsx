@@ -131,7 +131,7 @@ export const Route = createFileRoute("/collections")({
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
-        <h1 className="shrink-0 text-color-primary font-semibold text-page-title">
+        <h1 className="hidden md:block shrink-0 text-color-primary font-semibold text-page-title">
           Collections
         </h1>
 

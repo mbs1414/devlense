@@ -172,7 +172,7 @@ export const Route = createFileRoute("/environments")({
       <div className="h-full min-w-0 flex flex-col lg:h-[calc(100dvh-3rem)]">
         <div className="flex shrink-0 flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-color-primary font-semibold text-page-title">
+            <h1 className="hidden md:block text-color-primary font-semibold text-page-title">
               Environments
             </h1>
             <p className="text-color-secondary text-body mt-1">

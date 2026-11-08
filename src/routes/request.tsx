@@ -222,7 +222,7 @@ export const Route = createFileRoute("/request")({
 
     return (
       <div className="h-full min-w-0 flex flex-col">
-        <h1 className="text-color-primary font-semibold text-page-title">
+        <h1 className="hidden md:block text-color-primary font-semibold text-page-title">
           Request
         </h1>
 
