@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback } from "react"
 import { getReasonPhrase } from "http-status-codes"
 import type { RequestAuth } from "@/hooks/useRequestAuth"
 import { resolveVariables } from "@/lib/resolveVariables"
 import { useHistory } from "@/hooks/useHistory"
 import { useSettings } from "@/hooks/useSettings"
+import { useRequestResult } from "@/hooks/useRequestResult"
 
 interface Options {
+  requestKey: string
   method: string
   request: string
   requestBody: string
@@ -32,6 +34,7 @@ const getStatusLabel = (code: number): string => {
 }
 
 export function useSendRequest({
+  requestKey,
   method,
   request,
   requestBody,
@@ -48,20 +51,20 @@ export function useSendRequest({
   collectionName,
   environmentBearerToken = "",
 }: Options) {
-  const [responseInfo, setResponseInfo] = useState<ResponseInfo | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [submittedUrl, setSubmittedUrl] = useState("")
-  const [requestSummary, setRequestSummary] = useState("")
-  const [error, setError] = useState("")
+  const {
+    responseInfo,
+    setResponseInfo,
+    loading,
+    setLoading,
+    submittedUrl,
+    setSubmittedUrl,
+    requestSummary,
+    setRequestSummary,
+    error,
+    setError,
+  } = useRequestResult(requestKey)
   const { saveHistoryToIndexedDB } = useHistory()
   const { settings } = useSettings()
-
-  const imageUrl = responseInfo?.imageUrl
-  useEffect(() => {
-    return () => {
-      if (imageUrl) URL.revokeObjectURL(imageUrl)
-    }
-  }, [imageUrl])
 
   const sendRequest = useCallback(async () => {
     setError("")
@@ -237,13 +240,22 @@ export function useSendRequest({
       const isImage = blob.type.startsWith("image/")
       const body = isImage ? "" : await blob.text()
 
+      const imageUrl = isImage
+        ? await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(String(reader.result))
+            reader.onerror = () =>
+              reject(reader.error ?? new Error("Unable to read response image"))
+            reader.readAsDataURL(blob)
+          })
+        : null
       const responseDetails = {
         duration: Math.round(performance.now() - startTime),
         size: (blob.size / 1024).toFixed(2),
         statusLabel: `${response.status} ${getStatusLabel(response.status)}`,
         statusCode: response.status,
         body,
-        imageUrl: isImage ? URL.createObjectURL(blob) : null,
+        imageUrl,
       }
 
       setResponseInfo(responseDetails)
@@ -277,6 +289,11 @@ export function useSendRequest({
       setLoading(false)
     }
   }, [
+    setResponseInfo,
+    setLoading,
+    setSubmittedUrl,
+    setRequestSummary,
+    setError,
     method,
     request,
     requestBody,

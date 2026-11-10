@@ -20,12 +20,18 @@ import { useEnvironments } from "@/hooks/useEnvironments"
 import { useRequestFields } from "@/hooks/useRequestFields"
 import { useFormDataFields } from "@/hooks/useFormDataFields"
 import { useRequestAuth } from "@/hooks/useRequestAuth"
+import { useRequestDraft } from "@/hooks/useRequestDraft"
 import { useSendRequest } from "@/hooks/useSendRequest"
 import { getRequestVariables } from "@/lib/getRequestVariables"
 import { getEnvironmentBearerToken } from "@/lib/getEnvironmentBearerToken"
 import { getRequestAtPath } from "@/lib/collectionRequestPath"
+import {
+  readRequestDraft,
+  saveRequestDraft,
+  type RequestDraft,
+} from "@/lib/requestDrafts"
 import { createFileRoute, useLocation } from "@tanstack/react-router"
-import { useEffect, useEffectEvent, useRef, useState } from "react"
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
 
 export const Route = createFileRoute("/request")({
   component: function RequestPage() {
@@ -72,6 +78,8 @@ export const Route = createFileRoute("/request")({
     const [request, setRequest] = useState("")
     const [requestBody, setRequestBody] = useState("")
     const [bodyType, setBodyType] = useState("json")
+    const [activeTab, setActiveTab] = useState("params")
+    const [activeDraftKey, setActiveDraftKey] = useState<string | null>(null)
     const queryParamFields = useRequestFields()
     const headerFields = useRequestFields()
     const encodedBodyFields = useRequestFields()
@@ -80,6 +88,49 @@ export const Route = createFileRoute("/request")({
     const { fields: headers } = headerFields
     const { authType, setAuthType, auth, handleAuthChange, setAuth } =
       useRequestAuth()
+    const draft = useMemo<RequestDraft>(
+      () => ({
+        method,
+        request,
+        requestBody,
+        bodyType,
+        queryParams,
+        headers,
+        encodedBodyFields: encodedBodyFields.fields,
+        formDataFields: formDataFields.fields,
+        authType,
+        auth,
+        activeTab,
+      }),
+      [
+        method,
+        request,
+        requestBody,
+        bodyType,
+        queryParams,
+        headers,
+        encodedBodyFields.fields,
+        formDataFields.fields,
+        authType,
+        auth,
+        activeTab,
+      ],
+    )
+    useRequestDraft(activeDraftKey, draft)
+
+    const applyDraft = (saved: RequestDraft) => {
+      setMethod(saved.method)
+      setRequest(saved.request)
+      setRequestBody(saved.requestBody)
+      setBodyType(saved.bodyType)
+      queryParamFields.setFields(saved.queryParams)
+      headerFields.setFields(saved.headers)
+      encodedBodyFields.setFields(saved.encodedBodyFields)
+      formDataFields.setFields(saved.formDataFields)
+      setAuthType(saved.authType)
+      setAuth(saved.auth)
+      setActiveTab(saved.activeTab)
+    }
     const {
       sendRequest,
       responseInfo,
@@ -90,6 +141,11 @@ export const Route = createFileRoute("/request")({
       error: requestError,
       setError: setRequestError,
     } = useSendRequest({
+      requestKey:
+        activeDraftKey ??
+        (collectionId && requestPath !== undefined
+          ? JSON.stringify([collectionId, requestPath])
+          : "new"),
       method,
       request,
       requestBody,
@@ -115,14 +171,25 @@ export const Route = createFileRoute("/request")({
     ) => {
       const nextSelection = selectRequest(item, path, collection)
       if (nextSelection) {
-        restoredRequest.current = JSON.stringify([
+        const key = JSON.stringify([
           nextSelection.collectionId,
           nextSelection.requestPath,
         ])
+        restoredRequest.current = key
+        if (key === activeDraftKey) return
+        if (activeDraftKey) saveRequestDraft(activeDraftKey, draft)
+        setActiveDraftKey(key)
+        const saved = readRequestDraft(key)
+        if (saved) {
+          setSelectedCollectionId(collection.databaseId ?? "")
+          setRequestName(item.name ?? "")
+          applyDraft(saved)
+          return
+        }
       }
       setSelectedCollectionId(collection.databaseId ?? "")
       setRequestName(item.name ?? "")
-      setRequestError("")
+      setActiveTab("params")
 
       const toFields = (entries: PostmanHeader[]): RequestField[] =>
         entries.map((entry) => ({
@@ -218,7 +285,6 @@ export const Route = createFileRoute("/request")({
         apiKeyLocation: "header",
       })
 
-      setResponseInfo(null)
     }
 
     const openSelectedRequest = useEffectEvent(
@@ -241,10 +307,19 @@ export const Route = createFileRoute("/request")({
         "This request is no longer available. Select a request from the collection.",
       )
     })
+    const restoreNewRequest = useEffectEvent(() => {
+      if (activeDraftKey) return
+      const saved = readRequestDraft("new")
+      if (saved) applyDraft(saved)
+      setActiveDraftKey("new")
+    })
 
     useEffect(() => {
-      if (isLoadingCollections || !collectionId || requestPath === undefined)
+      if (isLoadingCollections) return
+      if (!collectionId || requestPath === undefined) {
+        restoreNewRequest()
         return
+      }
       const key = JSON.stringify([collectionId, requestPath])
       if (restoredRequest.current === key) return
       restoredRequest.current = key
@@ -314,7 +389,11 @@ export const Route = createFileRoute("/request")({
         >
           <div className="flex flex-col gap-4 min-h-0 min-w-0">
             {/* Request configuration tabs */}
-            <Tabs defaultValue="params" className="min-w-0">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="min-w-0"
+            >
               <TabsList variant="line">
                 {tabs.map((tab) => (
                   <TabsTrigger
