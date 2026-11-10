@@ -25,13 +25,6 @@ export const bodyTypes = [
   { value: "formdata", label: "Form Data" },
 ]
 
-export const responseTypes = [
-  { value: "body", label: "Body" },
-  { value: "headers", label: "Headers" },
-  { value: "pretty", label: "Pretty" },
-  { value: "raw", label: "Raw" },
-]
-
 export const authTypes = [
   { value: "no auth", label: "No Auth" },
   { value: "bearer", label: "Bearer" },
