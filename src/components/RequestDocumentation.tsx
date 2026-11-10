@@ -1,12 +1,21 @@
 import Markdown from "react-markdown"
 import { parseDocumentationFields } from "@/lib/parseDocumentationFields"
+import { cn } from "@/lib/utils"
 
-export default function RequestDocumentation({ text }: { text: string }) {
+interface Props {
+  text: string
+  className?: string
+}
+
+export default function RequestDocumentation({ text, className }: Props) {
   return (
     <details
       key={text}
       open
-      className="mb-5 rounded-lg border border-border-subtle bg-surface-subtle p-4"
+      className={cn(
+        "mb-5 rounded-lg border border-border-subtle bg-surface-subtle p-4",
+        className,
+      )}
     >
       <summary className="cursor-pointer text-section-title font-semibold text-color-primary">
         Documentation

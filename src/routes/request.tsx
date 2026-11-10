@@ -4,6 +4,7 @@ import RequestBar from "@/components/RequestBar"
 import RequestBodyCard from "@/components/RequestBodyCard"
 import RequestAuthCard from "@/components/RequestAuthCard"
 import RequestConfigurationSummary from "@/components/RequestConfigurationSummary"
+import RequestDocumentation from "@/components/RequestDocumentation"
 import ResponsePanel from "@/components/ResponsePanel"
 import CollectionsSplitPanels from "@/components/CollectionsSplitPanels"
 import CollectionImportDropZone from "@/components/CollectionImportDropZone"
@@ -25,6 +26,7 @@ import { useSendRequest } from "@/hooks/useSendRequest"
 import { getRequestVariables } from "@/lib/getRequestVariables"
 import { getEnvironmentBearerToken } from "@/lib/getEnvironmentBearerToken"
 import { getRequestAtPath } from "@/lib/collectionRequestPath"
+import { getRequestDetails } from "@/lib/getRequestDetails"
 import {
   readRequestDraft,
   saveRequestDraft,
@@ -42,6 +44,9 @@ export const Route = createFileRoute("/request")({
     const { collections, isLoadingCollections, addCollection } = useCollections()
     const { selection, selectedItem, selectRequest } =
       useCollectionRequestSelection(collections, "request")
+    const documentation = selectedItem
+      ? getRequestDetails(selectedItem).documentation
+      : ""
     const restoredRequest = useRef("")
     const { collectionId, requestPath } = requestToOpen ?? selection ?? {}
     const [environmentReloadKey, setEnvironmentReloadKey] = useState(0)
@@ -388,6 +393,19 @@ export const Route = createFileRoute("/request")({
           }
         >
           <div className="flex flex-col gap-4 min-h-0 min-w-0">
+            {responseInfo && (
+              <ResponsePanel
+                responseInfo={responseInfo}
+                setResponseInfo={setResponseInfo}
+                loading={loading}
+              />
+            )}
+            {documentation && (
+              <RequestDocumentation
+                text={documentation}
+                className="mb-0 min-w-0 rounded-xl bg-surface"
+              />
+            )}
             {/* Request configuration tabs */}
             <Tabs
               value={activeTab}
@@ -474,11 +492,13 @@ export const Route = createFileRoute("/request")({
               </p>
             )}
 
-            <ResponsePanel
-              responseInfo={responseInfo}
-              setResponseInfo={setResponseInfo}
-              loading={loading}
-            />
+            {!responseInfo && (
+              <ResponsePanel
+                responseInfo={responseInfo}
+                setResponseInfo={setResponseInfo}
+                loading={loading}
+              />
+            )}
           </div>
         </CollectionsSplitPanels>
       </CollectionImportDropZone>
