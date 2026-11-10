@@ -10,7 +10,7 @@ export default function RequestConfigurationSummary({
   submittedUrl,
 }: Props) {
   return (
-    <Card className="bg-surface mt-4">
+    <Card className="bg-surface">
       <CardHeader>
         <CardTitle className="text-section-title font-semibold">
           Request configuration
