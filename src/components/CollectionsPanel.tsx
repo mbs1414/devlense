@@ -9,9 +9,10 @@ import {
 } from "@/components/ui/input-group"
 import { useCollectionSearch } from "@/hooks/useCollectionSearch"
 import { FolderPlus, Search, SearchX } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 
 interface Props {
+  actions?: ReactNode
   collections: PostmanCollection[]
   isLoadingCollections: boolean
   onDeleteCollection?: (collection: PostmanCollection) => void
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function CollectionsPanel({
+  actions,
   collections,
   isLoadingCollections,
   onSelectRequest,
@@ -59,8 +61,9 @@ export default function CollectionsPanel({
 
   return (
     <section className="px-5 pt-5 flex flex-col gap-5 min-h-0 min-w-0">
-      <div className="flex shrink-0 justify-between">
+      <div className="flex flex-wrap shrink-0 items-center justify-between gap-2">
         <h1 className="text-color-primary">All collections</h1>
+        {actions}
       </div>
       <Field className="shrink-0">
         <InputGroup className="border-border">

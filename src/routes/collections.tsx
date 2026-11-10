@@ -1,14 +1,16 @@
 import CollectionRequestDetails from "@/components/CollectionRequestDetails"
 import CollectionsPanel from "@/components/CollectionsPanel"
 import CollectionsSplitPanels from "@/components/CollectionsSplitPanels"
-import { Button } from "@/components/ui/button"
+import CollectionImportDropZone from "@/components/CollectionImportDropZone"
+import ImportCollectionsButton, {
+  CollectionImportFeedback,
+} from "@/components/ImportCollectionsButton"
 import { Card, CardContent } from "@/components/ui/card"
 import { useCollections } from "@/hooks/useCollections"
 import { useImportPostmanCollection } from "@/hooks/useImportPostmanCollection"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { findRequestPath } from "@/lib/collectionRequestPath"
-import { Plus, Upload } from "lucide-react"
-import { useRef, useState, type DragEvent } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 export const Route = createFileRoute("/collections")({
@@ -21,11 +23,9 @@ export const Route = createFileRoute("/collections")({
       deleteCollection,
     } = useCollections()
     const {
-      collectionFileInputRef,
-      openCollectionFilePicker,
-      handleCollectionFileChange,
       importCollectionFiles,
       isImporting,
+      importMessage,
       importErrors,
     } = useImportPostmanCollection(addCollection)
 
@@ -35,39 +35,6 @@ export const Route = createFileRoute("/collections")({
       collectionId: string
     } | null>(null)
     const [deletingCollectionId, setDeletingCollectionId] = useState("")
-    const [isDragging, setIsDragging] = useState(false)
-    const dragDepth = useRef(0)
-
-    const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
-      if (!event.dataTransfer.types.includes("Files")) return
-      event.preventDefault()
-      dragDepth.current += 1
-      if (!isImporting && !isLoadingCollections) setIsDragging(true)
-    }
-
-    const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
-      if (!event.dataTransfer.types.includes("Files")) return
-      dragDepth.current = Math.max(0, dragDepth.current - 1)
-      if (dragDepth.current === 0) setIsDragging(false)
-    }
-
-    const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
-      if (!event.dataTransfer.types.includes("Files")) return
-      event.preventDefault()
-      event.dataTransfer.dropEffect =
-        isImporting || isLoadingCollections ? "none" : "copy"
-    }
-
-    const handleDrop = async (event: DragEvent<HTMLDivElement>) => {
-      if (!event.dataTransfer.types.includes("Files")) return
-      event.preventDefault()
-      dragDepth.current = 0
-      setIsDragging(false)
-      if (isImporting || isLoadingCollections) return
-
-      await importCollectionFiles(Array.from(event.dataTransfer.files))
-    }
-
     const handleSelectRequest = (
       _request: PostmanRequest,
       item: PostmanItem,
@@ -124,12 +91,10 @@ export const Route = createFileRoute("/collections")({
     }
 
     return (
-      <div
-        className="relative h-full min-w-0 flex flex-col xl:h-[calc(100dvh-3rem)] xl:min-h-128"
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
+      <CollectionImportDropZone
+        className="h-full min-w-0 flex flex-col xl:h-[calc(100dvh-3rem)] xl:min-h-128"
+        onImport={importCollectionFiles}
+        disabled={isImporting || isLoadingCollections}
       >
         <h1 className="hidden md:block shrink-0 text-color-primary font-semibold text-page-title">
           Collections
@@ -141,45 +106,14 @@ export const Route = createFileRoute("/collections")({
             collections.
           </p>
 
-          <input
-            type="file"
-            accept=".json,application/json"
-            multiple
-            ref={collectionFileInputRef}
-            hidden
-            onChange={handleCollectionFileChange}
+          <ImportCollectionsButton
+            onImport={importCollectionFiles}
+            isImporting={isImporting}
+            disabled={isLoadingCollections}
           />
-          <Button
-            onClick={openCollectionFilePicker}
-            disabled={isLoadingCollections || isImporting}
-          >
-            <Plus className="h-4 w-4" />
-            <span>{isImporting ? "Importing..." : "Import Collections"}</span>
-          </Button>
         </div>
 
-        {importErrors.length > 0 && (
-          <ul
-            role="alert"
-            className="shrink-0 text-caption text-status-error-fg mb-4 space-y-1"
-          >
-            {importErrors.map((error, index) => (
-              <li key={index}>{error}</li>
-            ))}
-          </ul>
-        )}
-
-        {isDragging && (
-          <div className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-action-primary bg-surface/95">
-            <Upload className="size-10 text-color-accent" />
-            <p className="text-section-title text-color-primary">
-              Drop Postman collections here
-            </p>
-            <p className="text-caption text-color-secondary">
-              You can drop multiple JSON files at once.
-            </p>
-          </div>
-        )}
+        <CollectionImportFeedback message={importMessage} errors={importErrors} />
 
         <CollectionsSplitPanels
           layoutId="devlens-collections-panels"
@@ -219,7 +153,7 @@ export const Route = createFileRoute("/collections")({
           title="No collection yet"
           description="Import a Postman collection to get started."
         /> */}
-      </div>
+      </CollectionImportDropZone>
     )
   },
 })

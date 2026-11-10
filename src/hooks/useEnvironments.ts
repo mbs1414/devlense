@@ -7,7 +7,8 @@ import { disableDuplicateVariables } from "@/lib/disableDuplicateVariables"
 
 export function useEnvironments({
   showToasts = true,
-}: { showToasts?: boolean } = {}) {
+  reloadKey = 0,
+}: { showToasts?: boolean; reloadKey?: number } = {}) {
   const [environments, setEnvironments] = useState<Environment[]>([])
   const [isLoadingEnvironments, setIsLoadingEnvironments] = useState(true)
   const [hasLoaded, setHasLoaded] = useState(false)
@@ -88,7 +89,7 @@ export function useEnvironments({
     return () => {
       cancelled = true
     }
-  }, [openDatabase, showToasts])
+  }, [openDatabase, showToasts, reloadKey])
 
   useEffect(() => {
     if (!hasLoaded) return

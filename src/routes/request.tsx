@@ -6,10 +6,15 @@ import RequestAuthCard from "@/components/RequestAuthCard"
 import RequestConfigurationSummary from "@/components/RequestConfigurationSummary"
 import ResponsePanel from "@/components/ResponsePanel"
 import CollectionsSplitPanels from "@/components/CollectionsSplitPanels"
+import CollectionImportDropZone from "@/components/CollectionImportDropZone"
 import { Card, CardContent } from "@/components/ui/card"
+import ImportCollectionsButton, {
+  CollectionImportFeedback,
+} from "@/components/ImportCollectionsButton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { tabs } from "@/constants/request"
 import { useCollections } from "@/hooks/useCollections"
+import { useImportPostmanCollection } from "@/hooks/useImportPostmanCollection"
 import { useEnvironments } from "@/hooks/useEnvironments"
 import { useRequestFields } from "@/hooks/useRequestFields"
 import { useFormDataFields } from "@/hooks/useFormDataFields"
@@ -28,12 +33,26 @@ export const Route = createFileRoute("/request")({
     })
     const { collectionId, requestPath } = requestToOpen ?? {}
     const navigate = Route.useNavigate()
-    const { collections, isLoadingCollections } = useCollections()
+    const { collections, isLoadingCollections, addCollection } = useCollections()
+    const [environmentReloadKey, setEnvironmentReloadKey] = useState(0)
+    const {
+      importCollectionFiles,
+      isImporting,
+      importMessage,
+      importErrors,
+    } = useImportPostmanCollection(addCollection)
     const {
       environments,
       hasLoaded,
       error: environmentError,
-    } = useEnvironments({ showToasts: false })
+    } = useEnvironments({
+      showToasts: false,
+      reloadKey: environmentReloadKey,
+    })
+    const handleImportCollectionFiles = async (files: File[]) => {
+      await importCollectionFiles(files)
+      setEnvironmentReloadKey((previous) => previous + 1)
+    }
     const [selectedCollectionId, setSelectedCollectionId] = useState("")
     const [requestName, setRequestName] = useState("")
     const collectionName =
@@ -221,7 +240,11 @@ export const Route = createFileRoute("/request")({
     }, [collections, isLoadingCollections, collectionId, requestPath])
 
     return (
-      <div className="h-full min-w-0 flex flex-col">
+      <CollectionImportDropZone
+        className="h-full min-w-0 flex flex-col"
+        onImport={handleImportCollectionFiles}
+        disabled={isImporting || isLoadingCollections || !hasLoaded}
+      >
         <h1 className="hidden md:block text-color-primary font-semibold text-page-title">
           Request
         </h1>
@@ -237,11 +260,20 @@ export const Route = createFileRoute("/request")({
           disabled={!hasLoaded}
           variables={variables}
         />
+        <CollectionImportFeedback message={importMessage} errors={importErrors} />
         <CollectionsSplitPanels
           collections={
             <Card className="h-112 xl:sticky xl:top-6 xl:h-[min(40rem,max(20rem,calc(100dvh-9.5rem)))] min-w-0 bg-surface py-0 ring-0 border border-border-subtle">
               <CardContent className="grid min-h-0 flex-1 p-0">
                 <CollectionsPanel
+                  actions={
+                    <ImportCollectionsButton
+                      compact
+                      onImport={handleImportCollectionFiles}
+                      isImporting={isImporting}
+                      disabled={isLoadingCollections || !hasLoaded}
+                    />
+                  }
                   collections={collections}
                   isLoadingCollections={isLoadingCollections}
                   onSelectRequest={(request, item, path, collection) => {
@@ -350,7 +382,7 @@ export const Route = createFileRoute("/request")({
             />
           </div>
         </CollectionsSplitPanels>
-      </div>
+      </CollectionImportDropZone>
     )
   },
 })

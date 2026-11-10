@@ -1,17 +1,12 @@
-import { useRef, useState, type ChangeEvent } from "react"
+import { useRef, useState } from "react"
 
 export function useImportPostmanCollection(
   onImport: (collection: PostmanCollection) => void | Promise<void>,
 ) {
-  const collectionFileInputRef = useRef<HTMLInputElement>(null)
   const importingRef = useRef(false)
   const [isImporting, setIsImporting] = useState(false)
   const [importMessage, setImportMessage] = useState("")
   const [importErrors, setImportErrors] = useState<string[]>([])
-
-  const openCollectionFilePicker = () => {
-    collectionFileInputRef.current?.click()
-  }
 
   const isPostmanCollection = (data: unknown): data is PostmanCollection => {
     if (typeof data !== "object" || data === null) return false
@@ -74,18 +69,7 @@ export function useImportPostmanCollection(
     }
   }
 
-  const handleCollectionFileChange = async (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = Array.from(event.target.files ?? [])
-    event.currentTarget.value = ""
-    await importCollectionFiles(files)
-  }
-
   return {
-    collectionFileInputRef,
-    openCollectionFilePicker,
-    handleCollectionFileChange,
     importCollectionFiles,
     isImporting,
     importMessage,
