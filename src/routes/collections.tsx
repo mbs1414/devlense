@@ -7,6 +7,7 @@ import ImportCollectionsButton, {
 } from "@/components/ImportCollectionsButton"
 import { Card, CardContent } from "@/components/ui/card"
 import { useCollections } from "@/hooks/useCollections"
+import { useCollectionRequestSelection } from "@/hooks/useCollectionRequestSelection"
 import { useImportPostmanCollection } from "@/hooks/useImportPostmanCollection"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { findRequestPath } from "@/lib/collectionRequestPath"
@@ -29,11 +30,12 @@ export const Route = createFileRoute("/collections")({
       importErrors,
     } = useImportPostmanCollection(addCollection)
 
-    const [selectedRequest, setSelectedRequest] = useState<{
-      item: PostmanItem
-      path: string
-      collectionId: string
-    } | null>(null)
+    const {
+      selection,
+      selectedItem,
+      selectRequest,
+      clearSelection,
+    } = useCollectionRequestSelection(collections, "collections")
     const [deletingCollectionId, setDeletingCollectionId] = useState("")
     const handleSelectRequest = (
       _request: PostmanRequest,
@@ -41,11 +43,7 @@ export const Route = createFileRoute("/collections")({
       path: string,
       collection: PostmanCollection,
     ) => {
-      setSelectedRequest({
-        item,
-        path,
-        collectionId: collection.databaseId ?? "",
-      })
+      selectRequest(item, path, collection)
     }
 
     const handleDeleteCollection = async (collection: PostmanCollection) => {
@@ -55,9 +53,7 @@ export const Route = createFileRoute("/collections")({
 
       try {
         await deleteCollection(collection.databaseId)
-        setSelectedRequest((previous) =>
-          previous?.collectionId === collection.databaseId ? null : previous,
-        )
+        if (selection?.collectionId === collection.databaseId) clearSelection()
         toast.success("Collection deleted")
       } catch {
         toast.error("Unable to delete collection")
@@ -68,11 +64,11 @@ export const Route = createFileRoute("/collections")({
 
     const handleOpenRequest = () => {
       const collection = collections.find(
-        (collection) => collection.databaseId === selectedRequest?.collectionId,
+        (collection) => collection.databaseId === selection?.collectionId,
       )
       const requestPath =
-        collection && selectedRequest
-          ? findRequestPath(collection.item, selectedRequest.item)
+        collection && selectedItem
+          ? findRequestPath(collection.item, selectedItem)
           : null
 
       if (!collection?.databaseId || requestPath === null) {
@@ -124,6 +120,7 @@ export const Route = createFileRoute("/collections")({
                 <CollectionsPanel
                   collections={collections}
                   isLoadingCollections={isLoadingCollections}
+                  selectedRequest={selectedItem}
                   onSelectRequest={handleSelectRequest}
                   onDeleteCollection={handleDeleteCollection}
                   deletingCollectionId={deletingCollectionId}
@@ -140,8 +137,8 @@ export const Route = createFileRoute("/collections")({
               tabIndex={0}
             >
               <CollectionRequestDetails
-                item={selectedRequest?.item ?? null}
-                path={selectedRequest?.path ?? ""}
+                item={selectedItem}
+                path={selectedItem ? selection?.path ?? "" : ""}
                 onOpenRequest={handleOpenRequest}
               />
             </CardContent>

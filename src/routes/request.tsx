@@ -14,6 +14,7 @@ import ImportCollectionsButton, {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { tabs } from "@/constants/request"
 import { useCollections } from "@/hooks/useCollections"
+import { useCollectionRequestSelection } from "@/hooks/useCollectionRequestSelection"
 import { useImportPostmanCollection } from "@/hooks/useImportPostmanCollection"
 import { useEnvironments } from "@/hooks/useEnvironments"
 import { useRequestFields } from "@/hooks/useRequestFields"
@@ -24,16 +25,19 @@ import { getRequestVariables } from "@/lib/getRequestVariables"
 import { getEnvironmentBearerToken } from "@/lib/getEnvironmentBearerToken"
 import { getRequestAtPath } from "@/lib/collectionRequestPath"
 import { createFileRoute, useLocation } from "@tanstack/react-router"
-import { useEffect, useEffectEvent, useState } from "react"
+import { useEffect, useEffectEvent, useRef, useState } from "react"
 
 export const Route = createFileRoute("/request")({
   component: function RequestPage() {
     const requestToOpen = useLocation({
       select: (location) => location.state.requestToOpen,
     })
-    const { collectionId, requestPath } = requestToOpen ?? {}
     const navigate = Route.useNavigate()
     const { collections, isLoadingCollections, addCollection } = useCollections()
+    const { selection, selectedItem, selectRequest } =
+      useCollectionRequestSelection(collections, "request")
+    const restoredRequest = useRef("")
+    const { collectionId, requestPath } = requestToOpen ?? selection ?? {}
     const [environmentReloadKey, setEnvironmentReloadKey] = useState(0)
     const {
       importCollectionFiles,
@@ -106,9 +110,16 @@ export const Route = createFileRoute("/request")({
     const handleSelectRequest = (
       selectedRequest: PostmanRequest,
       item: PostmanItem,
-      _path: string,
+      path: string,
       collection: PostmanCollection,
     ) => {
+      const nextSelection = selectRequest(item, path, collection)
+      if (nextSelection) {
+        restoredRequest.current = JSON.stringify([
+          nextSelection.collectionId,
+          nextSelection.requestPath,
+        ])
+      }
       setSelectedCollectionId(collection.databaseId ?? "")
       setRequestName(item.name ?? "")
       setRequestError("")
@@ -218,6 +229,11 @@ export const Route = createFileRoute("/request")({
           setRequestError(
             "This item is not a request. Select a request from the collection.",
           )
+        if (requestToOpen)
+          void navigate({
+            state: (previous) => ({ ...previous, requestToOpen: undefined }),
+            replace: true,
+          })
       },
     )
     const reportMissingRequest = useEffectEvent(() => {
@@ -229,6 +245,9 @@ export const Route = createFileRoute("/request")({
     useEffect(() => {
       if (isLoadingCollections || !collectionId || requestPath === undefined)
         return
+      const key = JSON.stringify([collectionId, requestPath])
+      if (restoredRequest.current === key) return
+      restoredRequest.current = key
       const collection = collections.find(
         (collection) => collection.databaseId === collectionId,
       )
@@ -276,6 +295,7 @@ export const Route = createFileRoute("/request")({
                   }
                   collections={collections}
                   isLoadingCollections={isLoadingCollections}
+                  selectedRequest={selectedItem}
                   onSelectRequest={(request, item, path, collection) => {
                     handleSelectRequest(request, item, path, collection)
                     if (requestToOpen)

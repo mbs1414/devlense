@@ -9,12 +9,13 @@ import {
 } from "@/components/ui/input-group"
 import { useCollectionSearch } from "@/hooks/useCollectionSearch"
 import { FolderPlus, Search, SearchX } from "lucide-react"
-import { useMemo, useState, type ReactNode } from "react"
+import { useMemo, type ReactNode } from "react"
 
 interface Props {
   actions?: ReactNode
   collections: PostmanCollection[]
   isLoadingCollections: boolean
+  selectedRequest?: PostmanItem | null
   onDeleteCollection?: (collection: PostmanCollection) => void
   deletingCollectionId?: string
   onSelectRequest?: (
@@ -29,13 +30,11 @@ export default function CollectionsPanel({
   actions,
   collections,
   isLoadingCollections,
+  selectedRequest,
   onSelectRequest,
   onDeleteCollection,
   deletingCollectionId,
 }: Props) {
-  const [selectedRequest, setSelectedRequest] = useState<PostmanItem | null>(
-    null,
-  )
   const {
     searchQuery,
     setSearchQuery,
@@ -104,10 +103,7 @@ export default function CollectionsPanel({
             filteredCollections={filteredCollections}
             isSearching={isSearching}
             selectedRequest={selectedRequest}
-            onSelectRequest={(request, item, path, collection) => {
-              setSelectedRequest(item)
-              onSelectRequest?.(request, item, path, collection)
-            }}
+            onSelectRequest={onSelectRequest}
             onDeleteCollection={onDeleteCollection}
             deletingCollectionId={deletingCollectionId}
           />
