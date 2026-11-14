@@ -3,11 +3,11 @@ import RequestFieldsCard from "@/components/RequestFieldsCard"
 import RequestBar from "@/components/RequestBar"
 import RequestBodyCard from "@/components/RequestBodyCard"
 import RequestAuthCard from "@/components/RequestAuthCard"
-import RequestDocumentation from "@/components/RequestDocumentation"
+import RequestDocumentationContent from "@/components/RequestDocumentationContent"
 import ResponsePanel from "@/components/ResponsePanel"
 import CollectionsSplitPanels from "@/components/CollectionsSplitPanels"
 import CollectionImportDropZone from "@/components/CollectionImportDropZone"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import ImportCollectionsButton, {
   CollectionImportFeedback,
 } from "@/components/ImportCollectionsButton"
@@ -397,15 +397,13 @@ export const Route = createFileRoute("/request")({
                 loading={loading}
               />
             )}
-            {documentation && (
-              <RequestDocumentation
-                text={documentation}
-                className="mb-0 min-w-0 rounded-xl bg-surface"
-              />
-            )}
             {/* Request configuration tabs */}
             <Tabs
-              value={activeTab}
+              value={
+                activeTab === "documentation" && !documentation
+                  ? "params"
+                  : activeTab
+              }
               onValueChange={setActiveTab}
               className="min-w-0"
             >
@@ -419,6 +417,14 @@ export const Route = createFileRoute("/request")({
                     {tab.label}
                   </TabsTrigger>
                 ))}
+                {documentation && (
+                  <TabsTrigger
+                    className="after:bg-action-primary"
+                    value="documentation"
+                  >
+                    Documentation
+                  </TabsTrigger>
+                )}
               </TabsList>
 
               {/* Params tab */}
@@ -470,6 +476,20 @@ export const Route = createFileRoute("/request")({
                   )}
                 />
               </TabsContent>
+              {documentation && (
+                <TabsContent value="documentation" className="min-w-0">
+                  <Card className="bg-surface mt-4 min-w-0">
+                    <CardHeader>
+                      <CardTitle className="text-section-title font-semibold">
+                        Documentation
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="min-w-0">
+                      <RequestDocumentationContent text={documentation} />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
             </Tabs>
 
             {(environmentError || requestError) && (
