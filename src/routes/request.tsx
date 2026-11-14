@@ -485,12 +485,12 @@ export const Route = createFileRoute("/request")({
               )}
             </Tabs>
 
-            {(environmentError || requestError) && (
+            {environmentError && (
               <p
                 role="alert"
                 className="text-caption text-status-error-fg wrap-break-word"
               >
-                {environmentError || requestError}
+                {environmentError}
               </p>
             )}
 
@@ -498,6 +498,7 @@ export const Route = createFileRoute("/request")({
               responseInfo={responseInfo}
               setResponseInfo={setResponseInfo}
               loading={loading}
+              error={requestError}
             />
           </div>
         </CollectionsSplitPanels>

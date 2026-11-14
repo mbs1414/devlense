@@ -1,14 +1,17 @@
 interface Props {
   responseInfo: ResponseInfo | null
   loading: boolean
+  error?: string
 }
-const ResponseStatusBar = ({ responseInfo, loading }: Props) => {
-  if (!loading && !responseInfo) return null
+const ResponseStatusBar = ({ responseInfo, loading, error = "" }: Props) => {
+  if (!loading && !responseInfo && !error) return null
 
   const isError =
-    responseInfo !== null &&
-    responseInfo.statusCode >= 400 &&
-    responseInfo.statusCode < 600
+    (!responseInfo && Boolean(error)) ||
+    (responseInfo !== null &&
+      responseInfo.statusCode >= 400 &&
+      responseInfo.statusCode < 600)
+  const statusLabel = responseInfo?.statusLabel ?? error
 
   const statusColor = loading
     ? "text-status-info-fg"
@@ -23,15 +26,25 @@ const ResponseStatusBar = ({ responseInfo, loading }: Props) => {
       : "bg-status-success-fg"
 
   return (
-    <div className="flex items-center justify-between bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2">
-      <div className={`${statusColor} flex items-center gap-2`}>
-        <div className={`rounded-full size-2 ${dotColor}`} />
-        <div>{loading ? "Loading" : responseInfo?.statusLabel}</div>
+    <div
+      role={error && !loading ? "alert" : undefined}
+      className="flex flex-wrap items-center justify-between gap-2 bg-surface-subtle border border-border-subtle rounded-md mx-4 p-2"
+    >
+      <div className={`${statusColor} flex min-w-0 items-center gap-2`}>
+        <div className={`shrink-0 rounded-full size-2 ${dotColor}`} />
+        <div className="min-w-0 wrap-break-word">
+          {loading ? "Loading" : statusLabel}
+          {!loading && responseInfo && error && (
+            <span className="text-status-error-fg"> · {error}</span>
+          )}
+        </div>
       </div>
-      <div className="text-color-secondary text-caption flex gap-4">
-        <div>{loading ? "— ms" : `${responseInfo?.duration ?? "—"} ms`}</div>
-        <div>{loading ? "— KB" : `${responseInfo?.size ?? "—"} KB`}</div>
-      </div>
+      {(responseInfo || loading) && (
+        <div className="text-color-secondary text-caption flex gap-4">
+          <div>{loading ? "— ms" : `${responseInfo?.duration ?? "—"} ms`}</div>
+          <div>{loading ? "— KB" : `${responseInfo?.size ?? "—"} KB`}</div>
+        </div>
+      )}
     </div>
   )
 }
