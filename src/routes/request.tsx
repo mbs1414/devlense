@@ -390,13 +390,6 @@ export const Route = createFileRoute("/request")({
           }
         >
           <div className="flex flex-col gap-4 min-h-0 min-w-0">
-            {responseInfo && (
-              <ResponsePanel
-                responseInfo={responseInfo}
-                setResponseInfo={setResponseInfo}
-                loading={loading}
-              />
-            )}
             {/* Request configuration tabs */}
             <Tabs
               value={
@@ -501,13 +494,11 @@ export const Route = createFileRoute("/request")({
               </p>
             )}
 
-            {!responseInfo && (
-              <ResponsePanel
-                responseInfo={responseInfo}
-                setResponseInfo={setResponseInfo}
-                loading={loading}
-              />
-            )}
+            <ResponsePanel
+              responseInfo={responseInfo}
+              setResponseInfo={setResponseInfo}
+              loading={loading}
+            />
           </div>
         </CollectionsSplitPanels>
       </CollectionImportDropZone>
