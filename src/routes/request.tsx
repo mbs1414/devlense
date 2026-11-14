@@ -3,7 +3,6 @@ import RequestFieldsCard from "@/components/RequestFieldsCard"
 import RequestBar from "@/components/RequestBar"
 import RequestBodyCard from "@/components/RequestBodyCard"
 import RequestAuthCard from "@/components/RequestAuthCard"
-import RequestConfigurationSummary from "@/components/RequestConfigurationSummary"
 import RequestDocumentation from "@/components/RequestDocumentation"
 import ResponsePanel from "@/components/ResponsePanel"
 import CollectionsSplitPanels from "@/components/CollectionsSplitPanels"
@@ -141,8 +140,6 @@ export const Route = createFileRoute("/request")({
       responseInfo,
       setResponseInfo,
       loading,
-      submittedUrl,
-      requestSummary,
       error: requestError,
       setError: setRequestError,
     } = useSendRequest({
@@ -474,14 +471,6 @@ export const Route = createFileRoute("/request")({
                 />
               </TabsContent>
             </Tabs>
-
-            {/* Request configuration summary */}
-            {responseInfo && (
-              <RequestConfigurationSummary
-                requestSummary={requestSummary}
-                submittedUrl={submittedUrl}
-              />
-            )}
 
             {(environmentError || requestError) && (
               <p

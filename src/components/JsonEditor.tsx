@@ -3,6 +3,7 @@ import { tags } from "@lezer/highlight"
 import { createTheme } from "@uiw/codemirror-themes"
 import CodeMirror, { EditorView } from "@uiw/react-codemirror"
 import { Copy, Trash2 } from "lucide-react"
+import { useMemo } from "react"
 
 import { Button } from "@/components/ui/button"
 import { useSettings } from "@/hooks/useSettings"
@@ -45,7 +46,15 @@ export default function JsonEditor({
   data,
   onChange,
 }: Props) {
-  const value = data ?? ""
+  const value = useMemo(() => {
+    const text = data ?? ""
+    if (!readOnly) return text
+    try {
+      return JSON.stringify(JSON.parse(text), null, 2)
+    } catch {
+      return text
+    }
+  }, [data, readOnly])
   const { settings } = useSettings()
 
   function formatJson() {
